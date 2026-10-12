@@ -2,7 +2,6 @@ name: Daily Stock Screener Runner
 
 on:
 schedule:
-# 台灣時間週一至週五 16:05 (UTC 08:05) 自動觸發
 - cron: '5 8 * * 1-5'
 workflow_dispatch:
 
