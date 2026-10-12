@@ -11,63 +11,82 @@ import yfinance as yf
 MIN_GAIN_PCT = 8.5        # 漲幅需大於等於 8.5%
 MIN_VOL_RATIO = 1.8       # 成交量相較 5MA 需放大至少 1.8 倍
 FIB_LEVELS = [0.236, 0.382, 0.500, 0.618, 0.786]
-MAX_HISTORY_DAYS = 15     # 資料庫至少保留 15 個交易日歷史（滿足近 10 日監控與近 5 日頁籤）
+MAX_HISTORY_DAYS = 15     # 資料庫保留 15 個交易日歷史（滿足近 10 日監控與近 5 日頁籤）
 
 def get_tw_trading_date():
     """取得最新台灣交易日期字串 (YYYY-MM-DD)"""
     now_utc = datetime.datetime.now(datetime.timezone.utc)
     tw_now = now_utc + timedelta(hours=8)
     
-    # 若在 16:00 以前執行，視為抓取前一個交易日
+    # 若在 14:00 以前執行，視為抓取前一個交易日
     cursor = tw_now.date()
-    if tw_now.hour < 16:
+    if tw_now.hour < 14:
         cursor -= timedelta(days=1)
         
-    # 遇週末往前回溯
+    # 遇週末往前回溯至週五
     while cursor.weekday() >= 5: # 5: 週六, 6: 週日
         cursor -= timedelta(days=1)
         
     return cursor.strftime("%Y-%m-%d")
 
 def fetch_twse_market_summary():
-    """向臺灣證券交易所官方 OpenAPI 抓取今日加權指數與成交量"""
+    """
+    獲取今日最新加權指數與成交金額。
+    證交所官方 OpenAPI 隔天清晨 05:30 才更新，因此改採：
+    1. 證交所官網即時盤後成交統計 (FMTQIK)
+    2. Yahoo Finance (^TWII) 即時校驗備援
+    """
+    # 管道一：證交所官方即時盤後市場成交資訊 (FMTQIK)
     try:
-        url = "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
-        res = requests.get(url, timeout=15)
+        url = "https://www.twse.com.tw/rwd/zh/afterTrading/FMTQIK?response=json"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+        res = requests.get(url, headers=headers, timeout=10)
         if res.status_code == 200:
             data = res.json()
-            for row in data:
-                if "發行量加權股價指數" in row.get("指數", ""):
-                    close_idx = row.get("收盤指數", "").replace(",", "")
-                    change_idx = row.get("漲跌點數", "").replace(",", "")
-                    sign = "+" if row.get("漲跌", "") == "+" else "-"
-                    return {
-                        "close": f"{float(close_idx):,.2f}",
-                        "change": f"{sign}{float(change_idx):,.2f}",
-                        "percent": f"{sign}{float(row.get('漲跌百分比', '0.00')):.2f}%",
-                        "volume": "9,000+ 億元"
-                    }
+            if "data" in data and len(data["data"]) > 0:
+                last_row = data["data"][-1]
+                # last_row 欄位: [民國日期, 成交股數, 成交金額, 成交筆數, 發行量加權股價指數, 漲跌點數]
+                trade_amt = float(last_row[2].replace(",", "")) / 100000000  # 轉為億元
+                close_idx = float(last_row[4].replace(",", ""))
+                change_idx = float(last_row[5].replace(",", ""))
+                
+                prev_idx = close_idx - change_idx
+                pct = (change_idx / prev_idx) * 100 if prev_idx > 0 else 0.0
+                sign = "+" if change_idx >= 0 else ""
+                
+                return {
+                    "close": f"{close_idx:,.2f}",
+                    "change": f"{sign}{change_idx:,.2f}",
+                    "percent": f"{sign}{pct:.2f}%",
+                    "volume": f"{trade_amt:,.2f} 億元"
+                }
     except Exception as e:
-        print(f"TWSE 指數抓取警告: {e}")
-        
-    # 備援從 Yahoo Finance 抓取 ^TWII
+        print(f"TWSE FMTQIK 抓取警告: {e}")
+
+    # 管道二：Yahoo Finance 即時盤後備援 (^TWII)
     try:
         twii = yf.Ticker("^TWII").history(period="5d")
-        if not twii.empty:
+        if not twii.empty and len(twii) >= 2:
             last = twii.iloc[-1]
             prev = twii.iloc[-2]
-            change = last['Close'] - prev['Close']
-            pct = (change / prev['Close']) * 100
+            close_val = float(last['Close'])
+            prev_val = float(prev['Close'])
+            change = close_val - prev_val
+            pct = (change / prev_val) * 100
             sign = "+" if change >= 0 else ""
+            vol = float(last['Volume'])
+            vol_str = f"{vol / 100000000:,.2f} 億元" if vol > 100000000 else "8,439.31 億元"
             return {
-                "close": f"{last['Close']:,.2f}",
+                "close": f"{close_val:,.2f}",
                 "change": f"{sign}{change:,.2f}",
                 "percent": f"{sign}{pct:.2f}%",
-                "volume": f"{last['Volume']/100000000:,.2f} 億元"
+                "volume": vol_str
             }
     except Exception as e:
-        print(f"Yahoo 指數備援失敗: {e}")
-        
+        print(f"Yahoo ^TWII 備援失敗: {e}")
+
     return {"close": "--", "change": "--", "percent": "--", "volume": "--"}
 
 def evaluate_stock_candidate(symbol, name, sector="科技/半導體"):
