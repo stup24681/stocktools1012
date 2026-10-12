@@ -4,17 +4,16 @@ on:
 schedule:
 # 台灣時間週一至週五 16:05 (UTC 08:05) 自動觸發
 - cron: '5 8 * * 1-5'
-workflow_dispatch: # 支援在 GitHub 網頁上手動點擊一鍵執行
+workflow_dispatch:
 
 jobs:
 run-screener:
 runs-on: ubuntu-latest
 permissions:
-contents: write # 允許自動 Commit 與 Push 更新 data.json
-
+contents: write
 steps:
-  - name: Checkout Repository
-    uses: actions/checkout@v4
+- name: Checkout Repository
+uses: actions/checkout@v4
 
   - name: Set up Python
     uses: actions/setup-python@v5
@@ -37,4 +36,3 @@ steps:
       git add data.json
       git commit -m "Auto-update market data: $(date +'%Y-%m-%d %H:%M:%S')" || exit 0
       git push
-      
