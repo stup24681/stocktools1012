@@ -1,5 +1,3 @@
-STREAMING_CHUNK:Defining workflow trigger schedule
-
 name: Daily Stock Screener Runner
 
 on:
@@ -7,8 +5,6 @@ schedule:
 # 台灣時間週一至週五 16:05 (UTC 08:05) 自動觸發
 - cron: '5 8 * * 1-5'
 workflow_dispatch: # 支援在 GitHub 網頁上手動點擊一鍵執行
-
-STREAMING_CHUNK:Configuring job environment and execution steps
 
 jobs:
 run-screener:
