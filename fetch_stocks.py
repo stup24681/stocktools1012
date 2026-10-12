@@ -11,26 +11,21 @@ import yfinance as yf
 MIN_GAIN_PCT = 8.5        # 漲幅需大於等於 8.5%
 MIN_VOL_RATIO = 1.8       # 成交量相較 5MA 需放大至少 1.8 倍
 FIB_LEVELS = [0.236, 0.382, 0.500, 0.618, 0.786]
-MAX_HISTORY_DAYS = 15     # 資料庫保留 15 個交易日歷史（滿足近 10 日監控與近 5 日頁籤）
+MAX_HISTORY_DAYS = 15     # 資料庫保留 15 個交易日歷史
 
 def get_dynamic_trading_date(ticker_symbol="^TWII"):
-    """
-    從市場行情動態取得最新真實開盤交易日 (YYYY-MM-DD)。
-    徹底不寫死任何日期，亦不受國定假日或休市公式干擾，以實際成交數據為準。
-    """
-    # 管道 1：從證交所官方盤後成交統計取得官方日期
+    """從市場行情動態取得最新真實開盤交易日 (YYYY-MM-DD)"""
     if ticker_symbol == "^TWII":
         try:
             url = "https://www.twse.com.tw/rwd/zh/afterTrading/FMTQIK?response=json"
             headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
             }
             res = requests.get(url, headers=headers, timeout=8)
             if res.status_code == 200:
                 data = res.json()
                 if "data" in data and len(data["data"]) > 0:
                     last_row = data["data"][-1]
-                    # last_row[0] 格式為民國日，例如 "115/10/12"
                     roc_parts = last_row[0].strip().split('/')
                     if len(roc_parts) == 3:
                         ad_year = int(roc_parts[0]) + 1911
@@ -39,7 +34,6 @@ def get_dynamic_trading_date(ticker_symbol="^TWII"):
         except Exception as e:
             print(f"TWSE 日期解析備援: {e}")
 
-    # 管道 2：從 Yahoo Finance 抓取最新成交日
     try:
         ticker = yf.Ticker(ticker_symbol)
         df = ticker.history(period="5d")
@@ -48,33 +42,27 @@ def get_dynamic_trading_date(ticker_symbol="^TWII"):
     except Exception as e:
         print(f"Yahoo 行情日期取得異常: {e}")
 
-    # 備援：由 UTC+8 時間取得今日日期
     now_tw = datetime.datetime.now(datetime.timezone.utc) + timedelta(hours=8)
     return now_tw.strftime("%Y-%m-%d")
 
 def fetch_twse_market_summary():
-    """
-    獲取今日最新加權指數與成交金額。
-    優先採證交所官方即時盤後統計 (FMTQIK)，搭配 Yahoo Finance (^TWII) 即時備援。
-    """
+    """獲取今日最新加權指數與成交金額"""
     try:
         url = "https://www.twse.com.tw/rwd/zh/afterTrading/FMTQIK?response=json"
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
         }
         res = requests.get(url, headers=headers, timeout=10)
         if res.status_code == 200:
             data = res.json()
             if "data" in data and len(data["data"]) > 0:
                 last_row = data["data"][-1]
-                trade_amt = float(last_row[2].replace(",", "")) / 100000000  # 轉為億元
+                trade_amt = float(last_row[2].replace(",", "")) / 100000000
                 close_idx = float(last_row[4].replace(",", ""))
                 change_idx = float(last_row[5].replace(",", ""))
-                
                 prev_idx = close_idx - change_idx
                 pct = (change_idx / prev_idx) * 100 if prev_idx > 0 else 0.0
                 sign = "+" if change_idx >= 0 else ""
-                
                 return {
                     "close": f"{close_idx:,.2f}",
                     "change": f"{sign}{change_idx:,.2f}",
@@ -108,7 +96,7 @@ def fetch_twse_market_summary():
     return {"close": "--", "change": "--", "percent": "--", "volume": "--"}
 
 def fetch_us_market_summary():
-    """動態抓取美股那斯達克 (^IXIC) 與費城半導體 (^SOX) 最新即時大盤"""
+    """動態抓取美股那斯達克 (^IXIC) 與費城半導體 (^SOX)"""
     summary = {
         "close": "--", "change": "--", "percent": "--", "volume": "--",
         "secondaryName": "費城半導體 (SOX)", "secondaryClose": "--"
@@ -157,12 +145,10 @@ def evaluate_stock_candidate(symbol, name, sector="科技/半導體", is_us=Fals
         prev_close = float(yesterday['Close'])
         gain_pct = ((close - prev_close) / prev_close) * 100
 
-        # 美股門檻彈性：漲幅 >= 4.5%；台股嚴格門檻：漲幅 >= 8.5%
         min_gain = 4.5 if is_us else MIN_GAIN_PCT
         if gain_pct < min_gain:
             return None
 
-        # 計算均線 (5MA, 10MA, 20MA)
         df['5MA'] = df['Close'].rolling(5).mean()
         df['10MA'] = df['Close'].rolling(10).mean()
         df['20MA'] = df['Close'].rolling(20).mean()
@@ -175,25 +161,21 @@ def evaluate_stock_candidate(symbol, name, sector="科技/半導體", is_us=Fals
         vma5 = float(df['5VMA'].iloc[-2])
         volume = float(today['Volume'])
 
-        # 均線多頭排列
         is_ma_bullish = (ma5 > ma10 > ma20) and (ma20 >= ma20_prev)
         if not is_ma_bullish:
             return None
 
-        # 成交量放量判定 (美股放量 >= 1.5倍，台股 >= 1.8倍)
         min_vol = 1.5 if is_us else MIN_VOL_RATIO
         vol_ratio = volume / vma5 if vma5 > 0 else 1.0
         if vol_ratio < min_vol:
             return None
 
-        # 箱型突破判定 (前 20 交易日高點)
         box_window = df.iloc[-22:-2]
         box_high = float(box_window['High'].max())
         box_low = float(box_window['Low'].min())
         if close <= box_high:
             return None
 
-        # 計算 Fibonacci 回撤
         wave_low = float(df['Low'].tail(30).min())
         wave_high = close
         wave_diff = wave_high - wave_low
@@ -291,10 +273,7 @@ def run_us_screener():
     return candidates[:5]
 
 def track_recent_candidates(history_data, market_key, active_date, current_candidates):
-    """
-    動態追蹤過去 10 個交易日內的所有候選標的。
-    依今日最新實際收盤價判定是否落入最佳進場區 [entryMin, entryMax]。
-    """
+    """追蹤過去 10 個交易日內候選標的是否落入最佳進場區"""
     m_data = history_data.get(market_key, {})
     sorted_dates = sorted(m_data.keys(), reverse=True)
     recent_dates = sorted_dates[:10]
@@ -335,10 +314,8 @@ def track_recent_candidates(history_data, market_key, active_date, current_candi
         entry_min = float(cand.get("entryMin", 0))
         entry_max = float(cand.get("entryMax", 0))
 
-        # 跌破停損點立刻排除
         if latest_close <= stop_loss:
             continue
-        # 現價低於進場區間下緣或高於進場區間上緣一律排除
         if latest_close < entry_min or latest_close > entry_max:
             continue
 
@@ -349,9 +326,8 @@ def track_recent_candidates(history_data, market_key, active_date, current_candi
     return entry_zone_alerts
 
 def main():
-    print("🚀 啟動全動態台美股量化篩選機器人 (零寫死日期版)...")
+    print("🚀 啟動全動態台美股量化篩選機器人...")
     
-    # 1. 動態取得台股與美股的真實交易日期
     tw_active_date = get_dynamic_trading_date("^TWII")
     us_active_date = get_dynamic_trading_date("^IXIC")
     print(f"📅 台股最新動態交易日: {tw_active_date}")
@@ -362,13 +338,13 @@ def main():
         try:
             with open("data.json", "r", encoding="utf-8") as f:
                 history_data = json.load(f)
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"讀取既有 data.json 提示: {e}")
 
     if "TW" not in history_data: history_data["TW"] = {}
     if "US" not in history_data: history_data["US"] = {}
 
-    # 若資料庫天數不足，自動填補基礎基準歷史資料，避免只有單日
+    # 若資料庫天數不足，自動填補基礎基準歷史資料
     if len(history_data["TW"]) == 0:
         base_tw_history = {
             "2026-10-08": {
@@ -378,7 +354,7 @@ def main():
                 "candidates": [{
                     "rank": 1, "code": "3624", "name": "光頡", "sector": "精密晶片電阻", "close": 175.0, "change": "+9.72%", "volume": "47,737", "volRatio": "2.85 倍",
                     "maStatus": "5MA > 10MA > 20MA 多頭排列", "boxDays": "24日箱型突破", "boxRange": "145.0～160.0", "breakoutPrice": "160.0", "breakoutReason": "9月營收年增 67%，放量突破 160 元頸線收 175 元。",
-                    "fib236": 164.8, "fib382": 158.5, "fib500": 153.5, "fib618: 148.4, "fib786": 141.2, "strategy": "等38.2%", "entryZone": "158.0 ～ 165.0", "entryMin": 158.0, "entryMax": 165.0,
+                    "fib236": 164.8, "fib382": 158.5, "fib500": 153.5, "fib618": 148.4, "fib786": 141.2, "strategy": "等38.2%", "entryZone": "158.0 ～ 165.0", "entryMin": 158.0, "entryMax": 165.0,
                     "entryPrice": "162.0", "breakoutConfirmPrice": "178.0", "stopLossPrice": "146.0", "stopLossNum": 146.0, "noBuyCondition": "短線急拉不追高；破 146.0 結構失效嚴禁抄底", "score": 96
                 }],
                 "entryZoneAlerts": [{
@@ -402,7 +378,7 @@ def main():
                 "marketNature": "台積電創新高摸 49,968 點 ‧ 光通訊族群接棒",
                 "sectors": [{"name": "光通訊 / CPO 封裝", "grade": "A級", "note": "全友 (2305) 爆量鎖漲停"}],
                 "candidates": [{
-                    "rank": 1, "code": "2305", "name": "全友", "sector": "光電子/AI光通訊", close: 63.5, "change": "+9.86%", "volume": "13,750", "volRatio": "3.61 倍",
+                    "rank": 1, "code": "2305", "name": "全友", "sector": "光電子/AI光通訊", "close": 63.5, "change": "+9.86%", "volume": "13,750", "volRatio": "3.61 倍",
                     "maStatus": "均線多頭發散，20MA向上", "boxDays": "22日箱型突破", "boxRange": "52.0～58.5", "breakoutPrice": "58.5", "breakoutReason": "突破 58.5 元箱型上緣強攻 63.5 元。",
                     "fib236": 57.6, "fib382": 54.0, "fib500": 51.0, "fib618": 48.0, "fib786": 43.8, "strategy": "等突破回踩", "entryZone": "57.0 ～ 58.5", "entryMin": 57.0, "entryMax": 58.5,
                     "entryPrice": "58.0", "breakoutConfirmPrice": "64.0", "stopLossPrice": "51.0", "stopLossNum": 51.0, "noBuyCondition": "短線急拉不追高；跌破 51.0 停損", "score": 94
@@ -412,9 +388,9 @@ def main():
             "2026-10-05": {
                 "date": "2026-10-05", "dayOfWeek": "一", "taiexClose": "49,712.04", "taiexChange": "+1236.30", "taiexPercent": "+2.55%", "taiexVolume": "11,542.00 億元",
                 "marketNature": "暴漲逾千點 ‧ AI 高頻高速銅箔基板群起噴出",
-                "sectors": [{"name": "AI 伺服器高頻銅箔 / CCL", "grade": "S級", note: "金居 (8358) 爆量漲停"}],
+                "sectors": [{"name": "AI 伺服器高頻銅箔 / CCL", "grade": "S級", "note": "金居 (8358) 爆量漲停"}],
                 "candidates": [{
-                    "rank": 1, "code": "8358", "name": "金居", sector: "AI伺服器高頻銅箔", "close": 570.0, "change": "+9.83%", "volume": "40,415", "volRatio": "3.34 倍",
+                    "rank": 1, "code": "8358", "name": "金居", "sector": "AI伺服器高頻銅箔", "close": 570.0, "change": "+9.83%", "volume": "40,415", "volRatio": "3.34 倍",
                     "maStatus": "5MA > 10MA > 20MA 多頭發散", "boxDays": "32日箱型突破", "boxRange": "480.0～530.0", "breakoutPrice": "530.0", "breakoutReason": "跳空突破 530 元箱型，量放大 3.3 倍鎖 570 元。",
                     "fib236": 542.9, "fib382": 526.1, "fib500": 512.5, "fib618": 498.9, "fib786": 479.5, "strategy": "等38.2%", "entryZone": "526.0 ～ 540.0", "entryMin": 526.0, "entryMax": 540.0,
                     "entryPrice": "530.0", "breakoutConfirmPrice": "580.0", "stopLossPrice": "498.0", "stopLossNum": 498.0, "noBuyCondition": "跳空長紅禁止追價；跌破 498.0 全面停損", "score": 96
