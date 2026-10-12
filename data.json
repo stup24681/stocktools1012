@@ -10,18 +10,40 @@
       "marketNature": "盤後量化篩選 ‧ 均線多頭 ‧ 箱型放量突破確認",
       "sectors": [
         {
-          "name": "精密晶片電阻 / 被動元件",
+          "name": "半導體材料 / 晶圓薄化",
           "grade": "S級",
-          "note": "龍頭爆量鎖穩，族群共振強勁"
+          "note": "多頭發散爆量上攻"
         },
         {
-          "name": "AI 伺服器高頻銅箔 / CCL",
+          "name": "光通訊 / 矽光子 CPO",
           "grade": "A級",
-          "note": "多頭排列向上發散"
+          "note": "長線多頭排列"
         }
       ],
-      "candidates": []
+      "candidates": [],
+      "entryZoneAlerts": []
     }
   },
-  "US": {}
+  "US": {
+    "2026-10-09": {
+      "date": "2026-10-09",
+      "dayOfWeek": "五",
+      "taiexClose": "27,366.17",
+      "taiexChange": "+172.83",
+      "taiexPercent": "+0.64%",
+      "taiexVolume": "68.5 億股",
+      "secondaryIndexName": "費城半導體 (SOX)",
+      "secondaryIndexClose": "12,572.42 (-0.41%)",
+      "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
+      "sectors": [
+        {
+          "name": "AI 高速傳輸 / 光互連",
+          "grade": "S級",
+          "note": "量能增溫帶動主升段"
+        }
+      ],
+      "candidates": [],
+      "entryZoneAlerts": []
+    }
+  }
 }
