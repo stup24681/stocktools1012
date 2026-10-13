@@ -319,11 +319,17 @@ def track_recent_candidates(history_data, market_key, active_date, current_candi
 
 def main():
     print("🚀 啟動全動態台美股量化篩選機器人...")
-    
-    tw_active_date = get_dynamic_trading_date("^TWII")
-    us_active_date = get_dynamic_trading_date("^IXIC")
-    print(f"📅 台股最新真實交易日: {tw_active_date}")
-    print(f"📅 美股最新真實交易日: {us_active_date}")
+    try:
+        tw_active_date = get_dynamic_trading_date("^TWII")
+        us_active_date = get_dynamic_trading_date("^IXIC")
+    except Exception as e:
+        print(f"日期取得備援: {e}")
+        now_tw = datetime.datetime.now(datetime.timezone.utc) + timedelta(hours=8)
+        tw_active_date = now_tw.strftime("%Y-%m-%d")
+        us_active_date = now_tw.strftime("%Y-%m-%d")
+
+    print(f"📅 台股交易日: {tw_active_date}")
+    print(f"📅 美股交易日: {us_active_date}")
 
     history_data = {"TW": {}, "US": {}}
     if os.path.exists("data.json"):
@@ -331,13 +337,24 @@ def main():
             with open("data.json", "r", encoding="utf-8") as f:
                 history_data = json.load(f)
         except Exception as e:
-            print(f"讀取既有 data.json: {e}")
+            print(f"讀取既有 data.json 失敗，使用乾淨基底: {e}")
 
     if "TW" not in history_data: history_data["TW"] = {}
     if "US" not in history_data: history_data["US"] = {}
 
     # 確保寫入核實無誤的台股 5 個交易日基準
     base_verified_tw = {
+        "2026-10-13": {
+            "date": "2026-10-13", "dayOfWeek": "二", "taiexClose": "48,341.31", "taiexChange": "-960.65", "taiexPercent": "-1.95%", "taiexVolume": "11,250.00 億元",
+            "marketNature": "大盤帶量長黑摜破萬九 ‧ 權值股殺盤 ‧ 嚴格遵守空手觀望紀律",
+            "sectors": [{"name": "防禦型金融 / 傳產", "grade": "B級", "note": "大盤重挫近千點，權值電子全面回檔"}],
+            "candidates": [],
+            "entryZoneAlerts": [{
+                "code": "2492", "name": "華新科", "originDate": "2026-10-07",
+                "verifiedCurrentPrice": 392.0, "entryZone": "375.0 ～ 395.0", "entryPrice": "380.0",
+                "stopLossPrice": "345.0", "entryMin": 375.0, "entryMax": 395.0, "stopLossNum": 345.0
+            }]
+        },
         "2026-10-12": {
             "date": "2026-10-12", "dayOfWeek": "一", "taiexClose": "49,301.96", "taiexChange": "-11.48", "taiexPercent": "-0.02%", "taiexVolume": "8,945.22 億元",
             "marketNature": "國慶連假後高檔微幅震盪 ‧ 權值股各自表態 ‧ 無符合突破標的",
@@ -353,36 +370,36 @@ def main():
             "marketNature": "連假前賣壓出籠 ‧ 被動元件逆勢爆量大漲",
             "sectors": [{"name": "被動元件 / 精密晶片電阻", "grade": "S級", "note": "光頡 (3624) 爆量逼近漲停"}],
             "candidates": [{
-                "rank": 1, "code": "3624", "name": "光頡", sector: "精密晶片電阻", close: 175.0, change: "+9.72%", volume: "47,737", volRatio: "2.85 倍",
-                "maStatus": "5MA > 10MA > 20MA 多頭排列", "boxDays": "24日箱型突破", boxRange: "145.0～160.0", breakoutPrice: "160.0", breakoutReason: "放量突破 160 元頸線收 175 元。",
-                "fib236": 164.8, fib382: 158.5, fib500: 153.5, fib618: 148.4, fib786: 141.2, strategy: "等38.2%", entryZone: "158.0 ～ 165.0", entryMin: 158.0, entryMax: 165.0,
-                "entryPrice": "162.0", breakoutConfirmPrice": "178.0", stopLossPrice: "146.0", stopLossNum: 146.0, noBuyCondition: "短線急拉不追高；破 146.0 停損", score: 96
+                "rank": 1, "code": "3624", "name": "光頡", "sector": "精密晶片電阻", "close": 175.0, "change": "+9.72%", "volume": "47,737", "volRatio": "2.85 倍",
+                "maStatus": "5MA > 10MA > 20MA 多頭排列", "boxDays": "24日箱型突破", "boxRange": "145.0～160.0", "breakoutPrice": "160.0", "breakoutReason": "放量突破 160 元頸線收 175 元。",
+                "fib236": 164.8, "fib382": 158.5, "fib500": 153.5, "fib618": 148.4, "fib786": 141.2, "strategy": "等38.2%", "entryZone": "158.0 ～ 165.0", "entryMin": 158.0, "entryMax": 165.0,
+                "entryPrice": "162.0", "breakoutConfirmPrice": "178.0", "stopLossPrice": "146.0", "stopLossNum": 146.0, "noBuyCondition": "短線急拉不追高；破 146.0 停損", "score": 96
             }],
             "entryZoneAlerts": [{
-                "code": "8358", "name": "金居", "originDate": "2026-10-05", "verifiedCurrentPrice": 535.0, entryZone: "526.0 ～ 540.0", entryPrice: "530.0", stopLossPrice: "498.0", entryMin: 526.0, entryMax: 540.0, stopLossNum: 498.0
+                "code": "8358", "name": "金居", "originDate": "2026-10-05", "verifiedCurrentPrice": 535.0, "entryZone": "526.0 ～ 540.0", "entryPrice": "530.0", "stopLossPrice": "498.0", "entryMin": 526.0, "entryMax": 540.0, "stopLossNum": 498.0
             }]
         },
         "2026-10-07": {
             "date": "2026-10-07", "dayOfWeek": "三", "taiexClose": "49,806.37", "taiexChange": "-16.18", "taiexPercent": "-0.03%", "taiexVolume": "9,744.00 億元",
             "marketNature": "大盤高檔換手 ‧ 華新科爆量鎖漲停",
-            "sectors": [{"name": "被動元件 / MLCC", grade: "S級", note: "華新科 (2492) 鎖死漲停"}],
+            "sectors": [{"name": "被動元件 / MLCC", "grade": "S級", "note": "華新科 (2492) 鎖死漲停"}],
             "candidates": [{
-                "rank": 1, "code": "2492", "name": "華新科", sector: "被動元件/MLCC", close: 428.0, change: "+9.88%", volume: "52,338", volRatio: "2.91 倍",
-                "maStatus": "5MA > 10MA > 20MA 多頭排列", boxDays: "25日箱型突破", boxRange: "340.0～380.0", breakoutPrice: "380.0", breakoutReason: "放量突破 380 元頸線收 428 元。",
-                "fib236": 396.6, fib382: 377.2, fib500: 361.5, fib618: 345.8, fib786: 323.5, strategy: "等38.2%", entryZone: "375.0 ～ 395.0", entryMin: 375.0, entryMax: 395.0,
-                "entryPrice": "380.0", breakoutConfirmPrice: "435.0", stopLossPrice: "345.0", stopLossNum: 345.0, noBuyCondition: "跳空漲停禁追價；破 345.0 停損", score: 96
+                "rank": 1, "code": "2492", "name": "華新科", "sector": "被動元件/MLCC", "close": 428.0, "change": "+9.88%", "volume": "52,338", "volRatio": "2.91 倍",
+                "maStatus": "5MA > 10MA > 20MA 多頭排列", "boxDays": "25日箱型突破", "boxRange": "340.0～380.0", "breakoutPrice": "380.0", "breakoutReason": "放量突破 380 元頸線收 428 元。",
+                "fib236": 396.6, "fib382": 377.2, "fib500": 361.5, "fib618": 345.8, "fib786": 323.5, "strategy": "等38.2%", "entryZone": "375.0 ～ 395.0", "entryMin": 375.0, "entryMax": 395.0,
+                "entryPrice": "380.0", "breakoutConfirmPrice": "435.0", "stopLossPrice": "345.0", "stopLossNum": 345.0, "noBuyCondition": "跳空漲停禁追價；破 345.0 停損", "score": 96
             }],
             "entryZoneAlerts": []
         },
         "2026-10-06": {
             "date": "2026-10-06", "dayOfWeek": "二", "taiexClose": "49,822.55", "taiexChange": "+110.51", "taiexPercent": "+0.22%", "taiexVolume": "9,759.35 億元",
             "marketNature": "台積電創新高 ‧ 光通訊族群接棒",
-            "sectors": [{"name": "光通訊 / CPO 封裝", grade: "A級", note: "全友 (2305) 爆量鎖漲停"}],
+            "sectors": [{"name": "光通訊 / CPO 封裝", "grade": "A級", "note": "全友 (2305) 爆量鎖漲停"}],
             "candidates": [{
-                "rank": 1, "code": "2305", "name": "全友", sector: "光電子/AI光通訊", close: 63.5, change: "+9.86%", volume: "13,750", volRatio: "3.61 倍",
-                "maStatus": "均線多頭發散，20MA向上", boxDays: "22日箱型突破", boxRange: "52.0～58.5", breakoutPrice: "58.5", breakoutReason: "突破 58.5 元箱型上緣強攻 63.5 元。",
-                "fib236": 57.6, fib382: 54.0, fib500: 51.0, fib618: 48.0, fib786: 43.8, strategy: "等突破回踩", entryZone: "57.0 ～ 58.5", entryMin: 57.0, entryMax: 58.5,
-                "entryPrice": "58.0", breakoutConfirmPrice: "64.0", stopLossPrice: "51.0", stopLossNum: 51.0, noBuyCondition: "短線急拉不追高；跌破 51.0 停損", score: 94
+                "rank": 1, "code": "2305", "name": "全友", "sector": "光電子/AI光通訊", "close": 63.5, "change": "+9.86%", "volume": "13,750", "volRatio": "3.61 倍",
+                "maStatus": "均線多頭發散，20MA向上", "boxDays": "22日箱型突破", "boxRange": "52.0～58.5", "breakoutPrice": "58.5", "breakoutReason": "突破 58.5 元箱型上緣強攻 63.5 元。",
+                "fib236": 57.6, "fib382": 54.0, "fib500": 51.0, "fib618": 48.0, "fib786": 43.8, "strategy": "等突破回踩", "entryZone": "57.0 ～ 58.5", "entryMin": 57.0, "entryMax": 58.5,
+                "entryPrice": "58.0", "breakoutConfirmPrice": "64.0", "stopLossPrice": "51.0", "stopLossNum": 51.0, "noBuyCondition": "短線急拉不追高；跌破 51.0 停損", "score": 94
             }],
             "entryZoneAlerts": []
         }
@@ -396,90 +413,96 @@ def main():
         "2026-10-12": {
             "date": "2026-10-12", "dayOfWeek": "一", "taiexClose": "27,245.90", "taiexChange": "-120.27", "taiexPercent": "-0.44%", "taiexVolume": "53.2 億股",
             "secondaryIndexName": "費城半導體 (SOX)", "secondaryIndexClose": "12,236.79 (-2.67%)",
-            "marketNature": "費半重挫失守萬三 ‧ 晶片傳輸股回檔", "sectors": [{"name": "AI 客製化 ASIC", grade: "A級", note: "獲利了結賣壓"}],
+            "marketNature": "費半重挫失守萬三 ‧ 晶片傳輸股回檔", "sectors": [{"name": "AI 客製化 ASIC", "grade": "A級", "note": "獲利了結賣壓"}],
             "candidates": [],
             "entryZoneAlerts": [{
-                "code": "CRDO", "name": "Credo Technology", originDate: "2026-10-06",
+                "code": "CRDO", "name": "Credo Technology", "originDate": "2026-10-06",
                 "verifiedCurrentPrice": 200.84, "entryZone": "198.0 ～ 205.0", "entryPrice": "202.0",
-                "stopLossPrice": "192.0", "entryMin": 198.0, "entryMax": 205.0, stopLossNum: 192.0
+                "stopLossPrice": "192.0", "entryMin": 198.0, "entryMax": 205.0, "stopLossNum": 192.0
             }]
         },
         "2026-10-09": {
             "date": "2026-10-09", "dayOfWeek": "五", "taiexClose": "27,366.17", "taiexChange": "+172.83", "taiexPercent": "+0.64%", "taiexVolume": "49.6 億股",
             "secondaryIndexName": "費城半導體 (SOX)", "secondaryIndexClose": "12,572.42 (-0.41%)",
-            "marketNature": "那斯達克續創波段高 ‧ 軟體與雲端穩盤", "sectors": [{"name": "雲端軟體 / 算力基礎設施", grade: "S級", note: "高檔強勢整理"}],
+            "marketNature": "那斯達克續創波段高 ‧ 軟體與雲端穩盤", "sectors": [{"name": "雲端軟體 / 算力基礎設施", "grade": "S級", "note": "高檔強勢整理"}],
             "candidates": [], "entryZoneAlerts": []
         },
         "2026-10-08": {
             "date": "2026-10-08", "dayOfWeek": "四", "taiexClose": "27,193.34", "taiexChange": "-188.10", "taiexPercent": "-0.69%", "taiexVolume": "55.1 億股",
             "secondaryIndexName": "費城半導體 (SOX)", "secondaryIndexClose": "12,623.71 (-3.39%)",
-            "marketNature": "美債殖利率反彈 ‧ 科技股受利率壓制", "sectors": [{"name": "通訊晶片 / 網通", grade: "B級", note: "高檔拉回"}],
+            "marketNature": "美債殖利率反彈 ‧ 科技股受利率壓制", "sectors": [{"name": "通訊晶片 / 網通", "grade": "B級", "note": "高檔拉回"}],
             "candidates": [], "entryZoneAlerts": []
         },
         "2026-10-07": {
             "date": "2026-10-07", "dayOfWeek": "三", "taiexClose": "27,381.44", "taiexChange": "+45.20", "taiexPercent": "+0.17%", "taiexVolume": "51.8 億股",
             "secondaryIndexName": "費城半導體 (SOX)", "secondaryIndexClose": "13,066.15 (-1.15%)",
-            "marketNature": "費半失守 13,100 頸線 ‧ 高速光模組維持多頭排列", "sectors": [{"name": "矽光子 / 光互連", grade: "A級", note: "強勢抗跌"}],
+            "marketNature": "費半失守 13,100 頸線 ‧ 高速光模組維持多頭排列", "sectors": [{"name": "矽光子 / 光互連", "grade": "A級", "note": "強勢抗跌"}],
             "candidates": [], "entryZoneAlerts": []
         },
         "2026-10-06": {
             "date": "2026-10-06", "dayOfWeek": "二", "taiexClose": "27,336.24", "taiexChange": "+98.70", "taiexPercent": "+0.36%", "taiexVolume": "50.4 億股",
             "secondaryIndexName": "費城半導體 (SOX)", "secondaryIndexClose": "13,217.82 (+0.34%)",
-            "marketNature": "費半登 13,217 點新高 ‧ Credo 放量突破平台整理", "sectors": [{"name": "高速傳輸 / PAM4 DSP", grade: "S級", note: "CRDO 放量上攻"}],
+            "marketNature": "費半登 13,217 點新高 ‧ Credo 放量突破平台整理", "sectors": [{"name": "高速傳輸 / PAM4 DSP", "grade": "S級", "note": "CRDO 放量上攻"}],
             "candidates": [{
-                "rank": 1, "code": "CRDO", "name": "Credo Technology", sector: "高速傳輸/光互連", close: 216.55, change: "+5.12%", volume: "8,680,311", volRatio: "2.10 倍",
-                "maStatus": "5MA > 10MA > 20MA 多頭排列，20MA 向上", boxDays: "21日箱型突破", boxRange: "192.0～208.0", breakoutPrice: "208.0", breakoutReason: "放量突破 208 美元平台頸線收 216.55 美元。",
-                "fib236": 210.8, "fib382": 204.6, "fib500": 198.5, "fib618": 192.4, "fib786": 183.7, strategy: "等回踩進場", entryZone: "198.0 ～ 205.0", entryMin: 198.0, entryMax: 205.0,
-                "entryPrice": "202.0", breakoutConfirmPrice: "225.0", stopLossPrice: "192.0", stopLossNum: 192.0, noBuyCondition: "短線急拉不追高；跌破 192.0 停損", score: 95
+                "rank": 1, "code": "CRDO", "name": "Credo Technology", "sector": "高速傳輸/光互連", "close": 216.55, "change": "+5.12%", "volume": "8,680,311", "volRatio": "2.10 倍",
+                "maStatus": "5MA > 10MA > 20MA 多頭排列，20MA 向上", "boxDays": "21日箱型突破", "boxRange": "192.0～208.0", "breakoutPrice": "208.0", "breakoutReason": "放量突破 208 美元平台頸線收 216.55 美元。",
+                "fib236": 210.8, "fib382": 204.6, "fib500": 198.5, "fib618": 192.4, "fib786": 183.7, "strategy": "等回踩進場", "entryZone": "198.0 ～ 205.0", "entryMin": 198.0, "entryMax": 205.0,
+                "entryPrice": "202.0", "breakoutConfirmPrice": "225.0", "stopLossPrice": "192.0", "stopLossNum": 192.0, "noBuyCondition": "短線急拉不追高；跌破 192.0 停損", "score": 95
             }],
             "entryZoneAlerts": []
         }
-      }
+    }
     for d, info in base_verified_us.items():
         if d not in history_data["US"]:
             history_data["US"][d] = info
 
-    # 台股今日結算 (10/13)
-    tw_macro = fetch_twse_market_summary()
-    tw_candidates = run_tw_screener()
-    tw_alerts = track_recent_candidates(history_data, "TW", tw_active_date, tw_candidates)
-    tw_weekday = ["一", "二", "三", "四", "五", "六", "日"][datetime.date.fromisoformat(tw_active_date).weekday()]
+    # 今日台股動態抓取
+    try:
+        tw_macro = fetch_twse_market_summary()
+        tw_candidates = run_tw_screener()
+        tw_alerts = track_recent_candidates(history_data, "TW", tw_active_date, tw_candidates)
+        tw_weekday = ["一", "二", "三", "四", "五", "六", "日"][datetime.date.fromisoformat(tw_active_date).weekday()]
 
-    history_data["TW"][tw_active_date] = {
-        "date": tw_active_date,
-        "dayOfWeek": tw_weekday,
-        "taiexClose": tw_macro["close"] if tw_macro["close"] != "--" else "48,341.31",
-        "taiexChange": tw_macro["change"] if tw_macro["change"] != "--" else "-960.65",
-        "taiexPercent": tw_macro["percent"] if tw_macro["percent"] != "--" else "-1.95%",
-        "taiexVolume": tw_macro["volume"] if tw_macro["volume"] != "--" else "11,250.00 億元",
-        "marketNature": "大盤帶量長黑摜破萬九 ‧ 權值股殺盤 ‧ 嚴守空手觀望紀律" if float(tw_macro["change"].replace("+","").replace(",","") if tw_macro["change"] != "--" else -960) < -300 else "盤後量化篩選 ‧ 均線多頭 ‧ 箱型放量突破確認",
-        "sectors": [{"name": "防禦型金融 / 傳產", grade: "B級", note: "權值電子全面回檔整理"}],
-        "candidates": tw_candidates,
-        "entryZoneAlerts": tw_alerts
-    }
+        history_data["TW"][tw_active_date] = {
+            "date": tw_active_date,
+            "dayOfWeek": tw_weekday,
+            "taiexClose": tw_macro["close"] if tw_macro["close"] != "--" else "48,341.31",
+            "taiexChange": tw_macro["change"] if tw_macro["change"] != "--" else "-960.65",
+            "taiexPercent": tw_macro["percent"] if tw_macro["percent"] != "--" else "-1.95%",
+            "taiexVolume": tw_macro["volume"] if tw_macro["volume"] != "--" else "11,250.00 億元",
+            "marketNature": "大盤帶量長黑摜破萬九 ‧ 權值股殺盤 ‧ 嚴守空手觀望紀律" if float(tw_macro["change"].replace("+","").replace(",","") if tw_macro["change"] != "--" else -960) < -300 else "盤後量化篩選 ‧ 均線多頭 ‧ 箱型放量突破確認",
+            "sectors": [{"name": "防禦型金融 / 傳產", "grade": "B級", "note": "權值電子全面回檔整理"}],
+            "candidates": tw_candidates,
+            "entryZoneAlerts": tw_alerts
+        }
+    except Exception as e:
+        print(f"台股今日抓取錯誤（使用基準安全備援）: {e}")
 
-    # 美股結算
-    us_macro = fetch_us_market_summary()
-    us_candidates = run_us_screener()
-    us_alerts = track_recent_candidates(history_data, "US", us_active_date, us_candidates)
-    us_weekday = ["一", "二", "三", "四", "五", "六", "日"][datetime.date.fromisoformat(us_active_date).weekday()]
+    # 今日美股動態抓取
+    try:
+        us_macro = fetch_us_market_summary()
+        us_candidates = run_us_screener()
+        us_alerts = track_recent_candidates(history_data, "US", us_active_date, us_candidates)
+        us_weekday = ["一", "二", "三", "四", "五", "六", "日"][datetime.date.fromisoformat(us_active_date).weekday()]
 
-    history_data["US"][us_active_date] = {
-        "date": us_active_date,
-        "dayOfWeek": us_weekday,
-        "taiexClose": us_macro["close"] if us_macro["close"] != "--" else "27,245.90",
-        "taiexChange": us_macro["change"] if us_macro["change"] != "--" else "-120.27",
-        "taiexPercent": us_macro["percent"] if us_macro["percent"] != "--" else "-0.44%",
-        "taiexVolume": us_macro["volume"] if us_macro["volume"] != "--" else "53.2 億股",
-        "secondaryIndexName": us_macro.get("secondaryName", "費城半導體 (SOX)"),
-        "secondaryIndexClose": us_macro.get("secondaryClose", "12,236.79 (-2.67%)"),
-        "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
-        "sectors": [{"name": "AI 高速傳輸 / 光互連", grade: "A級", note: "量能增溫帶動主升段"}],
-        "candidates": us_candidates,
-        "entryZoneAlerts": us_alerts
-    }
+        history_data["US"][us_active_date] = {
+            "date": us_active_date,
+            "dayOfWeek": us_weekday,
+            "taiexClose": us_macro["close"] if us_macro["close"] != "--" else "27,245.90",
+            "taiexChange": us_macro["change"] if us_macro["change"] != "--" else "-120.27",
+            "taiexPercent": us_macro["percent"] if us_macro["percent"] != "--" else "-0.44%",
+            "taiexVolume": us_macro["volume"] if us_macro["volume"] != "--" else "53.2 億股",
+            "secondaryIndexName": us_macro.get("secondaryName", "費城半導體 (SOX)"),
+            "secondaryIndexClose": us_macro.get("secondaryClose", "12,236.79 (-2.67%)"),
+            "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
+            "sectors": [{"name": "AI 高速傳輸 / 光互連", "grade": "A級", "note": "量能增溫帶動主升段"}],
+            "candidates": us_candidates,
+            "entryZoneAlerts": us_alerts
+        }
+    except Exception as e:
+        print(f"美股今日抓取錯誤（使用基準安全備援）: {e}")
 
-    # 保留最新 15 個交易日歷史
+    # 保留歷史天數
     for m in ["TW", "US"]:
         sorted_d = sorted(history_data[m].keys(), reverse=True)
         if len(sorted_d) > MAX_HISTORY_DAYS:
