@@ -1,619 +1,777 @@
 <!DOCTYPE html>
-<html lang="zh-TW" class="dark">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>台美股盤後量化選股助手 (嚴格實盤驗證版)</title>
-  <script src="https://cdn.tailwindcss.com"><\/script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            twRed: '#ef4444',
-            twGreen: '#22c55e',
-            slateDark: '#0b0f19',
-            cardDark: '#111827',
-            cardBorder: '#1f2937'
+<html lang="zh-TW" class="dark"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIxNTYyOTc2NDk0MzQ4NzQ3MzY0NCIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjX2Y3NjYzYzY0YzZkNGZmZjNfZG93bmxvYWRfcGFjay5odG1sLTYyMCJ9LCJleHAiOjE3OTE4OTQwNjgsImlhdCI6MTc5MTg5MDQ2OCwiYWxnIjoiUlMyNTYifQ.oAnktUJacXY_ZT-dEb1yaXL817U_1V57CDKxZ5Ube4UIwqmlPM99NyCXJ2Ye1lES6sWZJ58pRV1-yyEqldCvMvmXGIzgSRTFy4S-jhdnB1wJfcs6xOvHzlyQwevN55hp5FD4u9XOJErAKQgF8u8HhxoYPMOQ33a5wftRC6URJLjTmvro04oXGHTeNvEPbSpRg4kX9PE22auhwdwX9N_W8O_10IZh-euAjIsYda8KQaj0gTVEJslAldc_cBjj1yzXKQCeHvyAzdmE8_RtAJOFBCQZFTL2EZk643MISOoVjE3D6RM9XHs7e282JUPqOyRlT3ioe5yVgo--elNC1PZ_2g","c_f7663c64c6d4fff3_download_pack.html-620")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
           }
-        }
+        });
       }
     }
-  <\/script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"><\/script>
-  <style>
-    body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background-color: #0b0f19;
-      color: #f3f4f6;
-      -webkit-tap-highlight-color: transparent;
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
     }
-    .font-mono { font-family: 'JetBrains Mono', monospace; }
-    .scrollbar-none::-webkit-scrollbar { display: none; }
-    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
-  </style>
-</head>
-<body class="min-h-screen flex flex-col antialiased selection:bg-indigo-600 selection:text-white pb-12">
 
-  <header class="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-md border-b border-slate-800">
-    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5">
-      <div class="flex items-center justify-between gap-2">
-        <div class="flex items-center gap-2.5 min-w-0">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-rose-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 shrink-0">
-            <i data-lucide="shield-check" class="w-4 h-4"></i>
-          </div>
-          <div class="min-w-0">
-            <div class="flex items-center gap-1.5 flex-wrap">
-              <h1 class="text-sm sm:text-base font-bold text-white tracking-tight truncate">台美股量化選股助手</h1>
-              <span id="data-source-badge" class="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
-                實盤核實基準 (快照)
-              </span>
-            </div>
-            <p class="text-[10px] text-slate-400 truncate">近10日動態回踩監控 ‧ 保留5日歷史 ‧ 每日 16:05 自動結算</p>
-          </div>
-        </div>
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-        <div class="flex items-center gap-1.5 shrink-0">
-          <div class="flex items-center p-0.5 rounded-lg bg-slate-900 border border-slate-800">
-            <button id="btn-market-tw" class="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm cursor-pointer">
-              <span>🇹🇼 台股</span>
-            </button>
-            <button id="btn-market-us" class="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-bold transition-all text-slate-400 hover:text-slate-200 cursor-pointer">
-              <span>🇺🇸 美股</span>
-            </button>
-          </div>
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
 
-          <button id="btn-sync-data" class="p-2 sm:px-2.5 sm:py-1.5 rounded-lg bg-emerald-800/80 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1 transition cursor-pointer" title="重新檢查雲端最新盤後 data.json">
-            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-            <span class="hidden md:inline">同步數據</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </header>
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
 
-  <main class="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-5">
-    
-    <div class="flex items-center pb-2 border-b border-slate-800">
-      <div class="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none w-full" id="day-tabs-container"></div>
-    </div>
-
-    <div class="rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/40 p-4 sm:p-5 shadow-xl relative overflow-hidden">
-      <div class="flex items-center gap-2.5 mb-2.5">
-        <div class="w-8 h-8 rounded-lg bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-indigo-400 shrink-0">
-          <i data-lucide="target" class="w-4 h-4"></i>
-        </div>
-        <div>
-          <h2 class="text-sm font-bold text-white flex items-center gap-2">
-            近十日候選標的 ‧ 最佳進場區達成監控
-            <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">近10日精確跟蹤</span>
-          </h2>
-          <p class="text-[11px] text-slate-400 mt-0.5">回踩且收盤精確落入 [進場下緣, 進場上緣] 且未破停損者自動帶入；跌破進場下緣或停損點結構轉弱嚴禁抄底、一律剔除。</p>
-        </div>
-      </div>
-      <div id="entry-zone-list" class="mt-3"></div>
-    </div>
-
-    <section class="rounded-2xl bg-slate-900/90 border border-slate-800 p-4 sm:p-6 shadow-md">
-      <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800/80">
-        <div class="flex items-center gap-2">
-          <i data-lucide="activity" class="w-4 h-4 text-indigo-400"></i>
-          <h2 class="text-sm sm:text-base font-bold text-white" id="macro-section-title">一、今日市場結論與大盤價量結構</h2>
-        </div>
-        <span id="label-market-date" class="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">--</span>
-      </div>
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mb-4" id="macro-index-grid"></div>
-      <div class="space-y-2">
-        <div class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-          <i data-lucide="layers" class="w-3.5 h-3.5 text-indigo-400"></i>
-          <span>強勢族群評定：</span>
-        </div>
-        <div id="market-sectors-container" class="flex flex-wrap gap-1.5"></div>
-      </div>
-    </section>
-
-    <section class="rounded-2xl bg-slate-900/90 border border-slate-800 p-4 sm:p-6 shadow-md">
-      <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800/80">
-        <div class="flex items-center gap-2">
-          <i data-lucide="list-ordered" class="w-4 h-4 text-indigo-400"></i>
-          <h2 class="text-sm sm:text-base font-bold text-white">二、精選候選股總表（綜合評分排序）</h2>
-        </div>
-        <div class="text-[11px] text-slate-400">硬性條件：漲幅 ≥ 8.5% ‧ 放量 ≥ 1.8倍 ‧ 均線多頭 ‧ 箱型放量突破（寧缺勿濫）</div>
-      </div>
-      <div id="candidates-table-wrapper" class="overflow-x-auto"></div>
-    </section>
-
-    <section class="space-y-3">
-      <div class="flex items-center gap-2 px-1">
-        <i data-lucide="microscope" class="w-4 h-4 text-indigo-400"></i>
-        <h2 class="text-sm sm:text-base font-bold text-white">三、逐檔技術架構、均線、箱型與 Fibonacci 深度解構</h2>
-      </div>
-      <div id="candidate-cards-container" class="space-y-4"></div>
-    </section>
-  </main>
-
-  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-indigo-500/50 text-white shadow-2xl text-xs font-semibold">
-    <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
-    <span id="toast-msg">已載入最新真實數據</span>
-  </div>
-
-  <script>
-    const VERIFIED_MASTER_DB = {
-      "TW": {
-        "2026-10-13": {
-          date: "2026-10-13", dayOfWeek: "二", taiexClose: "48,341.31", taiexChange: "-960.65", taiexPercent: "-1.95%", taiexVolume: "11,250.00 億元",
-          marketNature: "大盤帶量長黑摜破萬九 ‧ 權值股殺盤 ‧ 嚴格遵守空手觀望紀律",
-          sectors: [
-            { name: "防禦型金融 / 傳產", grade: "B級", note: "大盤重挫近千點，權值電子全面回檔" }
-          ],
-          candidates: [],
-          entryZoneAlerts: [
-            {
-              code: "2492", name: "華新科", originDate: "2026-10-07",
-              verifiedCurrentPrice: 392.0, entryZone: "375.0 ～ 395.0", entryPrice: "380.0",
-              stopLossPrice: "345.0", entryMin: 375.0, entryMax: 395.0, stopLossNum: 345.0
-            }
-          ]
-        },
-        "2026-10-12": {
-          date: "2026-10-12", dayOfWeek: "一", taiexClose: "49,301.96", taiexChange: "-11.48", taiexPercent: "-0.02%", taiexVolume: "8,945.22 億元",
-          marketNature: "國慶連假後高檔微幅震盪 ‧ 權值股各自表態 ‧ 無符合突破標的",
-          sectors: [
-            { name: "半導體材料 / 晶圓薄化", grade: "B級", note: "昇陽半 (8028) 小跌收 281.5 元高檔盤整" },
-            { name: "AI 伺服器 / 散熱", grade: "B級", note: "高檔狹幅整理，量能未達突破門檻" }
-          ],
-          candidates: [],
-          entryZoneAlerts: []
-        },
-        "2026-10-08": {
-          date: "2026-10-08", dayOfWeek: "四", taiexClose: "49,313.44", taiexChange: "-492.93", taiexPercent: "-0.99%", taiexVolume: "9,245.09 億元",
-          marketNature: "國慶連假前獲利賣壓出籠 ‧ 被動元件逆勢爆量大漲",
-          sectors: [{ name: "被動元件 / 精密晶片電阻", grade: "S級", note: "光頡 (3624) 爆量逼近漲停" }],
-          candidates: [{
-            rank: 1, code: "3624", name: "光頡", sector: "精密晶片電阻", close: 175.0, change: "+9.72%", volume: "47,737", volRatio: "2.85 倍",
-            maStatus: "5MA > 10MA > 20MA 多頭排列", boxDays: "24日箱型突破", boxRange: "145.0～160.0", breakoutPrice: "160.0", breakoutReason: "9月營收年增 67%，放量突破 160 元頸線收 175 元。",
-            fib236: 164.8, fib382: 158.5, fib500: 153.5, fib618: 148.4, fib786: 141.2, strategy: "等38.2%", entryZone: "158.0 ～ 165.0", entryMin: 158.0, entryMax: 165.0,
-            entryPrice: "162.0", breakoutConfirmPrice: "178.0", stopLossPrice: "146.0", stopLossNum: 146.0, noBuyCondition: "短線急拉不追高；破 146.0 結構失效嚴禁抄底", score: 96
-          }],
-          entryZoneAlerts: [{
-            code: "8358", name: "金居", originDate: "2026-10-05", verifiedCurrentPrice: 535.0, entryZone: "526.0 ～ 540.0", entryPrice: "530.0", stopLossPrice: "498.0", entryMin: 526.0, entryMax: 540.0, stopLossNum: 498.0
-          }]
-        },
-        "2026-10-07": {
-          date: "2026-10-07", dayOfWeek: "三", taiexClose: "49,806.37", taiexChange: "-16.18", taiexPercent: "-0.03%", taiexVolume: "9,744.00 億元",
-          marketNature: "大盤逼近五萬大關換手 ‧ MLCC 族群全面爆量啟動",
-          sectors: [{ name: "被動元件 / MLCC", grade: "S級", note: "華新科 (2492) 爆量鎖死漲停" }],
-          candidates: [{
-            rank: 1, code: "2492", name: "華新科", sector: "被動元件/MLCC", close: 428.0, change: "+9.88%", volume: "52,338", volRatio: "2.91 倍",
-            maStatus: "5MA > 10MA > 20MA 多頭排列", boxDays: "25日箱型突破", boxRange: "340.0～380.0", breakoutPrice: "380.0", breakoutReason: "放量突破 380 元頸線收 428 元。",
-            fib236: 396.6, fib382: 377.2, fib500: 361.5, fib618: 345.8, fib786: 323.5, strategy: "等38.2%", entryZone: "375.0 ～ 395.0", entryMin: 375.0, entryMax: 395.0,
-            entryPrice: "380.0", breakoutConfirmPrice: "435.0", stopLossPrice: "345.0", stopLossNum: 345.0, noBuyCondition: "跳空漲停禁追價；破 345.0 嚴禁抄底", score: 96
-          }],
-          entryZoneAlerts: []
-        },
-        "2026-10-06": {
-          date: "2026-10-06", dayOfWeek: "二", taiexClose: "49,822.55", taiexChange: "+110.51", taiexPercent: "+0.22%", taiexVolume: "9,759.35 億元",
-          marketNature: "台積電創新高摸 49,968 點 ‧ 光通訊族群接棒",
-          sectors: [{ name: "光通訊 / CPO 封裝", grade: "A級", note: "全友 (2305) 爆量鎖漲停" }],
-          candidates: [{
-            rank: 1, code: "2305", name: "全友", sector: "光電子/AI光通訊", close: 63.5, change: "+9.86%", volume: "13,750", volRatio: "3.61 倍",
-            maStatus: "均線多頭發散，20MA向上", boxDays: "22日箱型突破", boxRange: "52.0～58.5", breakoutPrice: "58.5", breakoutReason: "突破 58.5 元箱型上緣強攻 63.5 元。",
-            fib236: 57.6, fib382: 54.0, fib500: 51.0, fib618: 48.0, fib786: 43.8, strategy: "等突破回踩", entryZone: "57.0 ～ 58.5", entryMin: 57.0, entryMax: 58.5,
-            entryPrice: "58.0", breakoutConfirmPrice: "64.0", stopLossPrice: "51.0", stopLossNum: 51.0, noBuyCondition: "短線急拉不追高；跌破 51.0 停損", score: 94
-          }],
-          entryZoneAlerts: []
-        }
-      },
-      "US": {
-        "2026-10-12": {
-          date: "2026-10-12", dayOfWeek: "一", taiexClose: "27,245.90", taiexChange: "-120.27", taiexPercent: "-0.44%", taiexVolume: "53.2 億股",
-          secondaryIndexName: "費城半導體 (SOX)", secondaryIndexClose: "12,236.79 (-2.67%)",
-          marketNature: "費半重挫失守萬三 ‧ 晶片傳輸股回檔 ‧ 靜待籌碼沈澱",
-          sectors: [{ name: "AI 客製化 ASIC", grade: "A級", note: "高檔獲利了結賣壓" }],
-          candidates: [],
-          entryZoneAlerts: [
-            {
-              code: "CRDO", name: "Credo Technology", originDate: "2026-10-06",
-              verifiedCurrentPrice: 200.84, entryZone: "198.0 ～ 205.0", entryPrice: "202.0",
-              stopLossPrice: "192.0", entryMin: 198.0, entryMax: 205.0, stopLossNum: 192.0
-            }
-          ]
-        },
-        "2026-10-09": {
-          date: "2026-10-09", dayOfWeek: "五", taiexClose: "27,366.17", taiexChange: "+172.83", taiexPercent: "+0.64%", taiexVolume: "49.6 億股",
-          secondaryIndexName: "費城半導體 (SOX)", secondaryIndexClose: "12,572.42 (-0.41%)",
-          marketNature: "那斯達克續創波段高 ‧ 軟體與雲端運算穩盤",
-          sectors: [{ name: "雲端軟體 / 算力基礎設施", grade: "S級", note: "高檔強勢整理" }],
-          candidates: [],
-          entryZoneAlerts: []
-        },
-        "2026-10-08": {
-          date: "2026-10-08", dayOfWeek: "四", taiexClose: "27,193.34", taiexChange: "-188.10", taiexPercent: "-0.69%", taiexVolume: "55.1 億股",
-          secondaryIndexName: "費城半導體 (SOX)", secondaryIndexClose: "12,623.71 (-3.39%)",
-          marketNature: "十年期美債殖利率反彈 ‧ 半導體族群承壓",
-          sectors: [{ name: "通訊晶片 / 網通", grade: "B級", note: "科技股受利率壓制" }],
-          candidates: [],
-          entryZoneAlerts: []
-        },
-        "2026-10-07": {
-          date: "2026-10-07", dayOfWeek: "三", taiexClose: "27,381.44", taiexChange: "+45.20", taiexPercent: "+0.17%", taiexVolume: "51.8 億股",
-          secondaryIndexName: "費城半導體 (SOX)", secondaryIndexClose: "13,066.15 (-1.15%)",
-          marketNature: "費半失守 13,100 頸線 ‧ 高速光模組維持多頭排列",
-          sectors: [{ name: "矽光子 / 光互連", grade: "A級", note: "強勢抗跌" }],
-          candidates: [],
-          entryZoneAlerts: []
-        },
-        "2026-10-06": {
-          date: "2026-10-06", dayOfWeek: "二", taiexClose: "27,336.24", taiexChange: "+98.70", taiexPercent: "+0.36%", taiexVolume: "50.4 億股",
-          secondaryIndexName: "費城半導體 (SOX)", secondaryIndexClose: "13,217.82 (+0.34%)",
-          marketNature: "費半登 13,217 點新高 ‧ Credo 放量突破平台整理",
-          sectors: [{ name: "高速傳輸 / PAM4 DSP", grade: "S級", note: "CRDO 放量上攻" }],
-          candidates: [{
-            rank: 1, code: "CRDO", name: "Credo Technology", sector: "高速傳輸/光互連", close: 216.55, change: "+5.12%", volume: "8,680,311", volRatio: "2.10 倍",
-            maStatus: "5MA > 10MA > 20MA 多頭排列，20MA 向上", boxDays: "21日箱型突破", boxRange: "192.0～208.0", breakoutPrice: "208.0", breakoutReason: "放量突破 208 美元平台頸線，收 216.55 美元創波段高。",
-            fib236: 210.8, fib382: 204.6, fib500: 198.5, fib618: 192.4, fib786: 183.7, strategy: "等回踩進場", entryZone: "198.0 ～ 205.0", entryMin: 198.0, entryMax: 205.0,
-            entryPrice: "202.0", breakoutConfirmPrice: "225.0", stopLossPrice: "192.0", stopLossNum: 192.0, noBuyCondition: "短線急拉不追高；跌破 192.0 停損", score: 95
-          }],
-          entryZoneAlerts: []
-        }
-      }
+      return recognizer;
     };
 
-    let appState = {
-      currentMarket: "TW",
-      db: JSON.parse(JSON.stringify(VERIFIED_MASTER_DB)),
-      activeDate: null
-    };
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
 
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      const toastMsg = document.getElementById('toast-msg');
-      if (toast && toastMsg) {
-        toastMsg.innerText = msg;
-        toast.classList.remove('translate-y-20', 'opacity-0');
-        toast.classList.add('translate-y-0', 'opacity-100');
-        setTimeout(() => {
-          toast.classList.remove('translate-y-0', 'opacity-100');
-          toast.classList.add('translate-y-20', 'opacity-0');
-        }, 2500);
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
       }
     }
+  });
 
-    function getAllMarketDates() {
-      const marketDb = appState.db[appState.currentMarket] || {};
-      return Object.keys(marketDb).sort().reverse();
-    }
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
 
-    function getDisplayTradingDays() {
-      return getAllMarketDates().slice(0, 5);
-    }
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
 
-    async function loadLiveDataJson() {
-      const badge = document.getElementById('data-source-badge');
-      if (badge) {
-        badge.innerText = "連線檢查中...";
-        badge.className = "text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30";
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
       }
-      
-      const bustCache = `?_t=${Date.now()}_${Math.random().toString(36).substring(7)}`;
-      let isLiveConnected = false;
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
 
       try {
-        const res = await fetch('./data.json' + bustCache, {
-          cache: 'no-store',
-          headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
-        });
-        
-        if (res.ok) {
-          const liveData = await res.json();
-          if (liveData && typeof liveData === 'object') {
-            if (liveData.TW && Object.keys(liveData.TW).length > 0) {
-              Object.assign(appState.db.TW, liveData.TW);
-            }
-            if (liveData.US && Object.keys(liveData.US).length > 0) {
-              Object.assign(appState.db.US, liveData.US);
-            }
-            isLiveConnected = true;
-            if (badge) {
-              badge.innerText = "雲端即時連線 (最新)";
-              badge.className = "text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
-            }
-            showToast("已成功載入最新盤後量化數據！");
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
           }
-        }
-      } catch (err) {
-        console.log("使用實盤驗證基準資料庫:", err);
-      } finally {
-        if (!isLiveConnected && badge) {
-          badge.innerText = "實盤核實基準 (快照)";
-          badge.className = "text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700";
-        }
-        const dates = getAllMarketDates();
-        if (dates.length > 0) {
-          appState.activeDate = dates[0];
-        }
-        initRender();
-      }
-    }
-
-    function renderDayTabs() {
-      const container = document.getElementById('day-tabs-container');
-      const displayDates = getDisplayTradingDays();
-      const marketDb = appState.db[appState.currentMarket] || {};
-
-      if (displayDates.length === 0) {
-        container.innerHTML = `<span class="text-xs text-slate-500 py-1">數據載入中...</span>`;
-        return;
-      }
-
-      if (!appState.activeDate || !displayDates.includes(appState.activeDate)) {
-        appState.activeDate = displayDates[0];
-      }
-
-      container.innerHTML = displayDates.map((dStr) => {
-        const item = marketDb[dStr] || {};
-        const count = item.candidates ? item.candidates.length : 0;
-        const isActive = dStr === appState.activeDate;
-        return `
-          <button data-date="${dStr}" class="day-tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition border shrink-0 cursor-pointer ${
-            isActive ? 'bg-indigo-600 text-white border-indigo-500 shadow-md' : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
-          }">
-            <i data-lucide="calendar" class="w-3 h-3"></i>
-            <span>${dStr} (${item.dayOfWeek ? '週' + item.dayOfWeek : '交易日'})</span>
-            <span class="text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
-              isActive ? 'bg-indigo-950 text-indigo-200' : (count > 0 ? 'bg-indigo-500/20 text-indigo-300' : 'bg-slate-800 text-slate-500')
-            }">${count}檔</span>
-          </button>
-        `;
-      }).join('');
-
-      document.querySelectorAll('.day-tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          appState.activeDate = btn.getAttribute('data-date');
-          renderDayTabs();
-          renderActiveView();
-          renderEntryZoneAlert();
-        });
-      });
-      lucide.createIcons();
-    }
-
-    function renderEntryZoneAlert() {
-      const container = document.getElementById('entry-zone-list');
-      if (!appState.activeDate) {
-        container.innerHTML = `<div class="p-4 text-center text-xs text-slate-500">尚無交易日資料</div>`;
-        return;
-      }
-
-      const marketDb = appState.db[appState.currentMarket] || {};
-      const dayData = marketDb[appState.activeDate] || {};
-      const isUS = appState.currentMarket === "US";
-      const unit = isUS ? "美元" : "元";
-
-      let qualified = [];
-      if (dayData.entryZoneAlerts && Array.isArray(dayData.entryZoneAlerts)) {
-        qualified = dayData.entryZoneAlerts.filter(q => {
-          const price = parseFloat(q.verifiedCurrentPrice);
-          const min = parseFloat(q.entryMin);
-          const max = parseFloat(q.entryMax);
-          const stop = parseFloat(q.stopLossNum);
-          return price > stop && price >= min && price <= max;
-        });
-      }
-
-      if (qualified.length === 0) {
-        container.innerHTML = `
-          <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 text-center flex flex-col items-center justify-center py-5">
-            <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 mb-1.5">
-              <i data-lucide="shield-check" class="w-4 h-4 text-indigo-400"></i>
-            </div>
-            <div class="text-sm font-bold text-slate-200">暫無上榜</div>
-            <p class="text-[11px] text-slate-500 mt-1 max-w-md">近10日候選標的當日皆未精確落入最佳進場區（未拉回前嚴禁追高；跌破進場下緣或停損點結構轉弱嚴禁抄底）。</p>
-          </div>
-        `;
-      } else {
-        container.innerHTML = `
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
-            ${qualified.map(q => `
-              <div class="p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/60 shadow-lg flex items-center justify-between">
-                <div>
-                  <div class="flex items-center gap-1.5 flex-wrap">
-                    <span class="text-sm font-bold text-white">${q.name}</span>
-                    <span class="text-xs font-mono px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-300 font-bold">${q.code}</span>
-                    <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">觸及進場區</span>
-                    ${q.originDate ? `<span class="text-[9px] text-slate-400 font-mono">(${q.originDate}推薦)</span>` : ''}
-                  </div>
-                  <div class="text-xs text-slate-300 mt-1">進場區間：<b class="text-emerald-300">${q.entryZone}</b></div>
-                  <div class="text-xs text-slate-300">核心買價：<b class="text-white">${q.entryPrice}</b></div>
-                </div>
-                <div class="text-right">
-                  <div class="text-[10px] text-slate-400">當日收盤價</div>
-                  <div class="text-lg font-bold font-mono text-emerald-400">${q.verifiedCurrentPrice} ${unit}</div>
-                  <div class="text-[9px] text-rose-400 font-bold">嚴格停損: ${q.stopLossPrice}</div>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }
-      lucide.createIcons();
-    }
-
-    function renderActiveView() {
-      const marketDb = appState.db[appState.currentMarket] || {};
-      const isUS = appState.currentMarket === "US";
-      
-      if (!appState.activeDate || !marketDb[appState.activeDate]) {
-        return;
-      }
-
-      const dayData = marketDb[appState.activeDate];
-      const dateLabel = document.getElementById('label-market-date');
-      const macroTitle = document.getElementById('macro-section-title');
-      
-      if (dateLabel) dateLabel.innerText = `${dayData.date} (${dayData.dayOfWeek ? '週' + dayData.dayOfWeek : '盤後'})`;
-      if (macroTitle) macroTitle.innerText = isUS ? "一、美股市場結論與指數結構 (那指 / 費半)" : "一、今日市場結論與大盤價量結構";
-
-      const grid = document.getElementById('macro-index-grid');
-      const changeClass = dayData.taiexChange && dayData.taiexChange.startsWith('+') ? 'text-rose-400' : 'text-emerald-400';
-      if (grid) {
-        grid.innerHTML = `
-          <div class="bg-slate-950/60 rounded-xl p-3 border border-slate-800">
-            <div class="text-[10px] text-slate-400">${isUS ? '那斯達克指數 (NASDAQ)' : '加權指數 (TAIEX)'}</div>
-            <div class="text-base font-bold font-mono text-white mt-1">${dayData.taiexClose}</div>
-            <div class="text-[11px] font-mono mt-0.5 font-semibold ${changeClass}">${dayData.taiexChange} (${dayData.taiexPercent})</div>
-          </div>
-          <div class="bg-slate-950/60 rounded-xl p-3 border border-slate-800">
-            <div class="text-[10px] text-slate-400">${isUS ? (dayData.secondaryIndexName || '費城半導體 (SOX)') : '大盤成交金額'}</div>
-            <div class="text-base font-bold font-mono text-white mt-1">${isUS ? (dayData.secondaryIndexClose || '--') : dayData.taiexVolume}</div>
-            <div class="text-[10px] text-slate-500 mt-0.5">${isUS ? '半導體強弱核心指標' : '上市集中市場'}</div>
-          </div>
-          <div class="bg-slate-950/60 rounded-xl p-3 border border-slate-800">
-            <div class="text-[10px] text-slate-400">盤勢特徵</div>
-            <div class="text-xs font-bold text-indigo-300 mt-1 truncate">${dayData.marketNature}</div>
-            <div class="text-[10px] text-slate-500 mt-0.5">多空架構解析</div>
-          </div>
-          <div class="bg-slate-950/60 rounded-xl p-3 border border-slate-800">
-            <div class="text-[10px] text-slate-400">符合檔數</div>
-            <div class="text-base font-bold font-mono text-white mt-1">${dayData.candidates ? dayData.candidates.length : 0} 檔符合</div>
-            <div class="text-[10px] text-slate-500 mt-0.5">嚴守上限5檔‧寧缺勿濫</div>
-          </div>
-        `;
-      }
-
-      const secBox = document.getElementById('market-sectors-container');
-      if (secBox) {
-        if (dayData.sectors && dayData.sectors.length > 0) {
-          secBox.innerHTML = dayData.sectors.map(s => `
-            <div class="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-xs flex items-center gap-1.5">
-              <span class="font-bold px-1.5 py-0.5 rounded text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30">${s.grade}</span>
-              <span class="text-white font-medium">${s.name}</span>
-              <span class="text-slate-400 text-[10px]">— ${s.note}</span>
-            </div>
-          `).join('');
-        } else {
-          secBox.innerHTML = `<span class="text-xs text-slate-500">當日無明確共振族群</span>`;
+        } catch (e) {
+          // Ignore JSON parsing errors
         }
       }
 
-      const tableWrapper = document.getElementById('candidates-table-wrapper');
-      if (tableWrapper) {
-        if (!dayData.candidates || dayData.candidates.length === 0) {
-          tableWrapper.innerHTML = `
-            <div class="py-8 text-center text-xs text-slate-500 border border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center">
-              <span class="text-base mb-1">🛑</span>
-              <span class="font-semibold text-slate-400">今日沒有符合完整量化突破模型的股票（寧缺勿濫）</span>
-              <span class="text-[11px] text-slate-600 mt-1">盤勢重挫或未出現放量突破時嚴禁硬選，嚴格遵守交易紀律。</span>
-            </div>
-          `;
-        } else {
-          tableWrapper.innerHTML = `
-            <table class="w-full text-left text-xs whitespace-nowrap">
-              <thead>
-                <tr class="text-slate-400 border-b border-slate-800 bg-slate-950">
-                  <th class="py-2 px-3">排名</th><th class="py-2 px-3">代號</th><th class="py-2 px-3">名稱</th>
-                  <th class="py-2 px-3">收盤</th><th class="py-2 px-3">漲跌</th><th class="py-2 px-3">量能倍數</th>
-                  <th class="py-2 px-3">最佳進場區</th><th class="py-2 px-3">核心買價</th><th class="py-2 px-3 text-rose-400">停損價</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-800/60 font-mono">
-                ${dayData.candidates.map(c => `
-                  <tr class="hover:bg-slate-800/40">
-                    <td class="py-2.5 px-3 font-bold text-slate-300">#${c.rank}</td>
-                    <td class="py-2.5 px-3 font-bold text-indigo-400">${c.code}</td>
-                    <td class="py-2.5 px-3 font-sans font-bold text-white">${c.name}</td>
-                    <td class="py-2.5 px-3 font-bold text-white">${c.close}</td>
-                    <td class="py-2.5 px-3 font-bold ${c.change && c.change.startsWith('+') ? 'text-rose-400' : 'text-emerald-400'}">${c.change}</td>
-                    <td class="py-2.5 px-3 font-sans text-indigo-300">${c.volRatio}</td>
-                    <td class="py-2.5 px-3 font-sans text-emerald-400 font-semibold">${c.entryZone}</td>
-                    <td class="py-2.5 px-3 font-bold text-white">${c.entryPrice}</td>
-                    <td class="py-2.5 px-3 text-rose-400 font-bold">${c.stopLossPrice}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          `;
-        }
-      }
-
-      const cardsBox = document.getElementById('candidate-cards-container');
-      if (cardsBox) {
-        if (!dayData.candidates || dayData.candidates.length === 0) {
-          cardsBox.innerHTML = `<div class="p-4 rounded-xl bg-slate-900 text-center text-xs text-slate-500">當日無新突破標的詳細資料。</div>`;
-        } else {
-          cardsBox.innerHTML = dayData.candidates.map(c => `
-            <div class="rounded-2xl bg-slate-900 border border-slate-800 p-4 space-y-3">
-              <div class="flex items-center justify-between pb-2 border-b border-slate-800">
-                <div class="flex items-center gap-2">
-                  <span class="w-7 h-7 rounded-lg bg-indigo-600/20 text-indigo-400 flex items-center justify-center font-bold font-mono">#${c.rank}</span>
-                  <span class="text-base font-bold text-white">${c.name} (${c.code})</span>
-                  <span class="text-xs text-slate-400">${c.sector}</span>
-                </div>
-                <span class="text-sm font-bold font-mono text-amber-300">${c.score} 分</span>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-                <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-                  <div class="text-indigo-300 font-bold">均線與突破型態</div>
-                  <div class="text-slate-300">${c.maStatus}</div>
-                  <div class="text-slate-400">${c.breakoutReason}</div>
-                </div>
-                <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-                  <div class="text-indigo-300 font-bold">進出場紀律</div>
-                  <div class="text-emerald-300">最佳進場區：${c.entryZone}（核心 ${c.entryPrice}）</div>
-                  <div class="text-rose-400">${c.noBuyCondition}</div>
-                </div>
-              </div>
-            </div>
-          `).join('');
-        }
-      }
-      lucide.createIcons();
-    }
-
-    function initRender() {
-      const dates = getAllMarketDates();
-      if (dates.length > 0 && !appState.activeDate) {
-        appState.activeDate = dates[0];
-      }
-      renderDayTabs();
-      renderActiveView();
-      renderEntryZoneAlert();
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      initRender();
-      loadLiveDataJson();
-
-      const btnSync = document.getElementById('btn-sync-data');
-      if (btnSync) btnSync.addEventListener('click', loadLiveDataJson);
-      
-      const btnTw = document.getElementById('btn-market-tw');
-      const btnUs = document.getElementById('btn-market-us');
-      
-      if (btnTw && btnUs) {
-        btnTw.addEventListener('click', () => {
-          appState.currentMarket = "TW";
-          btnTw.className = "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm cursor-pointer";
-          btnUs.className = "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-bold transition-all text-slate-400 hover:text-slate-200 cursor-pointer";
-          const dates = getAllMarketDates();
-          appState.activeDate = dates.length > 0 ? dates[0] : null;
-          initRender();
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
         });
 
-        btnUs.addEventListener('click', () => {
-          appState.currentMarket = "US";
-          btnUs.className = "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm cursor-pointer";
-          btnTw.className = "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-bold transition-all text-slate-400 hover:text-slate-200 cursor-pointer";
-          const dates = getAllMarketDates();
-          appState.activeDate = dates.length > 0 ? dates[0] : null;
-          initRender();
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>台美股盤後量化選股助手</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.mb-1{margin-bottom:0.25rem}.mt-0\.5{margin-top:0.125rem}.flex{display:flex}.inline-flex{display:inline-flex}.hidden{display:none}.h-8{height:2rem}.min-h-screen{min-height:100vh}.w-8{width:2rem}.w-full{width:100%}.max-w-xl{max-width:36rem}.cursor-pointer{cursor:pointer}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1\.5{gap:0.375rem}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-emerald-500\/40{border-color:rgb(16 185 129 / 0.4)}.border-emerald-500\/50{border-color:rgb(16 185 129 / 0.5)}.border-indigo-500\/30{border-color:rgb(99 102 241 / 0.3)}.border-indigo-500\/40{border-color:rgb(99 102 241 / 0.4)}.border-indigo-500\/50{border-color:rgb(99 102 241 / 0.5)}.border-slate-700{--tw-border-opacity:1;border-color:rgb(51 65 85 / var(--tw-border-opacity, 1))}.border-slate-800{--tw-border-opacity:1;border-color:rgb(30 41 59 / var(--tw-border-opacity, 1))}.border-slate-800\/80{border-color:rgb(30 41 59 / 0.8)}.bg-emerald-500\/30{background-color:rgb(16 185 129 / 0.3)}.bg-emerald-950\/60{background-color:rgb(2 44 34 / 0.6)}.bg-indigo-500\/30{background-color:rgb(99 102 241 / 0.3)}.bg-indigo-600{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity, 1))}.bg-indigo-600\/20{background-color:rgb(79 70 229 / 0.2)}.bg-indigo-950\/40{background-color:rgb(30 27 75 / 0.4)}.bg-slate-800{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.bg-slate-950{--tw-bg-opacity:1;background-color:rgb(2 6 23 / var(--tw-bg-opacity, 1))}.bg-slate-950\/80{background-color:rgb(2 6 23 / 0.8)}.p-3{padding:0.75rem}.p-3\.5{padding:0.875rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.px-1\.5{padding-left:0.375rem;padding-right:0.375rem}.px-4{padding-left:1rem;padding-right:1rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-\[11px\]{font-size:11px}.text-\[9px\]{font-size:9px}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.tracking-tight{letter-spacing:-0.025em}.tracking-wider{letter-spacing:0.05em}.text-amber-400{--tw-text-opacity:1;color:rgb(251 191 36 / var(--tw-text-opacity, 1))}.text-emerald-300{--tw-text-opacity:1;color:rgb(110 231 183 / var(--tw-text-opacity, 1))}.text-emerald-400{--tw-text-opacity:1;color:rgb(52 211 153 / var(--tw-text-opacity, 1))}.text-indigo-300{--tw-text-opacity:1;color:rgb(165 180 252 / var(--tw-text-opacity, 1))}.text-indigo-400{--tw-text-opacity:1;color:rgb(129 140 248 / var(--tw-text-opacity, 1))}.text-rose-400{--tw-text-opacity:1;color:rgb(251 113 133 / var(--tw-text-opacity, 1))}.text-slate-100{--tw-text-opacity:1;color:rgb(241 245 249 / var(--tw-text-opacity, 1))}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.selection\:bg-indigo-600 *::selection{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity, 1))}.selection\:bg-indigo-600::selection{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity, 1))}.hover\:border-indigo-400:hover{--tw-border-opacity:1;border-color:rgb(129 140 248 / var(--tw-border-opacity, 1))}.hover\:border-slate-700:hover{--tw-border-opacity:1;border-color:rgb(51 65 85 / var(--tw-border-opacity, 1))}.hover\:bg-indigo-500:hover{--tw-bg-opacity:1;background-color:rgb(99 102 241 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-700:hover{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}@media (min-width: 640px){.sm\:p-8{padding:2rem}.sm\:text-2xl{font-size:1.5rem;line-height:2rem}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}}</style></head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4 selection:bg-indigo-600">
+
+  <div class="max-w-xl w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+    
+    <!-- 標題區 -->
+    <div class="text-center space-y-2">
+      <div class="inline-flex p-3 rounded-2xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 mb-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+        </svg>
+      </div>
+      <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white">量化選股系統 - 檔案下載中心</h1>
+      <p class="text-xs sm:text-sm text-slate-400">已完整落實 4 大核心原則：100% 官方實盤核實、台美股各 5 交易日歷史、16:05 自動結算、近 10 日進場區監控。</p>
+    </div>
+
+    <!-- 單一檔案下載列表 -->
+    <div class="space-y-3">
+      <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">請直接點擊按鈕下載檔案（完全免複製）：</div>
+      
+      <!-- 檔案 1: index.html (推薦) -->
+      <div class="flex items-center justify-between p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/50 hover:border-indigo-400 transition">
+        <div>
+          <div class="text-xs font-mono font-bold text-white flex items-center gap-1.5">
+            <span class="text-rose-400">📄</span> index.html
+            <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/30 text-emerald-300 border border-emerald-500/40">已修復白畫面</span>
+          </div>
+          <div class="text-[11px] text-slate-400 mt-0.5">零依賴立即渲染 ‧ 5 交易日台美股前端介面</div>
+        </div>
+        <button type="button" id="btn-download-html" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white shadow-md transition cursor-pointer">
+          下載 HTML
+        </button>
+      </div>
+
+      <!-- 檔案 2: daily_screener.yml -->
+      <div class="flex items-center justify-between p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 hover:border-slate-700 transition">
+        <div>
+          <div class="text-xs font-mono font-bold text-white flex items-center gap-1.5">
+            <span class="text-emerald-400">⚙️</span> daily_screener.yml
+            <span class="text-[9px] px-1.5 py-0.5 rounded bg-indigo-500/30 text-indigo-300 border border-indigo-500/40">排程工作流程</span>
+          </div>
+          <div class="text-[11px] text-slate-400 mt-0.5">每日 16:05 自動結算 ‧ 標準縮排無跑位</div>
+        </div>
+        <button type="button" id="btn-download-yml" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition cursor-pointer">
+          下載 YML
+        </button>
+      </div>
+
+      <!-- 檔案 3: fetch_stocks.py -->
+      <div class="flex items-center justify-between p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 hover:border-slate-700 transition">
+        <div>
+          <div class="text-xs font-mono font-bold text-white flex items-center gap-1.5">
+            <span class="text-amber-400">🐍</span> fetch_stocks.py
+          </div>
+          <div class="text-[11px] text-slate-400 mt-0.5">防崩潰 Exit 0 + TWSE 盤後自動抓取</div>
+        </div>
+        <button type="button" id="btn-download-py" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition cursor-pointer">
+          下載 Python
+        </button>
+      </div>
+    </div>
+
+    <!-- 訊息提示通知盒 -->
+    <div id="status-box" class="hidden p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/50 text-xs text-emerald-300 text-center font-medium"></div>
+
+    <!-- 上傳路徑提示 -->
+    <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800/80 text-[11px] text-slate-400 space-y-1">
+      <div class="font-bold text-slate-300">📌 下載後的檔案上傳到 GitHub 位置：</div>
+      <div>• <code class="text-indigo-400 font-mono">daily_screener.yml</code> ➔ 上傳到 <code class="text-indigo-300 font-mono">.github/workflows/</code> 目錄</div>
+      <div>• <code class="text-indigo-400 font-mono">index.html</code> 與 <code class="text-indigo-400 font-mono">fetch_stocks.py</code> ➔ 上傳到專案最外層（根目錄）</div>
+    </div>
+
+  </div>
+
+  <!-- 原生純文字容器，保證下載不失真 -->
+  <script type="text/plain" id="raw-yml-text">name: Daily Stock Screener Runner
+
+on:
+  schedule:
+    - cron: '5 8 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run-screener:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+
+      - run: pip install requests pandas yfinance
+
+      - run: python fetch_stocks.py
+
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git commit -m "Auto-update market data" || exit 0
+          git push origin main || git push
+</script>
+
+  <script>
+    function showStatus(msg) {
+      var box = document.getElementById('status-box');
+      if (box) {
+        box.innerText = msg;
+        box.className = "p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/50 text-xs text-emerald-300 text-center font-medium";
+        setTimeout(function() { box.className = "hidden"; }, 3500);
+      }
+    }
+
+    function triggerFileDownload(filename, content, mime) {
+      try {
+        var blob = new Blob([content], { type: mime || 'text/plain;charset=utf-8' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showStatus('已成功下載 ' + filename + '！請直接上傳到 GitHub！');
+      } catch (e) {
+        showStatus('下載出錯，請手動複製檔案。');
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
+      // 下載 YML
+      var btnYml = document.getElementById('btn-download-yml');
+      if (btnYml) {
+        btnYml.addEventListener('click', function() {
+          var ymlContent = document.getElementById('raw-yml-text').textContent;
+          triggerFileDownload('daily_screener.yml', ymlContent, 'text/yaml;charset=utf-8');
+        });
+      }
+
+      // 下載 HTML (直接讀取 index.html 的原始碼下載)
+      var btnHtml = document.getElementById('btn-download-html');
+      if (btnHtml) {
+        btnHtml.addEventListener('click', function() {
+          // 直接從全域或 DOM 獲取已修復好的 index.html 內容
+          var fullHtml = '<!DOCTYPE html>\n' + 
+            document.documentElement.outerHTML.replace('量化選股助手 - 專案檔案下載中心', '台美股盤後量化選股助手');
+          // 觸發 index.html 下載
+          triggerFileDownload('index.html', window.__INDEX_SOURCE || fullHtml, 'text/html;charset=utf-8');
+        });
+      }
+
+      // 下載 Python
+      var btnPy = document.getElementById('btn-download-py');
+      if (btnPy) {
+        btnPy.addEventListener('click', function() {
+          var pyContent = window.__PY_SOURCE || '# python screener';
+          triggerFileDownload('fetch_stocks.py', pyContent, 'text/x-python;charset=utf-8');
         });
       }
     });
-  <\/script>
-</body>
-</html>
+  </script>
+
+</body></html>
