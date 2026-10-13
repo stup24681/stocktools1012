@@ -22,6 +22,29 @@
       ],
       "candidates": [],
       "entryZoneAlerts": []
+    },
+    "2026-10-13": {
+      "date": "2026-10-13",
+      "dayOfWeek": "二",
+      "taiexClose": "48,341.31",
+      "taiexChange": "-960.65",
+      "taiexPercent": "-1.95%",
+      "taiexVolume": "11,986.30 億元",
+      "marketNature": "盤後量化篩選 ‧ 均線多頭 ‧ 箱型放量突破確認",
+      "sectors": [
+        {
+          "name": "半導體材料 / 晶圓薄化",
+          "grade": "S級",
+          "note": "多頭發散爆量上攻"
+        },
+        {
+          "name": "光通訊 / 矽光子 CPO",
+          "grade": "A級",
+          "note": "長線多頭排列"
+        }
+      ],
+      "candidates": [],
+      "entryZoneAlerts": []
     }
   },
   "US": {
@@ -34,6 +57,26 @@
       "taiexVolume": "68.5 億股",
       "secondaryIndexName": "費城半導體 (SOX)",
       "secondaryIndexClose": "12,572.42 (-0.41%)",
+      "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
+      "sectors": [
+        {
+          "name": "AI 高速傳輸 / 光互連",
+          "grade": "S級",
+          "note": "量能增溫帶動主升段"
+        }
+      ],
+      "candidates": [],
+      "entryZoneAlerts": []
+    },
+    "2026-10-12": {
+      "date": "2026-10-12",
+      "dayOfWeek": "一",
+      "taiexClose": "27,245.90",
+      "taiexChange": "-120.27",
+      "taiexPercent": "-0.44%",
+      "taiexVolume": "62.9 億股",
+      "secondaryIndexName": "費城半導體 (SOX)",
+      "secondaryIndexClose": "12,236.79 (-2.67%)",
       "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
       "sectors": [
         {
