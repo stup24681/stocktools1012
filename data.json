@@ -233,6 +233,24 @@
         }
       ],
       "entryZoneAlerts": []
+    },
+    "2026-10-14": {
+      "date": "2026-10-14",
+      "dayOfWeek": "三",
+      "taiexClose": "48,625.83",
+      "taiexChange": "+284.52",
+      "taiexPercent": "+0.59%",
+      "taiexVolume": "9,665.68 億元",
+      "marketNature": "盤後量化篩選 ‧ 均線多頭 ‧ 箱型放量突破確認",
+      "sectors": [
+        {
+          "name": "防禦型金融 / 傳產",
+          "grade": "B級",
+          "note": "權值電子全面回檔整理"
+        }
+      ],
+      "candidates": [],
+      "entryZoneAlerts": []
     }
   },
   "US": {
@@ -312,22 +330,55 @@
     "2026-10-13": {
       "date": "2026-10-13",
       "dayOfWeek": "二",
-      "taiexClose": "27,245.90",
-      "taiexChange": "-120.27",
-      "taiexPercent": "-0.44%",
-      "taiexVolume": "62.9 億股",
+      "taiexClose": "27,204.38",
+      "taiexChange": "-41.52",
+      "taiexPercent": "-0.15%",
+      "taiexVolume": "69.9 億股",
       "secondaryIndexName": "費城半導體 (SOX)",
-      "secondaryIndexClose": "12,236.79 (-2.67%)",
+      "secondaryIndexClose": "12,208.79 (-0.23%)",
       "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
       "sectors": [
         {
           "name": "AI 高速傳輸 / 光互連",
-          "grade": "S級",
+          "grade": "A級",
           "note": "量能增溫帶動主升段"
         }
       ],
       "candidates": [],
-      "entryZoneAlerts": []
+      "entryZoneAlerts": [
+        {
+          "rank": 1,
+          "code": "CRDO",
+          "name": "Credo Technology",
+          "sector": "高速傳輸/光互連",
+          "close": 216.55,
+          "change": "+5.12%",
+          "volume": "8,680,311",
+          "volRatio": "2.10 倍",
+          "maStatus": "5MA > 10MA > 20MA 多頭排列，20MA 向上",
+          "boxDays": "21日箱型突破",
+          "boxRange": "192.0～208.0",
+          "breakoutPrice": "208.0",
+          "breakoutReason": "放量突破 208 美元平台頸線收 216.55 美元。",
+          "fib236": 210.8,
+          "fib382": 204.6,
+          "fib500": 198.5,
+          "fib618": 192.4,
+          "fib786": 183.7,
+          "strategy": "等回踩進場",
+          "entryZone": "198.0 ～ 205.0",
+          "entryMin": 198.0,
+          "entryMax": 205.0,
+          "entryPrice": "202.0",
+          "breakoutConfirmPrice": "225.0",
+          "stopLossPrice": "192.0",
+          "stopLossNum": 192.0,
+          "noBuyCondition": "短線急拉不追高；跌破 192.0 停損",
+          "score": 95,
+          "originDate": "2026-10-06",
+          "verifiedCurrentPrice": 198.31
+        }
+      ]
     },
     "2026-10-08": {
       "date": "2026-10-08",
