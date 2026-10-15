@@ -251,6 +251,57 @@
       ],
       "candidates": [],
       "entryZoneAlerts": []
+    },
+    "2026-10-15": {
+      "date": "2026-10-15",
+      "dayOfWeek": "四",
+      "taiexClose": "46,969.87",
+      "taiexChange": "-1,655.96",
+      "taiexPercent": "-3.41%",
+      "taiexVolume": "14,312.84 億元",
+      "marketNature": "大盤帶量長黑摜破萬九 ‧ 權值股殺盤 ‧ 嚴守空手觀望紀律",
+      "sectors": [
+        {
+          "name": "防禦型金融 / 傳產",
+          "grade": "B級",
+          "note": "權值電子全面回檔整理"
+        }
+      ],
+      "candidates": [],
+      "entryZoneAlerts": [
+        {
+          "rank": 1,
+          "code": "2305",
+          "name": "全友",
+          "sector": "光電子/AI光通訊",
+          "close": 63.5,
+          "change": "+9.86%",
+          "volume": "13,750",
+          "volRatio": "3.61 倍",
+          "maStatus": "均線多頭發散，20MA向上",
+          "boxDays": "22日箱型突破",
+          "boxRange": "52.0～58.5",
+          "breakoutPrice": "58.5",
+          "breakoutReason": "突破 58.5 元箱型上緣強攻 63.5 元。",
+          "fib236": 57.6,
+          "fib382": 54.0,
+          "fib500": 51.0,
+          "fib618": 48.0,
+          "fib786": 43.8,
+          "strategy": "等突破回踩",
+          "entryZone": "57.0 ～ 58.5",
+          "entryMin": 57.0,
+          "entryMax": 58.5,
+          "entryPrice": "58.0",
+          "breakoutConfirmPrice": "64.0",
+          "stopLossPrice": "51.0",
+          "stopLossNum": 51.0,
+          "noBuyCondition": "短線急拉不追高；跌破 51.0 停損",
+          "score": 94,
+          "originDate": "2026-10-06",
+          "verifiedCurrentPrice": 57.8
+        }
+      ]
     }
   },
   "US": {
@@ -469,6 +520,26 @@
           "score": 95
         }
       ],
+      "entryZoneAlerts": []
+    },
+    "2026-10-14": {
+      "date": "2026-10-14",
+      "dayOfWeek": "三",
+      "taiexClose": "26,692.87",
+      "taiexChange": "-511.51",
+      "taiexPercent": "-1.88%",
+      "taiexVolume": "85.7 億股",
+      "secondaryIndexName": "費城半導體 (SOX)",
+      "secondaryIndexClose": "11,684.38 (-4.30%)",
+      "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
+      "sectors": [
+        {
+          "name": "AI 高速傳輸 / 光互連",
+          "grade": "A級",
+          "note": "量能增溫帶動主升段"
+        }
+      ],
+      "candidates": [],
       "entryZoneAlerts": []
     }
   }
