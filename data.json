@@ -389,6 +389,24 @@
       ],
       "candidates": [],
       "entryZoneAlerts": []
+    },
+    "2026-10-21": {
+      "date": "2026-10-21",
+      "dayOfWeek": "三",
+      "taiexClose": "46,887.77",
+      "taiexChange": "+594.84",
+      "taiexPercent": "+1.28%",
+      "taiexVolume": "8,628.29 億元",
+      "marketNature": "盤後量化篩選 ‧ 均線多頭 ‧ 箱型放量突破確認",
+      "sectors": [
+        {
+          "name": "防禦型金融 / 傳產",
+          "grade": "B級",
+          "note": "權值電子全面回檔整理"
+        }
+      ],
+      "candidates": [],
+      "entryZoneAlerts": []
     }
   },
   "US": {
@@ -678,6 +696,26 @@
       "taiexVolume": "75.4 億股",
       "secondaryIndexName": "費城半導體 (SOX)",
       "secondaryIndexClose": "11,316.34 (+1.61%)",
+      "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
+      "sectors": [
+        {
+          "name": "AI 高速傳輸 / 光互連",
+          "grade": "A級",
+          "note": "量能增溫帶動主升段"
+        }
+      ],
+      "candidates": [],
+      "entryZoneAlerts": []
+    },
+    "2026-10-20": {
+      "date": "2026-10-20",
+      "dayOfWeek": "二",
+      "taiexClose": "26,424.82",
+      "taiexChange": "-6.07",
+      "taiexPercent": "-0.02%",
+      "taiexVolume": "76.6 億股",
+      "secondaryIndexName": "費城半導體 (SOX)",
+      "secondaryIndexClose": "11,283.81 (-0.29%)",
       "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
       "sectors": [
         {
