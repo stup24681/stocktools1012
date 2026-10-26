@@ -784,6 +784,26 @@
       ],
       "candidates": [],
       "entryZoneAlerts": []
+    },
+    "2026-10-23": {
+      "date": "2026-10-23",
+      "dayOfWeek": "五",
+      "taiexClose": "25,955.34",
+      "taiexChange": "-53.52",
+      "taiexPercent": "-0.21%",
+      "taiexVolume": "65.5 億股",
+      "secondaryIndexName": "費城半導體 (SOX)",
+      "secondaryIndexClose": "10,779.46 (+0.44%)",
+      "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
+      "sectors": [
+        {
+          "name": "AI 高速傳輸 / 光互連",
+          "grade": "A級",
+          "note": "量能增溫帶動主升段"
+        }
+      ],
+      "candidates": [],
+      "entryZoneAlerts": []
     }
   }
 }
