@@ -461,6 +461,24 @@
       ],
       "candidates": [],
       "entryZoneAlerts": []
+    },
+    "2026-10-29": {
+      "date": "2026-10-29",
+      "dayOfWeek": "四",
+      "taiexClose": "46,368.33",
+      "taiexChange": "-667.25",
+      "taiexPercent": "-1.42%",
+      "taiexVolume": "8,213.76 億元",
+      "marketNature": "大盤帶量長黑摜破萬九 ‧ 權值股殺盤 ‧ 嚴守空手觀望紀律",
+      "sectors": [
+        {
+          "name": "防禦型金融 / 傳產",
+          "grade": "B級",
+          "note": "權值電子全面回檔整理"
+        }
+      ],
+      "candidates": [],
+      "entryZoneAlerts": []
     }
   },
   "US": {
@@ -605,26 +623,6 @@
           "name": "通訊晶片 / 網通",
           "grade": "B級",
           "note": "高檔拉回"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
-    "2026-10-07": {
-      "date": "2026-10-07",
-      "dayOfWeek": "三",
-      "taiexClose": "27,381.44",
-      "taiexChange": "+45.20",
-      "taiexPercent": "+0.17%",
-      "taiexVolume": "51.8 億股",
-      "secondaryIndexName": "費城半導體 (SOX)",
-      "secondaryIndexClose": "13,066.15 (-1.15%)",
-      "marketNature": "費半失守 13,100 頸線 ‧ 高速光模組維持多頭排列",
-      "sectors": [
-        {
-          "name": "矽光子 / 光互連",
-          "grade": "A級",
-          "note": "強勢抗跌"
         }
       ],
       "candidates": [],
@@ -819,6 +817,26 @@
       "taiexVolume": "79.1 億股",
       "secondaryIndexName": "費城半導體 (SOX)",
       "secondaryIndexClose": "11,482.50 (+3.60%)",
+      "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
+      "sectors": [
+        {
+          "name": "AI 高速傳輸 / 光互連",
+          "grade": "A級",
+          "note": "量能增溫帶動主升段"
+        }
+      ],
+      "candidates": [],
+      "entryZoneAlerts": []
+    },
+    "2026-10-28": {
+      "date": "2026-10-28",
+      "dayOfWeek": "三",
+      "taiexClose": "26,549.85",
+      "taiexChange": "+72.04",
+      "taiexPercent": "+0.27%",
+      "taiexVolume": "79.9 億股",
+      "secondaryIndexName": "費城半導體 (SOX)",
+      "secondaryIndexClose": "11,684.00 (+1.75%)",
       "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
       "sectors": [
         {
