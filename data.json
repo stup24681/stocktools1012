@@ -74,68 +74,6 @@
         }
       ]
     },
-    "2026-10-08": {
-      "date": "2026-10-08",
-      "dayOfWeek": "四",
-      "taiexClose": "49,313.44",
-      "taiexChange": "-492.93",
-      "taiexPercent": "-0.99%",
-      "taiexVolume": "9,245.09 億元",
-      "marketNature": "連假前賣壓出籠 ‧ 被動元件逆勢爆量大漲",
-      "sectors": [
-        {
-          "name": "被動元件 / 精密晶片電阻",
-          "grade": "S級",
-          "note": "光頡 (3624) 爆量逼近漲停"
-        }
-      ],
-      "candidates": [
-        {
-          "rank": 1,
-          "code": "3624",
-          "name": "光頡",
-          "sector": "精密晶片電阻",
-          "close": 175.0,
-          "change": "+9.72%",
-          "volume": "47,737",
-          "volRatio": "2.85 倍",
-          "maStatus": "5MA > 10MA > 20MA 多頭排列",
-          "boxDays": "24日箱型突破",
-          "boxRange": "145.0～160.0",
-          "breakoutPrice": "160.0",
-          "breakoutReason": "放量突破 160 元頸線收 175 元。",
-          "fib236": 164.8,
-          "fib382": 158.5,
-          "fib500": 153.5,
-          "fib618": 148.4,
-          "fib786": 141.2,
-          "strategy": "等38.2%",
-          "entryZone": "158.0 ～ 165.0",
-          "entryMin": 158.0,
-          "entryMax": 165.0,
-          "entryPrice": "162.0",
-          "breakoutConfirmPrice": "178.0",
-          "stopLossPrice": "146.0",
-          "stopLossNum": 146.0,
-          "noBuyCondition": "短線急拉不追高；破 146.0 停損",
-          "score": 96
-        }
-      ],
-      "entryZoneAlerts": [
-        {
-          "code": "8358",
-          "name": "金居",
-          "originDate": "2026-10-05",
-          "verifiedCurrentPrice": 535.0,
-          "entryZone": "526.0 ～ 540.0",
-          "entryPrice": "530.0",
-          "stopLossPrice": "498.0",
-          "entryMin": 526.0,
-          "entryMax": 540.0,
-          "stopLossNum": 498.0
-        }
-      ]
-    },
     "2026-10-14": {
       "date": "2026-10-14",
       "dayOfWeek": "三",
@@ -417,62 +355,27 @@
       ],
       "candidates": [],
       "entryZoneAlerts": []
-    }
-  },
-  "US": {
-    "2026-10-12": {
-      "date": "2026-10-12",
-      "dayOfWeek": "一",
-      "taiexClose": "27,245.90",
-      "taiexChange": "-120.27",
-      "taiexPercent": "-0.44%",
-      "taiexVolume": "62.9 億股",
-      "secondaryIndexName": "費城半導體 (SOX)",
-      "secondaryIndexClose": "12,236.79 (-2.67%)",
-      "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
+    },
+    "2026-11-03": {
+      "date": "2026-11-03",
+      "dayOfWeek": "二",
+      "taiexClose": "43,307.54",
+      "taiexChange": "-1,612.60",
+      "taiexPercent": "-3.59%",
+      "taiexVolume": "9,905.06 億元",
+      "marketNature": "大盤帶量長黑摜破萬九 ‧ 權值股殺盤 ‧ 嚴守空手觀望紀律",
       "sectors": [
         {
-          "name": "AI 高速傳輸 / 光互連",
-          "grade": "A級",
-          "note": "量能增溫帶動主升段"
+          "name": "防禦型金融 / 傳產",
+          "grade": "B級",
+          "note": "權值電子全面回檔整理"
         }
       ],
       "candidates": [],
-      "entryZoneAlerts": [
-        {
-          "rank": 1,
-          "code": "CRDO",
-          "name": "Credo Technology",
-          "sector": "高速傳輸/光互連",
-          "close": 216.55,
-          "change": "+5.12%",
-          "volume": "8,680,311",
-          "volRatio": "2.10 倍",
-          "maStatus": "5MA > 10MA > 20MA 多頭排列，20MA 向上",
-          "boxDays": "21日箱型突破",
-          "boxRange": "192.0～208.0",
-          "breakoutPrice": "208.0",
-          "breakoutReason": "放量突破 208 美元平台頸線收 216.55 美元。",
-          "fib236": 210.8,
-          "fib382": 204.6,
-          "fib500": 198.5,
-          "fib618": 192.4,
-          "fib786": 183.7,
-          "strategy": "等回踩進場",
-          "entryZone": "198.0 ～ 205.0",
-          "entryMin": 198.0,
-          "entryMax": 205.0,
-          "entryPrice": "202.0",
-          "breakoutConfirmPrice": "225.0",
-          "stopLossPrice": "192.0",
-          "stopLossNum": 192.0,
-          "noBuyCondition": "短線急拉不追高；跌破 192.0 停損",
-          "score": 95,
-          "originDate": "2026-10-06",
-          "verifiedCurrentPrice": 200.84
-        }
-      ]
-    },
+      "entryZoneAlerts": []
+    }
+  },
+  "US": {
     "2026-10-13": {
       "date": "2026-10-13",
       "dayOfWeek": "二",
@@ -775,6 +678,26 @@
       "taiexVolume": "90.7 億股",
       "secondaryIndexName": "費城半導體 (SOX)",
       "secondaryIndexClose": "10,688.80 (-7.20%)",
+      "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
+      "sectors": [
+        {
+          "name": "AI 高速傳輸 / 光互連",
+          "grade": "A級",
+          "note": "量能增溫帶動主升段"
+        }
+      ],
+      "candidates": [],
+      "entryZoneAlerts": []
+    },
+    "2026-11-02": {
+      "date": "2026-11-02",
+      "dayOfWeek": "一",
+      "taiexClose": "25,164.31",
+      "taiexChange": "-272.69",
+      "taiexPercent": "-1.07%",
+      "taiexVolume": "91.5 億股",
+      "secondaryIndexName": "費城半導體 (SOX)",
+      "secondaryIndexClose": "10,328.33 (-3.37%)",
       "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
       "sectors": [
         {
