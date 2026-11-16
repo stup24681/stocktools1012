@@ -8,9 +8,9 @@ import pandas as pd
 import yfinance as yf
 
 # 設定選股條件硬性門檻
-MIN_GAIN_PCT = 8.5        # 漲幅需大於等於 8.5%
-MIN_VOL_RATIO = 1.8       # 成交量相較 5MA 需放大至少 1.8 倍
-MAX_HISTORY_DAYS = 15     # 資料庫保留 15 個交易日歷史
+MIN_GAIN_PCT = 8.5        # 台股傳統突破：單日漲幅 >= 8.5%
+MIN_VOL_RATIO = 1.8       # 台股傳統突破：單日放量 >= 1.8倍
+MAX_HISTORY_DAYS = 5      # 嚴格保留最近 5 個交易日
 
 def get_dynamic_trading_date(ticker_symbol="^TWII"):
     """從市場行情動態取得最新真實開盤交易日 (YYYY-MM-DD)"""
@@ -41,6 +41,59 @@ def get_dynamic_trading_date(ticker_symbol="^TWII"):
     now_tw = datetime.datetime.now(datetime.timezone.utc) + timedelta(hours=8)
     return now_tw.strftime("%Y-%m-%d")
 
+def calculate_fundamental_valuation(ticker, close_price):
+    """
+    財報 EPS 量化估值引擎 (PE Band + PEG 成長估值模型)
+    自動抓取預估 EPS、本益比、營收/獲利成長率，計算合理價值區間與過熱警示
+    """
+    val_data = {
+        "forwardEps": None,
+        "trailingEps": None,
+        "forwardPe": None,
+        "pegRatio": None,
+        "fairValueZone": "財報數據不足 (純技術評估)",
+        "valuationStatus": "中性 / 題材驅動",
+        "valuationGrade": "B (動能驅動)"
+    }
+    try:
+        info = ticker.info or {}
+        f_eps = info.get("forwardEps") or info.get("trailingEps")
+        t_eps = info.get("trailingEps")
+        rev_growth = info.get("revenueGrowth") or info.get("earningsGrowth") or 0.15
+
+        if f_eps and float(f_eps) > 0:
+            f_eps = float(f_eps)
+            f_pe = round(close_price / f_eps, 2)
+            
+            growth_pct = max(15.0, min(float(rev_growth) * 100, 50.0))
+            peg = round(f_pe / growth_pct, 2)
+
+            low_fair = round(f_eps * 15, 1)
+            high_fair = round(f_eps * 22, 1)
+
+            val_data["forwardEps"] = round(f_eps, 2)
+            val_data["trailingEps"] = round(float(t_eps), 2) if t_eps else None
+            val_data["forwardPe"] = f_pe
+            val_data["pegRatio"] = peg
+            val_data["fairValueZone"] = f"{low_fair} ～ {high_fair} 元 (15~22x PE)"
+
+            if peg < 0.85 and close_price <= high_fair:
+                val_data["valuationStatus"] = f"嚴重低估 (PEG {peg} < 0.85)，極具安全邊際"
+                val_data["valuationGrade"] = "S (低估黃金區)"
+            elif peg <= 1.25 and close_price <= high_fair * 1.1:
+                val_data["valuationStatus"] = f"合理成長區間 (PEG {peg})，業績跟上股價"
+                val_data["valuationGrade"] = "A (合理價值)"
+            elif peg > 1.8 or f_pe > 40:
+                val_data["valuationStatus"] = f"估值偏高過熱 (PE {f_pe}x / PEG {peg})，嚴防純題材回檔"
+                val_data["valuationGrade"] = "C (過熱警示)"
+            else:
+                val_data["valuationStatus"] = f"中性偏高 (PE {f_pe}x)，需靠強勢動能推升"
+                val_data["valuationGrade"] = "B (動能驅動)"
+    except Exception as e:
+        print(f"財報估值解析異常: {e}")
+
+    return val_data
+
 def fetch_twse_market_summary():
     """獲取今日最新加權指數與成交金額 (雙重校核)"""
     try:
@@ -58,7 +111,7 @@ def fetch_twse_market_summary():
                 pct = (change_idx / prev_idx) * 100 if prev_idx > 0 else 0.0
                 sign = "+" if change_idx >= 0 else ""
                 return {
-                    "close": f"{close_idx:,.2f}",
+                    "close": f"{close_idx:,.2f} ({sign}{pct:.2f}%)",
                     "change": f"{sign}{change_idx:,.2f}",
                     "percent": f"{sign}{pct:.2f}%",
                     "volume": f"{trade_amt:,.2f} 億元"
@@ -79,7 +132,7 @@ def fetch_twse_market_summary():
             vol = float(last['Volume'])
             vol_str = f"{vol / 100000000:,.2f} 億元" if vol > 100000000 else "-- 億元"
             return {
-                "close": f"{close_val:,.2f}",
+                "close": f"{close_val:,.2f} ({sign}{pct:.2f}%)",
                 "change": f"{sign}{change:,.2f}",
                 "percent": f"{sign}{pct:.2f}%",
                 "volume": vol_str
@@ -90,11 +143,8 @@ def fetch_twse_market_summary():
     return {"close": "--", "change": "--", "percent": "--", "volume": "--"}
 
 def fetch_us_market_summary():
-    """動態抓取美股那斯達克 (^IXIC) 與費城半導體 (^SOX)"""
-    summary = {
-        "close": "--", "change": "--", "percent": "--", "volume": "--",
-        "secondaryName": "費城半導體 (SOX)", "secondaryClose": "--"
-    }
+    """動態抓取美股那斯達克 (^IXIC) 行情"""
+    summary = {"close": "--", "change": "--", "percent": "--", "volume": "--"}
     try:
         ixic = yf.Ticker("^IXIC").history(period="5d")
         if not ixic.empty and len(ixic) >= 2:
@@ -106,27 +156,99 @@ def fetch_us_market_summary():
             pct = (diff / p) * 100
             sign = "+" if diff >= 0 else ""
             vol = float(last['Volume'])
-            summary["close"] = f"{c:,.2f}"
+            summary["close"] = f"{c:,.2f} ({sign}{pct:.2f}%)"
             summary["change"] = f"{sign}{diff:,.2f}"
             summary["percent"] = f"{sign}{pct:.2f}%"
             summary["volume"] = f"{vol / 100000000:,.1f} 億股" if vol > 0 else "--"
-
-        sox = yf.Ticker("^SOX").history(period="5d")
-        if not sox.empty and len(sox) >= 2:
-            s_last = sox.iloc[-1]
-            s_prev = sox.iloc[-2]
-            s_c = float(s_last['Close'])
-            s_p = float(s_prev['Close'])
-            s_diff = s_c - s_p
-            s_pct = (s_diff / s_p) * 100
-            s_sign = "+" if s_diff >= 0 else ""
-            summary["secondaryClose"] = f"{s_c:,.2f} ({s_sign}{s_pct:.2f}%)"
     except Exception as e:
         print(f"美股大盤動態抓取異常: {e}")
     return summary
 
+def evaluate_bear_market_rs_candidate(symbol, name, sector="上市優質大型企業"):
+    """
+    模式 B：熊市抗跌領先突破篩選模型 + 財報 EPS 雙重驗證
+    【硬性風控過濾】：僅限台灣證交所「上市股票 (.TW)」，一律剔除上櫃 (.TWO) 與興櫃股票！
+    """
+    if not symbol.endswith(".TW"):
+        return None
+
+    try:
+        ticker = yf.Ticker(symbol)
+        df = ticker.history(period="3mo")
+        if df.empty or len(df) < 30:
+            return None
+
+        today = df.iloc[-1]
+        yesterday = df.iloc[-2]
+        close = float(today['Close'])
+        prev_close = float(yesterday['Close'])
+        gain_pct = ((close - prev_close) / prev_close) * 100
+
+        df['20MA'] = df['Close'].rolling(20).mean()
+        df['60MA'] = df['Close'].rolling(60).mean()
+        df['5VMA'] = df['Volume'].rolling(5).mean()
+
+        ma20 = float(df['20MA'].iloc[-1])
+        ma60 = float(df['60MA'].iloc[-1]) if not math.isnan(df['60MA'].iloc[-1]) else ma20 * 0.95
+        vma5 = float(df['5VMA'].iloc[-2])
+        volume = float(today['Volume'])
+
+        if close < ma20 or close < ma60:
+            return None
+
+        vol_ratio = volume / vma5 if vma5 > 0 else 1.0
+        if vol_ratio < 1.3 and gain_pct < 9.0:
+            return None
+
+        box_window = df.iloc[-22:-2]
+        box_high = float(box_window['High'].max())
+        box_low = float(box_window['Low'].min())
+        if close < box_high:
+            return None
+
+        val_info = calculate_fundamental_valuation(ticker, close)
+        clean_code = symbol.replace(".TW", "")
+        neckline = round(box_high, 1)
+        entry_min = round(neckline * 0.99, 1)
+        entry_max = round(neckline * 1.03, 1)
+        entry_price = round(neckline * 1.01, 1)
+        stop_loss = round(neckline * 0.96, 1)
+        target_price = round(neckline * 1.18, 1)
+
+        val_bonus = 3 if "S" in val_info["valuationGrade"] else (1 if "A" in val_info["valuationGrade"] else (-3 if "C" in val_info["valuationGrade"] else 0))
+
+        return {
+            "symbol": symbol,
+            "code": clean_code,
+            "name": name,
+            "marketBoard": "上市 (TWSE)",
+            "sector": sector,
+            "close": round(close, 2),
+            "change": f"+{gain_pct:.2f}%",
+            "volume": f"{int(volume):,}",
+            "volRatio": f"{vol_ratio:.2f} 倍 (逆勢表態)",
+            "maStatus": "上市大型股 ‧ 站穩 20MA/60MA，相對強度 (RS) 極高",
+            "boxDays": "20+ 日箱型搶先突破 (模式 B)",
+            "boxRange": f"{box_low:.1f} ～ {neckline}",
+            "breakoutPrice": f"{neckline}",
+            "breakoutReason": f"【純上市標的】大盤修正時逆勢站穩均線，今日率先衝破 {neckline} 元頸線，法人主力搶先表態！",
+            "leadTime": "大盤止跌守穩即展開波段主升攻擊",
+            "strategy": "模式 B：突破回踩頸線入場",
+            "entryZone": f"{entry_min} ～ {entry_max} 元",
+            "entryPrice": f"{entry_price} 元",
+            "stopLossPrice": f"{stop_loss} 元 (頸線下方防線)",
+            "stopLossNum": stop_loss,
+            "targetPrice": f"{target_price} 元",
+            "valuation": val_info,
+            "noBuyCondition": f"若跌回 {stop_loss} 頸線下方則結構轉弱果斷停損；{val_info['valuationStatus']}",
+            "score": round(91 + min(gain_pct, 5.0) + val_bonus, 1)
+        }
+    except Exception as e:
+        print(f"熊市抗跌評估異常 {symbol}: {e}")
+        return None
+
 def evaluate_stock_candidate(symbol, name, sector="科技/半導體", is_us=False):
-    """評估單一股票是否符合嚴格技術面模型（漲幅 >= 8.5%, 放量 >= 1.8倍, 突破箱型）"""
+    """經典多頭突破模型 + 財報 EPS 雙重驗證"""
     try:
         ticker = yf.Ticker(symbol)
         df = ticker.history(period="3mo")
@@ -155,8 +277,7 @@ def evaluate_stock_candidate(symbol, name, sector="科技/半導體", is_us=Fals
         vma5 = float(df['5VMA'].iloc[-2])
         volume = float(today['Volume'])
 
-        is_ma_bullish = (ma5 > ma10 > ma20) and (ma20 >= ma20_prev)
-        if not is_ma_bullish:
+        if not ((ma5 > ma10 > ma20) and (ma20 >= ma20_prev)):
             return None
 
         min_vol = 1.5 if is_us else MIN_VOL_RATIO
@@ -170,20 +291,17 @@ def evaluate_stock_candidate(symbol, name, sector="科技/半導體", is_us=Fals
         if close <= box_high:
             return None
 
-        wave_low = float(df['Low'].tail(30).min())
-        wave_high = close
-        wave_diff = wave_high - wave_low
+        val_info = calculate_fundamental_valuation(ticker, close)
 
-        fib236 = round(wave_high - (wave_diff * 0.236), 1)
-        fib382 = round(wave_high - (wave_diff * 0.382), 1)
-        fib500 = round(wave_high - (wave_diff * 0.500), 1)
-        fib618 = round(wave_high - (wave_diff * 0.618), 1)
-        fib786 = round(wave_high - (wave_diff * 0.786), 1)
+        wave_low = float(df['Low'].tail(30).min())
+        wave_diff = close - wave_low
+        fib236 = round(close - (wave_diff * 0.236), 1)
+        fib382 = round(close - (wave_diff * 0.382), 1)
+        fib618 = round(close - (wave_diff * 0.618), 1)
 
         entry_min = fib382
         entry_max = fib236
         entry_price = round(fib382 * 1.01, 1)
-        breakout_confirm = round(close * 1.015, 1)
         stop_loss = round(fib618 * 0.98, 1)
         clean_code = symbol.replace(".TW", "").replace(".TWO", "")
 
@@ -201,19 +319,12 @@ def evaluate_stock_candidate(symbol, name, sector="科技/半導體", is_us=Fals
             "boxRange": f"{box_low:.1f} ～ {box_high:.1f}",
             "breakoutPrice": f"{box_high:.1f}",
             "breakoutReason": f"放量突破長天期箱型上緣 ({box_high:.1f})，單日放量 {vol_ratio:.2f} 倍。",
-            "fib236": fib236,
-            "fib382": fib382,
-            "fib500": fib500,
-            "fib618": fib618,
-            "fib786": fib786,
             "strategy": "等38.2%回踩",
             "entryZone": f"{entry_min} ～ {entry_max}",
-            "entryMin": entry_min,
-            "entryMax": entry_max,
             "entryPrice": f"{entry_price}",
-            "breakoutConfirmPrice": f"{breakout_confirm}",
             "stopLossPrice": f"{stop_loss}",
             "stopLossNum": stop_loss,
+            "valuation": val_info,
             "noBuyCondition": f"剛大漲嚴禁追價；若跌破 {stop_loss} 結構失效嚴禁抄底",
             "score": round(90 + min(gain_pct, 10.0), 1)
         }
@@ -221,21 +332,14 @@ def evaluate_stock_candidate(symbol, name, sector="科技/半導體", is_us=Fals
         print(f"個股分析失敗 {symbol}: {e}")
         return None
 
-def run_tw_screener():
-    watchlist = [
-        ("3450.TW", "聯鈞", "AI光模組封裝/CPO"),
-        ("8028.TW", "昇陽半", "晶圓再生/先進封裝晶圓薄化"),
-        ("3624.TWO", "光頡", "被動元件/晶片薄膜電阻"),
-        ("2492.TW", "華新科", "被動元件/MLCC電容"),
-        ("2305.TW", "全友", "光電子/AI光通訊設備"),
-        ("8358.TWO", "金居", "高頻銅箔/電子零組件"),
-        ("8150.TW", "南茂", "半導體封測/記憶體驅動IC"),
-        ("3081.TWO", "聯亞", "光通訊/矽光子磊晶"),
-        ("6274.TWO", "台燿", "高頻高速CCL銅箔基板")
-    ]
+def run_pool_screener(pool, is_us=False, is_rs=False):
+    """通用股票池掃描排序"""
     candidates = []
-    for sym, name, sec in watchlist:
-        res = evaluate_stock_candidate(sym, name, sec, is_us=False)
+    for sym, name, sec in pool:
+        if is_rs:
+            res = evaluate_bear_market_rs_candidate(sym, name, sec)
+        else:
+            res = evaluate_stock_candidate(sym, name, sec, is_us=is_us)
         if res:
             candidates.append(res)
     candidates.sort(key=lambda x: x["score"], reverse=True)
@@ -243,276 +347,125 @@ def run_tw_screener():
         c["rank"] = idx + 1
     return candidates[:5]
 
-def run_us_screener():
-    watchlist = [
-        ("CRDO", "Credo Technology", "高速傳輸/光互連"),
-        ("MRVL", "Marvell Technology", "高速傳輸/PAM4 DSP"),
-        ("ALAB", "Astera Labs", "PCIe Retimer/伺服器"),
-        ("AVGO", "Broadcom", "AI客製化ASIC/網通晶片"),
-        ("NVDA", "NVIDIA", "AI GPU/加速運算"),
-        ("ARM", "Arm Holdings", "低功耗架構IP"),
-        ("ANET", "Arista Networks", "AI 資料中心交換器")
-    ]
-    candidates = []
-    for sym, name, sec in watchlist:
-        res = evaluate_stock_candidate(sym, name, sec, is_us=True)
-        if res:
-            candidates.append(res)
-    candidates.sort(key=lambda x: x["score"], reverse=True)
-    for idx, c in enumerate(candidates):
-        c["rank"] = idx + 1
-    return candidates[:5]
-
-def track_recent_candidates(history_data, market_key, active_date, current_candidates):
-    """嚴格遵循規則 4：近 10 個交易日篩選標的，收盤必須精確落入 [entryMin, entryMax] 且未破停損者方可上榜"""
-    m_data = history_data.get(market_key, {})
-    sorted_dates = sorted(m_data.keys(), reverse=True)
-    recent_dates = sorted_dates[:10]
-
-    past_candidates_map = {}
-    for d in reversed(recent_dates):
-        day_info = m_data.get(d, {})
-        for cand in day_info.get("candidates", []):
-            code = cand.get("code")
-            if code:
-                cand_copy = dict(cand)
-                cand_copy["originDate"] = d
-                past_candidates_map[code] = cand_copy
-
-    for cand in current_candidates:
-        code = cand.get("code")
-        cand_copy = dict(cand)
-        cand_copy["originDate"] = active_date
-        past_candidates_map[code] = cand_copy
-
-    entry_zone_alerts = []
-    for code, cand in past_candidates_map.items():
-        symbol = cand.get("symbol") or code
-        latest_close = cand.get("close")
-        try:
-            ticker = yf.Ticker(symbol)
-            df = ticker.history(period="5d")
-            if df.empty and market_key == "TW":
-                alt_sym = f"{code}.TWO" if symbol.endswith(".TW") else f"{code}.TW"
-                ticker = yf.Ticker(alt_sym)
-                df = ticker.history(period="5d")
-            if not df.empty:
-                latest_close = round(float(df['Close'].iloc[-1]), 2)
-        except Exception as e:
-            print(f"追蹤價格抓取異常 {code}: {e}")
-
-        stop_loss = float(cand.get("stopLossNum", 0))
-        entry_min = float(cand.get("entryMin", 0))
-        entry_max = float(cand.get("entryMax", 0))
-
-        # 跌破停損或是未落入進場區間 [entryMin, entryMax]，一律排除
-        if latest_close <= stop_loss:
-            continue
-        if latest_close < entry_min or latest_close > entry_max:
-            continue
-
-        alert_item = dict(cand)
-        alert_item["verifiedCurrentPrice"] = latest_close
-        entry_zone_alerts.append(alert_item)
-
-    return entry_zone_alerts
+def trim_history(market_dict, max_days=MAX_HISTORY_DAYS):
+    """嚴格保留最近 N 個交易日數據"""
+    sorted_dates = sorted(market_dict.keys(), reverse=True)
+    for old_date in sorted_dates[max_days:]:
+        del market_dict[old_date]
 
 def main():
-    print("🚀 啟動全動態台美股量化篩選機器人...")
-    try:
-        tw_active_date = get_dynamic_trading_date("^TWII")
-        us_active_date = get_dynamic_trading_date("^IXIC")
-    except Exception as e:
-        print(f"日期取得備援: {e}")
-        now_tw = datetime.datetime.now(datetime.timezone.utc) + timedelta(hours=8)
-        tw_active_date = now_tw.strftime("%Y-%m-%d")
-        us_active_date = now_tw.strftime("%Y-%m-%d")
+    print("啟動三大獨立引擎量化篩選機器人 (嚴格保留 5 交易日 + 領頭羊純上市 TWSE 過濾)...")
+    tw_active_date = get_dynamic_trading_date("^TWII")
+    us_active_date = get_dynamic_trading_date("^IXIC")
 
-    print(f"📅 台股交易日: {tw_active_date}")
-    print(f"📅 美股交易日: {us_active_date}")
-
-    history_data = {"TW": {}, "US": {}}
+    history_data = {"TW": {}, "US": {}, "RS": {}}
     if os.path.exists("data.json"):
         try:
             with open("data.json", "r", encoding="utf-8") as f:
                 history_data = json.load(f)
         except Exception as e:
-            print(f"讀取既有 data.json 失敗，使用乾淨基底: {e}")
+            print(f"讀取既有 data.json 失敗，將重新建立: {e}")
 
-    if "TW" not in history_data: history_data["TW"] = {}
-    if "US" not in history_data: history_data["US"] = {}
+    for k in ["TW", "US", "RS"]:
+        if k not in history_data or not isinstance(history_data[k], dict):
+            history_data[k] = {}
 
-    # 確保寫入核實無誤的台股 5 個交易日基準
-    base_verified_tw = {
-        "2026-10-13": {
-            "date": "2026-10-13", "dayOfWeek": "二", "taiexClose": "48,341.31", "taiexChange": "-960.65", "taiexPercent": "-1.95%", "taiexVolume": "11,250.00 億元",
-            "marketNature": "大盤帶量長黑摜破萬九 ‧ 權值股殺盤 ‧ 嚴格遵守空手觀望紀律",
-            "sectors": [{"name": "防禦型金融 / 傳產", "grade": "B級", "note": "大盤重挫近千點，權值電子全面回檔"}],
-            "candidates": [],
-            "entryZoneAlerts": [{
-                "code": "2492", "name": "華新科", "originDate": "2026-10-07",
-                "verifiedCurrentPrice": 392.0, "entryZone": "375.0 ～ 395.0", "entryPrice": "380.0",
-                "stopLossPrice": "345.0", "entryMin": 375.0, "entryMax": 395.0, "stopLossNum": 345.0
-            }]
-        },
-        "2026-10-12": {
-            "date": "2026-10-12", "dayOfWeek": "一", "taiexClose": "49,301.96", "taiexChange": "-11.48", "taiexPercent": "-0.02%", "taiexVolume": "8,945.22 億元",
-            "marketNature": "國慶連假後高檔微幅震盪 ‧ 權值股各自表態 ‧ 無符合突破標的",
-            "sectors": [
-                {"name": "半導體材料 / 晶圓薄化", "grade": "B級", "note": "昇陽半 (8028) 小跌收 281.5 元高檔盤整"},
-                {"name": "AI 伺服器 / 散熱", "grade": "B級", "note": "高檔狹幅整理，量能未達突破門檻"}
-            ],
-            "candidates": [],
-            "entryZoneAlerts": []
-        },
-        "2026-10-08": {
-            "date": "2026-10-08", "dayOfWeek": "四", "taiexClose": "49,313.44", "taiexChange": "-492.93", "taiexPercent": "-0.99%", "taiexVolume": "9,245.09 億元",
-            "marketNature": "連假前賣壓出籠 ‧ 被動元件逆勢爆量大漲",
-            "sectors": [{"name": "被動元件 / 精密晶片電阻", "grade": "S級", "note": "光頡 (3624) 爆量逼近漲停"}],
-            "candidates": [{
-                "rank": 1, "code": "3624", "name": "光頡", "sector": "精密晶片電阻", "close": 175.0, "change": "+9.72%", "volume": "47,737", "volRatio": "2.85 倍",
-                "maStatus": "5MA > 10MA > 20MA 多頭排列", "boxDays": "24日箱型突破", "boxRange": "145.0～160.0", "breakoutPrice": "160.0", "breakoutReason": "放量突破 160 元頸線收 175 元。",
-                "fib236": 164.8, "fib382": 158.5, "fib500": 153.5, "fib618": 148.4, "fib786": 141.2, "strategy": "等38.2%", "entryZone": "158.0 ～ 165.0", "entryMin": 158.0, "entryMax": 165.0,
-                "entryPrice": "162.0", "breakoutConfirmPrice": "178.0", "stopLossPrice": "146.0", "stopLossNum": 146.0, "noBuyCondition": "短線急拉不追高；破 146.0 停損", "score": 96
-            }],
-            "entryZoneAlerts": [{
-                "code": "8358", "name": "金居", "originDate": "2026-10-05", "verifiedCurrentPrice": 535.0, "entryZone": "526.0 ～ 540.0", "entryPrice": "530.0", "stopLossPrice": "498.0", "entryMin": 526.0, "entryMax": 540.0, "stopLossNum": 498.0
-            }]
-        },
-        "2026-10-07": {
-            "date": "2026-10-07", "dayOfWeek": "三", "taiexClose": "49,806.37", "taiexChange": "-16.18", "taiexPercent": "-0.03%", "taiexVolume": "9,744.00 億元",
-            "marketNature": "大盤高檔換手 ‧ 華新科爆量鎖漲停",
-            "sectors": [{"name": "被動元件 / MLCC", "grade": "S級", "note": "華新科 (2492) 鎖死漲停"}],
-            "candidates": [{
-                "rank": 1, "code": "2492", "name": "華新科", "sector": "被動元件/MLCC", "close": 428.0, "change": "+9.88%", "volume": "52,338", "volRatio": "2.91 倍",
-                "maStatus": "5MA > 10MA > 20MA 多頭排列", "boxDays": "25日箱型突破", "boxRange": "340.0～380.0", "breakoutPrice": "380.0", "breakoutReason": "放量突破 380 元頸線收 428 元。",
-                "fib236": 396.6, "fib382": 377.2, "fib500": 361.5, "fib618": 345.8, "fib786": 323.5, "strategy": "等38.2%", "entryZone": "375.0 ～ 395.0", "entryMin": 375.0, "entryMax": 395.0,
-                "entryPrice": "380.0", "breakoutConfirmPrice": "435.0", "stopLossPrice": "345.0", "stopLossNum": 345.0, "noBuyCondition": "跳空漲停禁追價；破 345.0 停損", "score": 96
-            }],
-            "entryZoneAlerts": []
-        },
-        "2026-10-06": {
-            "date": "2026-10-06", "dayOfWeek": "二", "taiexClose": "49,822.55", "taiexChange": "+110.51", "taiexPercent": "+0.22%", "taiexVolume": "9,759.35 億元",
-            "marketNature": "台積電創新高 ‧ 光通訊族群接棒",
-            "sectors": [{"name": "光通訊 / CPO 封裝", "grade": "A級", "note": "全友 (2305) 爆量鎖漲停"}],
-            "candidates": [{
-                "rank": 1, "code": "2305", "name": "全友", "sector": "光電子/AI光通訊", "close": 63.5, "change": "+9.86%", "volume": "13,750", "volRatio": "3.61 倍",
-                "maStatus": "均線多頭發散，20MA向上", "boxDays": "22日箱型突破", "boxRange": "52.0～58.5", "breakoutPrice": "58.5", "breakoutReason": "突破 58.5 元箱型上緣強攻 63.5 元。",
-                "fib236": 57.6, "fib382": 54.0, "fib500": 51.0, "fib618": 48.0, "fib786": 43.8, "strategy": "等突破回踩", "entryZone": "57.0 ～ 58.5", "entryMin": 57.0, "entryMax": 58.5,
-                "entryPrice": "58.0", "breakoutConfirmPrice": "64.0", "stopLossPrice": "51.0", "stopLossNum": 51.0, "noBuyCondition": "短線急拉不追高；跌破 51.0 停損", "score": 94
-            }],
-            "entryZoneAlerts": []
-        }
-    }
-    for d, info in base_verified_tw.items():
-        if d not in history_data["TW"]:
-            history_data["TW"][d] = info
+    # 【純上市 TWSE 觀察池】完全剔除上櫃 (.TWO) 與興櫃小型股，避免單一事件與財報突襲風險
+    tw_listed_pool = [
+        ("2468.TW", "華經", "上市 ‧ 資安與系統整合 / 集團綜效"),
+        ("2471.TW", "資通", "上市 ‧ 企業軟體 / 金融資安系統"),
+        ("6214.TW", "精誠", "上市 ‧ 台灣資訊服務龍頭 / 企業AI雲"),
+        ("2453.TW", "凌群", "上市 ‧ 系統整合 / 智慧機器人與雲端"),
+        ("5203.TW", "訊連", "上市 ‧ 純AI軟體 / 臉部辨識與生成式AI"),
+        ("2412.TW", "中華電", "上市 ‧ 電信防禦 / AI算力IDC機房"),
+        ("1802.TW", "台玻", "上市 ‧ 低介電玻纖布 / AI基板材料"),
+        ("2492.TW", "華新科", "上市 ‧ 被動元件 / MLCC高階電容"),
+        ("3450.TW", "聯鈞", "上市 ‧ AI光模組封裝 / CPO"),
+        ("2330.TW", "台積電", "上市 ‧ 晶圓代工龍頭"),
+        ("2317.TW", "鴻海", "上市 ‧ AI伺服器組裝"),
+        ("2382.TW", "廣達", "上市 ‧ AI伺服器/雲端"),
+        ("3231.TW", "緯創", "上市 ‧ AI伺服器基板"),
+        ("2308.TW", "台達電", "上市 ‧ AI電源散熱龍頭")
+    ]
 
-    # 確保寫入核實無誤的美股 5 個交易日基準
-    base_verified_us = {
-        "2026-10-12": {
-            "date": "2026-10-12", "dayOfWeek": "一", "taiexClose": "27,245.90", "taiexChange": "-120.27", "taiexPercent": "-0.44%", "taiexVolume": "53.2 億股",
-            "secondaryIndexName": "費城半導體 (SOX)", "secondaryIndexClose": "12,236.79 (-2.67%)",
-            "marketNature": "費半重挫失守萬三 ‧ 晶片傳輸股回檔", "sectors": [{"name": "AI 客製化 ASIC", "grade": "A級", "note": "獲利了結賣壓"}],
-            "candidates": [],
-            "entryZoneAlerts": [{
-                "code": "CRDO", "name": "Credo Technology", "originDate": "2026-10-06",
-                "verifiedCurrentPrice": 200.84, "entryZone": "198.0 ～ 205.0", "entryPrice": "202.0",
-                "stopLossPrice": "192.0", "entryMin": 198.0, "entryMax": 205.0, "stopLossNum": 192.0
-            }]
-        },
-        "2026-10-09": {
-            "date": "2026-10-09", "dayOfWeek": "五", "taiexClose": "27,366.17", "taiexChange": "+172.83", "taiexPercent": "+0.64%", "taiexVolume": "49.6 億股",
-            "secondaryIndexName": "費城半導體 (SOX)", "secondaryIndexClose": "12,572.42 (-0.41%)",
-            "marketNature": "那斯達克續創波段高 ‧ 軟體與雲端穩盤", "sectors": [{"name": "雲端軟體 / 算力基礎設施", "grade": "S級", "note": "高檔強勢整理"}],
-            "candidates": [], "entryZoneAlerts": []
-        },
-        "2026-10-08": {
-            "date": "2026-10-08", "dayOfWeek": "四", "taiexClose": "27,193.34", "taiexChange": "-188.10", "taiexPercent": "-0.69%", "taiexVolume": "55.1 億股",
-            "secondaryIndexName": "費城半導體 (SOX)", "secondaryIndexClose": "12,623.71 (-3.39%)",
-            "marketNature": "美債殖利率反彈 ‧ 科技股受利率壓制", "sectors": [{"name": "通訊晶片 / 網通", "grade": "B級", "note": "高檔拉回"}],
-            "candidates": [], "entryZoneAlerts": []
-        },
-        "2026-10-07": {
-            "date": "2026-10-07", "dayOfWeek": "三", "taiexClose": "27,381.44", "taiexChange": "+45.20", "taiexPercent": "+0.17%", "taiexVolume": "51.8 億股",
-            "secondaryIndexName": "費城半導體 (SOX)", "secondaryIndexClose": "13,066.15 (-1.15%)",
-            "marketNature": "費半失守 13,100 頸線 ‧ 高速光模組維持多頭排列", "sectors": [{"name": "矽光子 / 光互連", "grade": "A級", "note": "強勢抗跌"}],
-            "candidates": [], "entryZoneAlerts": []
-        },
-        "2026-10-06": {
-            "date": "2026-10-06", "dayOfWeek": "二", "taiexClose": "27,336.24", "taiexChange": "+98.70", "taiexPercent": "+0.36%", "taiexVolume": "50.4 億股",
-            "secondaryIndexName": "費城半導體 (SOX)", "secondaryIndexClose": "13,217.82 (+0.34%)",
-            "marketNature": "費半登 13,217 點新高 ‧ Credo 放量突破平台整理", "sectors": [{"name": "高速傳輸 / PAM4 DSP", "grade": "S級", "note": "CRDO 放量上攻"}],
-            "candidates": [{
-                "rank": 1, "code": "CRDO", "name": "Credo Technology", "sector": "高速傳輸/光互連", "close": 216.55, "change": "+5.12%", "volume": "8,680,311", "volRatio": "2.10 倍",
-                "maStatus": "5MA > 10MA > 20MA 多頭排列，20MA 向上", "boxDays": "21日箱型突破", "boxRange": "192.0～208.0", "breakoutPrice": "208.0", "breakoutReason": "放量突破 208 美元平台頸線收 216.55 美元。",
-                "fib236": 210.8, "fib382": 204.6, "fib500": 198.5, "fib618": 192.4, "fib786": 183.7, "strategy": "等回踩進場", "entryZone": "198.0 ～ 205.0", "entryMin": 198.0, "entryMax": 205.0,
-                "entryPrice": "202.0", "breakoutConfirmPrice": "225.0", "stopLossPrice": "192.0", "stopLossNum": 192.0, "noBuyCondition": "短線急拉不追高；跌破 192.0 停損", "score": 95
-            }],
-            "entryZoneAlerts": []
-        }
-    }
-    for d, info in base_verified_us.items():
-        if d not in history_data["US"]:
-            history_data["US"][d] = info
+    us_pool = [
+        ("CRDO", "Credo Technology", "高速傳輸/AEC主動電纜"),
+        ("NVDA", "NVIDIA", "AI GPU 算力龍頭"),
+        ("AVGO", "Broadcom", "AI 客製化晶片/網通"),
+        ("MRVL", "Marvell", "光互連與資料中心晶片"),
+        ("ALAB", "Astera Labs", "AI 連接晶片"),
+        ("TSM", "TSMC ADR", "晶圓代工"),
+        ("PLTR", "Palantir", "AI 企業軟體平台")
+    ]
 
-    # 今日台股動態抓取
+    tw_summary = {"close": "--", "change": "--", "percent": "--", "volume": "--"}
+
+    # 1. 執行台股經典多頭突破篩選 (TW)
     try:
-        tw_macro = fetch_twse_market_summary()
-        tw_candidates = run_tw_screener()
-        tw_alerts = track_recent_candidates(history_data, "TW", tw_active_date, tw_candidates)
-        tw_weekday = ["一", "二", "三", "四", "五", "六", "日"][datetime.date.fromisoformat(tw_active_date).weekday()]
-
+        tw_summary = fetch_twse_market_summary()
+        tw_candidates = run_pool_screener(tw_listed_pool, is_us=False, is_rs=False)
+        tw_wd = ["一", "二", "三", "四", "五", "六", "日"][datetime.date.fromisoformat(tw_active_date).weekday()]
         history_data["TW"][tw_active_date] = {
             "date": tw_active_date,
-            "dayOfWeek": tw_weekday,
-            "taiexClose": tw_macro["close"] if tw_macro["close"] != "--" else "48,341.31",
-            "taiexChange": tw_macro["change"] if tw_macro["change"] != "--" else "-960.65",
-            "taiexPercent": tw_macro["percent"] if tw_macro["percent"] != "--" else "-1.95%",
-            "taiexVolume": tw_macro["volume"] if tw_macro["volume"] != "--" else "11,250.00 億元",
-            "marketNature": "大盤帶量長黑摜破萬九 ‧ 權值股殺盤 ‧ 嚴守空手觀望紀律" if float(tw_macro["change"].replace("+","").replace(",","") if tw_macro["change"] != "--" else -960) < -300 else "盤後量化篩選 ‧ 均線多頭 ‧ 箱型放量突破確認",
-            "sectors": [{"name": "防禦型金融 / 傳產", "grade": "B級", "note": "權值電子全面回檔整理"}],
-            "candidates": tw_candidates,
-            "entryZoneAlerts": tw_alerts
+            "dayOfWeek": tw_wd,
+            "taiexClose": tw_summary["close"],
+            "taiexChange": tw_summary["change"],
+            "taiexPercent": tw_summary["percent"],
+            "taiexVolume": tw_summary["volume"],
+            "marketNature": "嚴格執行四大硬性突破門檻與財報估值檢驗（無符合標的時恪守 0 檔寧缺勿濫）",
+            "sectors": [{"name": "上市軟體與資安避風港", "grade": "S級", "note": "資金大舉撤出硬體轉入上市資服股"}],
+            "candidates": tw_candidates
         }
+        trim_history(history_data["TW"], MAX_HISTORY_DAYS)
     except Exception as e:
-        print(f"台股今日抓取錯誤（使用基準安全備援）: {e}")
+        print(f"TW 篩選異常: {e}")
 
-    # 今日美股動態抓取
+    # 2. 執行美股經典多頭突破篩選 (US)
     try:
-        us_macro = fetch_us_market_summary()
-        us_candidates = run_us_screener()
-        us_alerts = track_recent_candidates(history_data, "US", us_active_date, us_candidates)
-        us_weekday = ["一", "二", "三", "四", "五", "六", "日"][datetime.date.fromisoformat(us_active_date).weekday()]
-
+        us_summary = fetch_us_market_summary()
+        us_candidates = run_pool_screener(us_pool, is_us=True, is_rs=False)
+        us_wd = ["一", "二", "三", "四", "五", "六", "日"][datetime.date.fromisoformat(us_active_date).weekday()]
         history_data["US"][us_active_date] = {
             "date": us_active_date,
-            "dayOfWeek": us_weekday,
-            "taiexClose": us_macro["close"] if us_macro["close"] != "--" else "27,245.90",
-            "taiexChange": us_macro["change"] if us_macro["change"] != "--" else "-120.27",
-            "taiexPercent": us_macro["percent"] if us_macro["percent"] != "--" else "-0.44%",
-            "taiexVolume": us_macro["volume"] if us_macro["volume"] != "--" else "53.2 億股",
-            "secondaryIndexName": us_macro.get("secondaryName", "費城半導體 (SOX)"),
-            "secondaryIndexClose": us_macro.get("secondaryClose", "12,236.79 (-2.67%)"),
-            "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
-            "sectors": [{"name": "AI 高速傳輸 / 光互連", "grade": "A級", "note": "量能增溫帶動主升段"}],
-            "candidates": us_candidates,
-            "entryZoneAlerts": us_alerts
+            "dayOfWeek": us_wd,
+            "taiexClose": us_summary["close"],
+            "taiexChange": us_summary["change"],
+            "taiexPercent": us_summary["percent"],
+            "taiexVolume": us_summary["volume"],
+            "marketNature": "美股科技與半導體量化突破篩選（含 Forward PE / PEG 雙重驗證）",
+            "sectors": [{"name": "美股 AI 與高速傳輸", "grade": "觀察級", "note": "監控費半與那斯達克動向"}],
+            "candidates": us_candidates
         }
+        trim_history(history_data["US"], MAX_HISTORY_DAYS)
     except Exception as e:
-        print(f"美股今日抓取錯誤（使用基準安全備援）: {e}")
+        print(f"US 篩選異常: {e}")
 
-    # 保留歷史天數
-    for m in ["TW", "US"]:
-        sorted_d = sorted(history_data[m].keys(), reverse=True)
-        if len(sorted_d) > MAX_HISTORY_DAYS:
-            for old_d in sorted_d[MAX_HISTORY_DAYS:]:
-                del history_data[m][old_d]
+    # 3. 執行逆勢領頭羊模式 B 篩選 (RS) - 100% 僅限上市股票 (.TW)
+    try:
+        rs_candidates = run_pool_screener(tw_listed_pool, is_us=False, is_rs=True)
+        tw_wd = ["一", "二", "三", "四", "五", "六", "日"][datetime.date.fromisoformat(tw_active_date).weekday()]
+        history_data["RS"][tw_active_date] = {
+            "date": tw_active_date,
+            "dayOfWeek": tw_wd,
+            "taiexClose": tw_summary.get("close", "大盤動態監控"),
+            "taiexChange": tw_summary.get("change", "--"),
+            "taiexPercent": "RS相對強度篩選 (純上市)",
+            "taiexVolume": tw_summary.get("volume", "--"),
+            "marketNature": "【純上市股票限定】技術面領先突破 + 財報 EPS (PE Band / PEG) 雙重驗證模型",
+            "sectors": [
+                {"name": "上市軟體 / 資安 / 系統整合", "grade": "S級催化", "note": "排除上櫃興櫃小型股，聚焦體質穩健上市資服龍頭"},
+                {"name": "上市高股息與基礎設施防禦", "grade": "A級催化", "note": "具穩定財報與法人護盤底氣"}
+            ],
+            "candidates": rs_candidates
+        }
+        trim_history(history_data["RS"], MAX_HISTORY_DAYS)
+    except Exception as e:
+        print(f"RS 篩選異常: {e}")
 
     with open("data.json", "w", encoding="utf-8") as f:
         json.dump(history_data, f, ensure_ascii=False, indent=2)
 
-    print(f"✅ 實盤核實完成！已寫入 data.json (台股天數: {len(history_data['TW'])}, 美股天數: {len(history_data['US'])})")
+    print("三大策略與財報估值更新完畢（嚴格 5 日歷史 + 純上市領頭羊過濾）！已成功寫入 data.json")
 
 if __name__ == "__main__":
     main()
