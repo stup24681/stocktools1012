@@ -555,12 +555,12 @@
     "2026-11-16": {
       "date": "2026-11-16",
       "dayOfWeek": "一",
-      "taiexClose": "24,635.60",
-      "taiexChange": "-500.67",
-      "taiexPercent": "-1.99%",
-      "taiexVolume": "45.9 億股",
+      "taiexClose": "24,591.97",
+      "taiexChange": "-544.29",
+      "taiexPercent": "-2.17%",
+      "taiexVolume": "47.7 億股",
       "secondaryIndexName": "費城半導體 (SOX)",
-      "secondaryIndexClose": "9,710.89 (-4.29%)",
+      "secondaryIndexClose": "9,675.63 (-4.64%)",
       "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
       "sectors": [
         {
