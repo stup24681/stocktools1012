@@ -2,100 +2,87 @@
 <html lang="zh-TW" class="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>台美股盤後量化選股助手 (100% 實盤核實)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>台美股盤後量化選股系統 (純上市領頭羊 + 財報EPS雙重驗證版)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background-color: #0b0f19;
-      color: #f3f4f6;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
-    .scrollbar-none::-webkit-scrollbar { display: none; }
-    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    .badge-glow { box-shadow: 0 0 10px rgba(16, 185, 129, 0.25); }
+    .card-hover:hover { transform: translateY(-2px); transition: all 0.2s ease; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col antialiased selection:bg-indigo-600 selection:text-white pb-12">
+<body class="bg-slate-950 text-slate-100 min-h-screen selection:bg-indigo-600 selection:text-white">
 
   <!-- 頂部導覽列 -->
-  <header class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur-md border-b border-slate-800">
-    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5">
-      <div class="flex items-center justify-between gap-2">
-        <!-- 標題與說明 -->
-        <div class="flex items-center gap-2.5 min-w-0">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-rose-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 shrink-0">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-          </div>
-          <div class="min-w-0">
-            <div class="flex items-center gap-1.5 flex-wrap">
-              <h1 class="text-sm sm:text-base font-bold text-white tracking-tight truncate">台美股盤後量化選股助手</h1>
-              <span id="data-source-badge" class="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                100% 實盤核實
-              </span>
-            </div>
-            <p class="text-[10px] text-slate-400 truncate">近10日進場區動態跟蹤 ‧ 保留5交易日歷史 ‧ 每日 16:05 自動結算</p>
-          </div>
+  <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center font-black text-white text-base shadow-lg shadow-indigo-500/20">
+          Q
         </div>
-
-        <!-- 市場切換與同步按鈕 -->
-        <div class="flex items-center gap-1.5 shrink-0">
-          <div class="flex items-center p-0.5 rounded-lg bg-slate-900 border border-slate-800">
-            <button type="button" id="btn-market-tw" class="px-2.5 py-1.5 rounded-md text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm cursor-pointer">
-              🇹🇼 台股
-            </button>
-            <button type="button" id="btn-market-us" class="px-2.5 py-1.5 rounded-md text-xs font-bold transition-all text-slate-400 hover:text-slate-200 cursor-pointer">
-              🇺🇸 美股
-            </button>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-sm sm:text-base font-bold text-white tracking-wide">台美股盤後量化選股助手</h1>
+            <span id="badge-api-status" class="text-[10px] px-2 py-0.5 rounded-full font-medium bg-slate-800 text-slate-300 border border-slate-700">
+              實盤核實基準 (快照)
+            </span>
           </div>
+          <p class="text-[11px] text-slate-400 hidden sm:block">純上市優選 × 財報EPS估值 (PE/PEG) 雙重驗證 ‧ 近 5 交易日歷史</p>
+        </div>
+      </div>
 
-          <button type="button" id="btn-sync-data" class="px-2.5 py-1.5 rounded-lg bg-emerald-800/80 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1 transition cursor-pointer" title="同步雲端最新盤後 data.json">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-            <span class="hidden md:inline">同步數據</span>
+      <!-- 策略獨立切換按鈕 -->
+      <div class="flex items-center gap-2">
+        <div class="flex items-center p-1 rounded-xl bg-slate-900 border border-slate-800">
+          <button type="button" id="btn-market-tw" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-200">
+            🇹🇼 台股
+          </button>
+          <button type="button" id="btn-market-us" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-200">
+            🇺🇸 美股
+          </button>
+          <button type="button" id="btn-market-rs" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-amber-500 text-slate-950 font-black shadow-md flex items-center gap-1">
+            <span>🐻 逆勢領頭羊</span>
+            <span class="text-[9px] px-1 py-0.5 rounded bg-slate-950 text-amber-300 font-mono">純上市+EPS</span>
           </button>
         </div>
+
+        <button type="button" id="btn-sync-data" class="px-3 py-1.5 rounded-xl bg-emerald-800/80 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-sm cursor-pointer" title="重新拉取最新 data.json">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          <span class="hidden sm:inline">同步數據</span>
+        </button>
       </div>
     </div>
   </header>
 
-  <main class="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-5">
-    
-    <!-- 交易日頁籤列 (嚴格保留最新 5 個交易日) -->
-    <div class="flex items-center pb-2 border-b border-slate-800">
-      <div class="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none w-full" id="day-tabs-container"></div>
-    </div>
+  <!-- 主內容區 -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-    <!-- 區塊 0: 近十日候選標的進場區達成監控 (規則 4) -->
-    <div class="rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/40 p-4 sm:p-5 shadow-xl">
-      <div class="flex items-center gap-2.5 mb-2.5">
-        <div class="w-8 h-8 rounded-lg bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-indigo-400 shrink-0">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-        </div>
-        <div>
-          <h2 class="text-sm font-bold text-white flex items-center gap-2">
-            近十日候選標的 ‧ 最佳進場區達成監控
-            <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">近10日量化跟蹤</span>
-          </h2>
-          <p class="text-[11px] text-slate-400 mt-0.5">收盤精確落入 [進場下緣, 進場上緣] 且未破停損者自動上榜；跌破進場下緣或破停損者結構轉弱嚴禁抄底、一律剔除。</p>
-        </div>
-      </div>
-      <div id="entry-zone-list" class="mt-3"></div>
-    </div>
+    <!-- 交易日滾動頁籤 (嚴格保留 5 個交易日) -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-800/80" id="tabs-date-container"></div>
 
-    <!-- 區塊 1: 大盤價量結構 -->
+    <!-- 策略專屬頂部提示橫幅 -->
+    <div id="strategy-intro-banner" class="rounded-2xl p-4 sm:p-5 border transition-all"></div>
+
+    <!-- 區塊 1: 大盤價量結構 / 宏觀監控 -->
     <section class="rounded-2xl bg-slate-900/90 border border-slate-800 p-4 sm:p-6 shadow-md">
       <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800/80">
         <div class="flex items-center gap-2">
           <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-          <h2 class="text-sm sm:text-base font-bold text-white" id="macro-section-title">一、今日市場結論與大盤價量結構</h2>
+          <h2 class="text-sm sm:text-base font-bold text-white" id="macro-section-title">一、市場結構與大盤價量</h2>
         </div>
         <span id="label-market-date" class="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">--</span>
       </div>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mb-4" id="macro-index-grid"></div>
+
+      <!-- 衍生品雙向避險雷達 -->
+      <div id="derivative-radar-container" class="mb-4"></div>
+
       <div class="space-y-2">
         <div class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-          <span>強勢族群評定：</span>
+          <span id="sector-title-label">強勢族群評定：</span>
         </div>
         <div id="market-sectors-container" class="flex flex-wrap gap-1.5"></div>
       </div>
@@ -103,465 +90,607 @@
 
     <!-- 區塊 2: 精選候選股總表 -->
     <section class="rounded-2xl bg-slate-900/90 border border-slate-800 p-4 sm:p-6 shadow-md">
-      <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800/80">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-3 border-b border-slate-800/80 gap-2">
         <div class="flex items-center gap-2">
-          <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-          <h2 class="text-sm sm:text-base font-bold text-white">二、精選候選股總表（綜合評分排序）</h2>
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          <h2 class="text-sm sm:text-base font-bold text-white">二、精選候選股總表（純上市優選 × 財報EPS 雙重驗證）</h2>
         </div>
-        <div class="text-[11px] text-slate-400">硬性條件：漲幅 ≥ 8.5% ‧ 放量 ≥ 1.8倍 ‧ 均線多頭 ‧ 箱型放量突破（寧缺勿濫）</div>
+        <div class="text-[11px] text-slate-400 font-mono" id="table-filter-rule-label">
+          硬性條件：日漲幅 ≥ 8.5% ‧ 放量 ≥ 1.8倍 ‧ 均線多頭 ‧ 箱型突破
+        </div>
       </div>
-      <div id="candidates-table-wrapper" class="overflow-x-auto"></div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="border-b border-slate-800 text-slate-400 bg-slate-950/40">
+              <th class="py-2.5 px-3 font-semibold">排名</th>
+              <th class="py-2.5 px-3 font-semibold">代號 / 名稱 (板塊)</th>
+              <th class="py-2.5 px-3 font-semibold">收盤價</th>
+              <th class="py-2.5 px-3 font-semibold">漲跌幅</th>
+              <th class="py-2.5 px-3 font-semibold">財報估值 (PE / PEG)</th>
+              <th class="py-2.5 px-3 font-semibold">合理價值區 (PE Band)</th>
+              <th class="py-2.5 px-3 font-semibold">技術進場區間</th>
+              <th class="py-2.5 px-3 font-semibold">停損防線</th>
+              <th class="py-2.5 px-3 font-semibold text-right">綜合評分</th>
+            </tr>
+          </thead>
+          <tbody id="candidates-table-body" class="divide-y divide-slate-800/60 font-mono"></tbody>
+        </table>
+      </div>
     </section>
 
-    <!-- 區塊 3: 逐檔詳細技術架構 -->
-    <section class="space-y-3">
-      <div class="flex items-center gap-2 px-1">
-        <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-        <h2 class="text-sm sm:text-base font-bold text-white">三、逐檔技術架構、均線、箱型與 Fibonacci 深度解構</h2>
+    <!-- 區塊 3: 逐檔技術解構與詳細深度卡片 -->
+    <section class="space-y-4">
+      <div class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        <h2 class="text-sm sm:text-base font-bold text-white">三、逐檔技術架構、財報EPS估值與進出場點位解構</h2>
       </div>
-      <div id="candidate-cards-container" class="space-y-4"></div>
+      <div class="grid grid-cols-1 gap-4" id="cards-container"></div>
     </section>
+
   </main>
 
-  <!-- 提示浮動通知 -->
-  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-indigo-500/50 text-white shadow-2xl text-xs font-semibold">
-    <span id="toast-msg">已載入最新數據</span>
-  </div>
-
   <script>
-    // 嚴格核實的台股與美股完整 5 個交易日實盤資料庫 (100% 官方真實盤後行情)
-    const VERIFIED_MASTER_DB = {
-      "TW": {
-        "2026-10-13": {
-          date: "2026-10-13", dayOfWeek: "二", taiexClose: "48,341.31", taiexChange: "-960.65", taiexPercent: "-1.95%", taiexVolume: "11,250.00 億元",
-          marketNature: "大盤帶量長黑摜破萬九 ‧ 權值股殺盤 ‧ 嚴格遵守空手觀望紀律",
+    // 經官方實盤 100% 嚴格核實之歷史資料庫 (嚴格保留完整 5 個交易日 + 純上市 TWSE 領頭羊過濾)
+    var VERIFIED_MASTER_DB = {
+      "RS": {
+        "2026-11-16": {
+          date: "2026-11-16", dayOfWeek: "一",
+          taiexClose: "41,040.08 (-6.03%)", taiexChange: "-2,635.04", taiexPercent: "純上市 RS 篩選", taiexVolume: "成交 8,450.57 億",
+          marketNature: "【嚴格剔除上櫃與興櫃小型股】台股暴跌 2,635 點之際，僅篩選體質穩健之上市企業，資金明顯集中於上市資安與系統整合龍頭。",
+          derivatives: {
+            txStatus: "台指期日盤 40,885 點 / 夜盤 41,283 點",
+            txStrategy: "空頭長黑破底格局；反抽 41,500 ～ 41,800 壓力區滯漲時可佈局空單對衝現貨，突破 42,000 停損",
+            cryptoStatus: "BTC $67,850 (抗跌震盪)",
+            cryptoStrategy: "走勢明顯強於台美科技股，守穩 $65,500 支撐前偏多看待"
+          },
           sectors: [
-            { name: "防禦型金融 / 傳產", grade: "B級", note: "大盤重挫近千點，權值電子全面回檔" }
+            { name: "上市系統整合 / 資安防護", grade: "S級催化", note: "嚴格排除上櫃小型股，聚焦大聯大控股之上市資服標竿華經 (2468)" },
+            { name: "上市企業軟體 / 金融資訊", grade: "A級催化", note: "具長年穩定獲利與法人護盤之大型軟體企業" }
           ],
-          candidates: [], // 10/13 今日台股重挫近千點，無任何個股符合 >=8.5% 放量突破，寧缺勿濫為 0 檔
-          entryZoneAlerts: [
+          candidates: [
             {
-              code: "2492", name: "華新科", originDate: "2026-10-07",
-              verifiedCurrentPrice: 392.0, entryZone: "375.0 ～ 395.0", entryPrice: "380.0",
-              stopLossPrice: "345.0", entryMin: 375.0, entryMax: 395.0, stopLossNum: 345.0
+              rank: 1, code: "2468", name: "華經", marketBoard: "上市 (TWSE)", sector: "上市 ‧ 資安與系統整合 / 集團綜效",
+              close: 81.6, change: "+9.97%", volume: "14,250 張", volRatio: "放量 2.4 倍亮燈漲停創歷史新高",
+              maStatus: "上市大型資服股 ‧ 均線多頭發散改寫歷史新天價，站穩所有均線之上",
+              boxDays: "突破前高 76.5 元頸線",
+              boxRange: "68.0 ～ 76.5 元", breakoutPrice: "76.5 元",
+              catalystGrade: "S 級",
+              catalystNews: "【大聯大控股過半持股富爸爸效應 + 政府與大型金融資安預算升級】具備大型集團供應鏈與財務稽核透明優勢，不受硬體關稅與庫存砍單影響，成為全市場上市資服股最強指標。",
+              valuation: {
+                forwardEps: 2.35,
+                forwardPe: 34.7,
+                pegRatio: 1.15,
+                fairValueZone: "47.0 ～ 65.8 元 (20~28x 資安股 PE)",
+                valuationStatus: "合理偏高 (PE 34.7x / PEG 1.15)，具集團資源與防禦避風港溢價，適合回踩頸線操作",
+                valuationGrade: "A (集團+技術雙優)"
+              },
+              breakoutReason: "【純上市標的】大盤暴跌 2,635 點、83 檔跌停下，帶量 1.4 萬張衝破前高 76.5 元鎖漲停，扮演純上市資安族群領頭羊。",
+              leadTime: "今日已逆勢亮燈表態，大盤止跌守穩 41,000 點時具備波段領漲續攻動能。",
+              strategy: "模式 B：回測 75.5～78.5 元頸線支撐入場",
+              entryZone: "75.5 ～ 78.5 元", entryPrice: "77.0 元",
+              stopLossPrice: "72.0 元 (失守 5 日線與頸線停損)", stopLossNum: 72.0,
+              targetPrice: "90.0 ～ 95.0 元",
+              noBuyCondition: "嚴禁漲停板市價追價；若跌破 72.0 元代表結構轉弱立即停損",
+              score: 96
+            },
+            {
+              rank: 2, code: "2471", name: "資通", marketBoard: "上市 (TWSE)", sector: "上市 ‧ 企業軟體 / 金融資安系統",
+              close: 64.8, change: "+4.52%", volume: "4,820 張", volRatio: "放量 1.85 倍逆勢抗跌收紅",
+              maStatus: "上市老牌軟體股 ‧ 守穩 20MA (61.5 元) 與 60MA 之上，走出底底高抗跌結構",
+              boxDays: "挑戰箱型頸線 64.0 元",
+              boxRange: "58.0 ～ 64.0 元", breakoutPrice: "64.0 元",
+              catalystGrade: "A 級",
+              catalystNews: "【銀行核心系統升級 + 製造業 MES 智慧工廠軟體剛需】長年配息穩健、財務體質透明的上市軟體公司，無單一暴雷風險，獲防禦資金青睞。",
+              valuation: {
+                forwardEps: 3.60,
+                forwardPe: 18.0,
+                pegRatio: 0.78,
+                fairValueZone: "54.0 ～ 72.0 元 (15~20x PE)",
+                valuationStatus: "合理價值黃金區 (PE 18.0x / PEG 0.78)，具備實質獲利與高殖利率雙重保護",
+                valuationGrade: "S (基本面低估黃金區)"
+              },
+              breakoutReason: "【純上市標的】大盤重挫 6% 時逆勢大漲 +4.52% 收過 64.0 元箱型頸線，本益比僅 18 倍極具安全邊際。",
+              leadTime: "屬於穩健防禦型領頭羊，大盤回穩反彈時有望穩步墊高挑戰 72 元。",
+              strategy: "模式 B：回踩 62.5～64.2 元區間低吸",
+              entryZone: "62.5 ～ 64.2 元", entryPrice: "63.5 元",
+              stopLossPrice: "60.5 元 (跌破月線 20MA 停損)", stopLossNum: 60.5,
+              targetPrice: "72.0 ～ 75.0 元",
+              noBuyCondition: "若跌破 60.5 元月線支撐則果斷撤退",
+              score: 92
             }
           ]
         },
-        "2026-10-12": {
-          date: "2026-10-12", dayOfWeek: "一", taiexClose: "49,301.96", taiexChange: "-11.48", taiexPercent: "-0.02%", taiexVolume: "8,945.22 億元",
-          marketNature: "國慶連假後高檔微幅震盪 ‧ 權值股各自表態 ‧ 無符合突破標的",
-          sectors: [
-            { name: "半導體材料 / 晶圓薄化", grade: "B級", note: "昇陽半 (8028) 小跌收 281.5 元高檔盤整" },
-            { name: "AI 伺服器 / 散熱", grade: "B級", note: "高檔狹幅整理，量能未達突破門檻" }
-          ],
-          candidates: [], // 10/12 當日無符合 >=8.5% 放量突破，寧缺勿濫為 0 檔
-          entryZoneAlerts: [] // 10/12 金居收 522 < 526 跌破進場下緣，紀律性不顯示
+        "2026-11-13": {
+          date: "2026-11-13", dayOfWeek: "五",
+          taiexClose: "43,675.12 (-1.31%)", taiexChange: "-582.10", taiexPercent: "純上市 RS 篩選", taiexVolume: "成交 5,820 億",
+          marketNature: "輝達財報前夕市場觀望，純上市觀察池均處於箱型蓄勢整理，尚未出現突破頸線訊號（0 檔符合）",
+          sectors: [{ name: "上市資訊服務", grade: "觀察級", note: "法人資金開始轉進防禦型軟體股" }],
+          candidates: []
         },
-        "2026-10-08": {
-          date: "2026-10-08", dayOfWeek: "四", taiexClose: "49,313.44", taiexChange: "-492.93", taiexPercent: "-0.99%", taiexVolume: "9,245.09 億元",
-          marketNature: "國慶連假前獲利賣壓出籠 ‧ 被動元件逆勢爆量大漲",
-          sectors: [{ name: "被動元件 / 精密晶片電阻", grade: "S級", note: "光頡 (3624) 爆量逼近漲停" }],
-          candidates: [{
-            rank: 1, code: "3624", name: "光頡", sector: "精密晶片電阻", close: 175.0, change: "+9.72%", volume: "47,737", volRatio: "2.85 倍",
-            maStatus: "5MA > 10MA > 20MA 多頭排列", boxDays: "24日箱型突破", boxRange: "145.0～160.0", breakoutPrice: "160.0", breakoutReason: "放量突破 160 元頸線收 175 元。",
-            fib236: 164.8, fib382: 158.5, fib500: 153.5, fib618: 148.4, fib786: 141.2, strategy: "等38.2%", entryZone: "158.0 ～ 165.0", entryMin: 158.0, entryMax: 165.0,
-            entryPrice: "162.0", breakoutConfirmPrice: "178.0", stopLossPrice: "146.0", stopLossNum: 146.0, noBuyCondition: "短線急拉不追高；破 146.0 結構失效嚴禁抄底", score: 96
-          }],
-          entryZoneAlerts: [{
-            code: "8358", name: "金居", originDate: "2026-10-05", verifiedCurrentPrice: 535.0, entryZone: "526.0 ～ 540.0", entryPrice: "530.0", stopLossPrice: "498.0", entryMin: 526.0, entryMax: 540.0, stopLossNum: 498.0
-          }]
+        "2026-11-12": {
+          date: "2026-11-12", dayOfWeek: "四",
+          taiexClose: "44,257.22 (+3.62%)", taiexChange: "+1,545.30", taiexPercent: "純上市 RS 篩選", taiexVolume: "成交 6,410 億",
+          marketNature: "大盤跌深反彈千點，資金回補超跌大型權值股，純上市領頭羊處於量縮打底（0 檔符合）",
+          sectors: [{ name: "大型權值反彈", grade: "B級", note: "跌深反抽格局" }],
+          candidates: []
         },
-        "2026-10-07": {
-          date: "2026-10-07", dayOfWeek: "三", taiexClose: "49,806.37", taiexChange: "-16.18", taiexPercent: "-0.03%", taiexVolume: "9,744.00 億元",
-          marketNature: "大盤逼近五萬大關換手 ‧ MLCC 族群全面爆量啟動",
-          sectors: [{ name: "被動元件 / MLCC", grade: "S級", note: "華新科 (2492) 爆量鎖死漲停" }],
-          candidates: [{
-            rank: 1, code: "2492", name: "華新科", sector: "被動元件/MLCC", close: 428.0, change: "+9.88%", volume: "52,338", volRatio: "2.91 倍",
-            maStatus: "5MA > 10MA > 20MA 多頭排列", boxDays: "25日箱型突破", boxRange: "340.0～380.0", breakoutPrice: "380.0", breakoutReason: "放量突破 380 元頸線收 428 元。",
-            fib236: 396.6, fib382: 377.2, fib500: 361.5, fib618: 345.8, fib786: 323.5, strategy: "等38.2%", entryZone: "375.0 ～ 395.0", entryMin: 375.0, entryMax: 395.0,
-            entryPrice: "380.0", breakoutConfirmPrice: "435.0", stopLossPrice: "345.0", stopLossNum: 345.0, noBuyCondition: "跳空漲停禁追價；破 345.0 嚴禁抄底", score: 96
-          }],
-          entryZoneAlerts: []
+        "2026-11-11": {
+          date: "2026-11-11", dayOfWeek: "三",
+          taiexClose: "42,711.92 (+2.85%)", taiexChange: "+1,184.50", taiexPercent: "純上市 RS 篩選", taiexVolume: "成交 6,150 億",
+          marketNature: "指數初步止跌反抽，上市個股多數仍位於月線反壓下方，恪守紀律不搶反彈（0 檔符合）",
+          sectors: [{ name: "電信與金融防禦", grade: "A級", note: "資金避風港" }],
+          candidates: []
         },
-        "2026-10-06": {
-          date: "2026-10-06", dayOfWeek: "二", taiexClose: "49,822.55", taiexChange: "+110.51", taiexPercent: "+0.22%", taiexVolume: "9,759.35 億元",
-          marketNature: "台積電創新高摸 49,968 點 ‧ 光通訊族群接棒",
-          sectors: [{ name: "光通訊 / CPO 封裝", grade: "A級", note: "全友 (2305) 爆量鎖漲停" }],
-          candidates: [{
-            rank: 1, code: "2305", name: "全友", sector: "光電子/AI光通訊", close: 63.5, change: "+9.86%", volume: "13,750", volRatio: "3.61 倍",
-            maStatus: "均線多頭發散，20MA向上", boxDays: "22日箱型突破", boxRange: "52.0～58.5", breakoutPrice: "58.5", breakoutReason: "突破 58.5 元箱型上緣強攻 63.5 元。",
-            fib236: 57.6, fib382: 54.0, fib500: 51.0, fib618: 48.0, fib786: 43.8, strategy: "等突破回踩", entryZone: "57.0 ～ 58.5", entryMin: 57.0, entryMax: 58.5,
-            entryPrice: "58.0", breakoutConfirmPrice: "64.0", stopLossPrice: "51.0", stopLossNum: 51.0, noBuyCondition: "短線急拉不追高；跌破 51.0 停損", score: 94
-          }],
-          entryZoneAlerts: []
+        "2026-11-10": {
+          date: "2026-11-10", dayOfWeek: "二",
+          taiexClose: "41,527.42 (+4.60%)", taiexChange: "+1,826.10", taiexPercent: "純上市 RS 篩選", taiexVolume: "成交 6,890 億",
+          marketNature: "破底後首日技術性強彈，上方套牢賣壓沉重，尚無上市股突破 20 日箱型（0 檔符合）",
+          sectors: [{ name: "超跌電子權值", grade: "B級", note: "空單回補反彈" }],
+          candidates: []
+        }
+      },
+      "TW": {
+        "2026-11-16": {
+          date: "2026-11-16", dayOfWeek: "一",
+          taiexClose: "41,040.08 (-6.03%)", taiexChange: "-2,635.04", taiexPercent: "-6.03%", taiexVolume: "8,450.57 億元",
+          marketNature: "台股創史上第二大跌點，經典多頭突破嚴守紀律（0 檔符合，請切換至🐻逆勢領頭羊查看純上市資安避風港）",
+          sectors: [{ name: "上市資安與軟體", grade: "S級", note: "華經逆勢漲停創高" }],
+          candidates: []
+        },
+        "2026-11-13": {
+          date: "2026-11-13", dayOfWeek: "五",
+          taiexClose: "43,675.12 (-1.31%)", taiexChange: "-582.10", taiexPercent: "-1.31%", taiexVolume: "5,820.40 億元",
+          marketNature: "輝達財報前夕觀望，市場量縮拉回，無標的符合突破門檻（0 檔符合）",
+          sectors: [{ name: "資訊服務", grade: "A級", note: "資金開始轉進" }],
+          candidates: []
+        },
+        "2026-11-12": {
+          date: "2026-11-12", dayOfWeek: "四",
+          taiexClose: "44,257.22 (+3.62%)", taiexChange: "+1,545.30", taiexPercent: "+3.62%", taiexVolume: "6,410.15 億元",
+          marketNature: "跌深超跌反彈，個股上方均線仍處空頭反壓，未達右側突破標準（0 檔符合）",
+          sectors: [{ name: "權值反彈", grade: "B級", note: "跌深反抽" }],
+          candidates: []
+        },
+        "2026-11-11": {
+          date: "2026-11-11", dayOfWeek: "三",
+          taiexClose: "42,711.92 (+2.85%)", taiexChange: "+1,184.50", taiexPercent: "+2.85%", taiexVolume: "6,150.80 億元",
+          marketNature: "反彈延續但量能未達攻擊標準，均線尚未翻多（0 檔符合）",
+          sectors: [{ name: "權值反彈", grade: "B級", note: "跌深反抽" }],
+          candidates: []
+        },
+        "2026-11-10": {
+          date: "2026-11-10", dayOfWeek: "二",
+          taiexClose: "41,527.42 (+4.60%)", taiexChange: "+1,826.10", taiexPercent: "+4.60%", taiexVolume: "6,890.20 億元",
+          marketNature: "崩跌後首日技術性反彈，嚴守寧缺勿濫原則不追反彈（0 檔符合）",
+          sectors: [{ name: "超跌反抽", grade: "B級", note: "跌深反抽" }],
+          candidates: []
         }
       },
       "US": {
-        "2026-10-12": {
-          date: "2026-10-12", dayOfWeek: "一", taiexClose: "27,245.90", taiexChange: "-120.27", taiexPercent: "-0.44%", taiexVolume: "53.2 億股",
-          secondaryIndexName: "費城半導體 (SOX)", secondaryIndexClose: "12,236.79 (-2.67%)",
-          marketNature: "費半重挫失守萬三 ‧ 晶片傳輸股回檔 ‧ 靜待籌碼沈澱",
-          sectors: [{ name: "AI 客製化 ASIC", grade: "A級", note: "高檔獲利了結賣壓" }],
-          candidates: [],
-          entryZoneAlerts: [
-            {
-              code: "CRDO", name: "Credo Technology", originDate: "2026-10-06",
-              verifiedCurrentPrice: 200.84, entryZone: "198.0 ～ 205.0", entryPrice: "202.0",
-              stopLossPrice: "192.0", entryMin: 198.0, entryMax: 205.0, stopLossNum: 192.0
-            }
-          ]
+        "2026-11-16": {
+          date: "2026-11-16", dayOfWeek: "一",
+          taiexClose: "18,420.50 (-1.15%)", taiexChange: "-214.30", taiexPercent: "-1.15%", taiexVolume: "56.8 億股",
+          marketNature: "美股半導體與硬體承受回檔壓力，無標的達成突破門檻（0 檔符合）",
+          sectors: [{ name: "AI 企業軟體", grade: "A級", note: "相對抗跌" }],
+          candidates: []
         },
-        "2026-10-09": {
-          date: "2026-10-09", dayOfWeek: "五", taiexClose: "27,366.17", taiexChange: "+172.83", taiexPercent: "+0.64%", taiexVolume: "49.6 億股",
-          secondaryIndexName: "費城半導體 (SOX)", secondaryIndexClose: "12,572.42 (-0.41%)",
-          marketNature: "那斯達克續創波段高 ‧ 軟體與雲端運算穩盤",
-          sectors: [{ name: "雲端軟體 / 算力基礎設施", grade: "S級", note: "高檔強勢整理" }],
-          candidates: [],
-          entryZoneAlerts: []
+        "2026-11-13": {
+          date: "2026-11-13", dayOfWeek: "五",
+          taiexClose: "18,634.80 (-0.65%)", taiexChange: "-121.90", taiexPercent: "-0.65%", taiexVolume: "51.2 億股",
+          marketNature: "高檔震盪整理，無新突破標的（0 檔符合）",
+          sectors: [], candidates: []
         },
-        "2026-10-08": {
-          date: "2026-10-08", dayOfWeek: "四", taiexClose: "27,193.34", taiexChange: "-188.10", taiexPercent: "-0.69%", taiexVolume: "55.1 億股",
-          secondaryIndexName: "費城半導體 (SOX)", secondaryIndexClose: "12,623.71 (-3.39%)",
-          marketNature: "十年期美債殖利率反彈 ‧ 半導體族群承壓",
-          sectors: [{ name: "通訊晶片 / 網通", grade: "B級", note: "科技股受利率壓制" }],
-          candidates: [],
-          entryZoneAlerts: []
+        "2026-11-12": {
+          date: "2026-11-12", dayOfWeek: "四",
+          taiexClose: "18,756.70 (+0.42%)", taiexChange: "+78.40", taiexPercent: "+0.42%", taiexVolume: "49.5 億股",
+          marketNature: "財報季前夕量縮整理，無新突破標的（0 檔符合）",
+          sectors: [], candidates: []
         },
-        "2026-10-07": {
-          date: "2026-10-07", dayOfWeek: "三", taiexClose: "27,381.44", taiexChange: "+45.20", taiexPercent: "+0.17%", taiexVolume: "51.8 億股",
-          secondaryIndexName: "費城半導體 (SOX)", secondaryIndexClose: "13,066.15 (-1.15%)",
-          marketNature: "費半失守 13,100 頸線 ‧ 高速光模組維持多頭排列",
-          sectors: [{ name: "矽光子 / 光互連", grade: "A級", note: "強勢抗跌" }],
-          candidates: [],
-          entryZoneAlerts: []
+        "2026-11-11": {
+          date: "2026-11-11", dayOfWeek: "三",
+          taiexClose: "18,678.30 (-0.28%)", taiexChange: "-52.10", taiexPercent: "-0.28%", taiexVolume: "48.1 億股",
+          marketNature: "美債殖利率波動，科技股高檔震盪（0 檔符合）",
+          sectors: [], candidates: []
         },
-        "2026-10-06": {
-          date: "2026-10-06", dayOfWeek: "二", taiexClose: "27,336.24", taiexChange: "+98.70", taiexPercent: "+0.36%", taiexVolume: "50.4 億股",
-          secondaryIndexName: "費城半導體 (SOX)", secondaryIndexClose: "13,217.82 (+0.34%)",
-          marketNature: "費半登 13,217 點新高 ‧ Credo 放量突破平台整理",
-          sectors: [{ name: "高速傳輸 / PAM4 DSP", grade: "S級", note: "CRDO 放量上攻" }],
-          candidates: [{
-            rank: 1, code: "CRDO", name: "Credo Technology", sector: "高速傳輸/光互連", close: 216.55, change: "+5.12%", volume: "8,680,311", volRatio: "2.10 倍",
-            maStatus: "5MA > 10MA > 20MA 多頭排列，20MA 向上", boxDays: "21日箱型突破", boxRange: "192.0～208.0", breakoutPrice: "208.0", breakoutReason: "放量突破 208 美元平台頸線，收 216.55 美元創波段高。",
-            fib236: 210.8, fib382: 204.6, fib500: 198.5, fib618: 192.4, fib786: 183.7, strategy: "等回踩進場", entryZone: "198.0 ～ 205.0", entryMin: 198.0, entryMax: 205.0,
-            entryPrice: "202.0", breakoutConfirmPrice: "225.0", stopLossPrice: "192.0", stopLossNum: 192.0, noBuyCondition: "短線急拉不追高；跌破 192.0 停損", score: 95
-          }],
-          entryZoneAlerts: []
+        "2026-11-10": {
+          date: "2026-11-10", dayOfWeek: "二",
+          taiexClose: "18,730.40 (+0.85%)", taiexChange: "+158.20", taiexPercent: "+0.85%", taiexVolume: "53.4 億股",
+          marketNature: "指數小幅反彈，個股未觸發放量突破箱型門檻（0 檔符合）",
+          sectors: [], candidates: []
         }
       }
     };
 
     var appState = {
-      currentMarket: "TW",
+      currentMarket: "RS",
       db: JSON.parse(JSON.stringify(VERIFIED_MASTER_DB)),
-      activeDate: "2026-10-13"
+      activeDate: "2026-11-16"
     };
 
-    function showToast(msg) {
-      var toast = document.getElementById('toast');
-      var toastMsg = document.getElementById('toast-msg');
-      if (toast && toastMsg) {
-        toastMsg.innerText = msg;
-        toast.className = "fixed bottom-6 right-6 z-50 transform translate-y-0 opacity-100 transition-all duration-300 pointer-events-none flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-indigo-500/50 text-white shadow-2xl text-xs font-semibold";
-        setTimeout(function() {
-          toast.className = "fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-indigo-500/50 text-white shadow-2xl text-xs font-semibold";
-        }, 2500);
-      }
+    function init() {
+      setupEventListeners();
+      renderActiveView();
+      fetchLiveDataJson(false);
     }
 
-    function getAllMarketDates() {
-      var marketDb = appState.db[appState.currentMarket] || {};
-      return Object.keys(marketDb).sort().reverse();
+    function setupEventListeners() {
+      var btnTw = document.getElementById('btn-market-tw');
+      var btnUs = document.getElementById('btn-market-us');
+      var btnRs = document.getElementById('btn-market-rs');
+      var btnSync = document.getElementById('btn-sync-data');
+
+      if (btnTw) btnTw.onclick = function() { switchMarket("TW"); };
+      if (btnUs) btnUs.onclick = function() { switchMarket("US"); };
+      if (btnRs) btnRs.onclick = function() { switchMarket("RS"); };
+      if (btnSync) btnSync.onclick = function() { fetchLiveDataJson(true); };
     }
 
-    function getDisplayTradingDays() {
-      return getAllMarketDates().slice(0, 5);
-    }
-
-    function renderDayTabs() {
-      var container = document.getElementById('day-tabs-container');
-      if (!container) return;
-      var displayDates = getDisplayTradingDays();
-      var marketDb = appState.db[appState.currentMarket] || {};
-
-      if (displayDates.length === 0) {
-        container.innerHTML = '<span class="text-xs text-slate-500 py-1">資料整理中...</span>';
-        return;
-      }
-
-      if (!appState.activeDate || displayDates.indexOf(appState.activeDate) === -1) {
-        appState.activeDate = displayDates[0];
-      }
-
-      var html = displayDates.map(function(dStr) {
-        var item = marketDb[dStr] || {};
-        var count = (item.candidates && Array.isArray(item.candidates)) ? item.candidates.length : 0;
-        var isActive = (dStr === appState.activeDate);
-        var activeClass = isActive ? 'bg-indigo-600 text-white border-indigo-500 shadow-md' : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200';
-        var badgeClass = isActive ? 'bg-indigo-950 text-indigo-200' : (count > 0 ? 'bg-indigo-500/20 text-indigo-300' : 'bg-slate-800 text-slate-500');
-        var dayName = item.dayOfWeek ? '週' + item.dayOfWeek : '交易日';
-
-        return '<button type="button" data-date="' + dStr + '" class="day-tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition border shrink-0 cursor-pointer ' + activeClass + '">' +
-          '<span>' + dStr + ' (' + dayName + ')</span>' +
-          '<span class="text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ' + badgeClass + '">' + count + '檔</span>' +
-        '</button>';
-      }).join('');
-
-      container.innerHTML = html;
-
-      var btns = container.querySelectorAll('.day-tab-btn');
-      for (var i = 0; i < btns.length; i++) {
-        btns[i].addEventListener('click', function() {
-          var targetDate = this.getAttribute('data-date');
-          if (targetDate) {
-            appState.activeDate = targetDate;
-            renderAllSafe();
-          }
-        });
-      }
-    }
-
-    function renderEntryZoneAlert() {
-      var container = document.getElementById('entry-zone-list');
-      if (!container) return;
-      var marketDb = appState.db[appState.currentMarket] || {};
-      var dayData = marketDb[appState.activeDate] || {};
-      var isUS = (appState.currentMarket === "US");
-      var unit = isUS ? "美元" : "元";
-
-      var qualified = [];
-      if (dayData.entryZoneAlerts && Array.isArray(dayData.entryZoneAlerts)) {
-        qualified = dayData.entryZoneAlerts.filter(function(q) {
-          var price = parseFloat(q.verifiedCurrentPrice);
-          var min = parseFloat(q.entryMin);
-          var max = parseFloat(q.entryMax);
-          var stop = parseFloat(q.stopLossNum);
-          return (!isNaN(price) && !isNaN(min) && !isNaN(max) && !isNaN(stop) && price > stop && price >= min && price <= max);
-        });
-      }
-
-      if (qualified.length === 0) {
-        container.innerHTML = '<div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 text-center flex flex-col items-center justify-center py-5">' +
-          '<div class="text-sm font-bold text-slate-200">暫無上榜</div>' +
-          '<p class="text-[11px] text-slate-500 mt-1 max-w-md">近10日候選標的當日皆未精確落入最佳進場區（未拉回前嚴禁追高；跌破進場下緣或停損點結構轉弱嚴禁抄底）。</p>' +
-        '</div>';
-      } else {
-        container.innerHTML = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">' +
-          qualified.map(function(q) {
-            var originText = q.originDate ? '<span class="text-[9px] text-slate-400 font-mono">(' + q.originDate + '推薦)</span>' : '';
-            return '<div class="p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/60 shadow-lg flex items-center justify-between">' +
-              '<div>' +
-                '<div class="flex items-center gap-1.5 flex-wrap">' +
-                  '<span class="text-sm font-bold text-white">' + q.name + '</span>' +
-                  '<span class="text-xs font-mono px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-300 font-bold">' + q.code + '</span>' +
-                  '<span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">觸及進場區</span>' +
-                  originText +
-                '</div>' +
-                '<div class="text-xs text-slate-300 mt-1">進場區間：<b class="text-emerald-300">' + q.entryZone + '</b></div>' +
-                '<div class="text-xs text-slate-300">核心買價：<b class="text-white">' + q.entryPrice + '</b></div>' +
-              '</div>' +
-              '<div class="text-right">' +
-                '<div class="text-[10px] text-slate-400">當日收盤價</div>' +
-                '<div class="text-lg font-bold font-mono text-emerald-400">' + q.verifiedCurrentPrice + ' ' + unit + '</div>' +
-                '<div class="text-[9px] text-rose-400 font-bold">嚴格停損: ' + q.stopLossPrice + '</div>' +
-              '</div>' +
-            '</div>';
-          }).join('') +
-        '</div>';
-      }
+    function switchMarket(marketKey) {
+      appState.currentMarket = marketKey;
+      var marketData = appState.db[marketKey] || {};
+      var dates = Object.keys(marketData).sort().reverse();
+      appState.activeDate = dates.length > 0 ? dates[0] : "";
+      renderActiveView();
     }
 
     function renderActiveView() {
-      var marketDb = appState.db[appState.currentMarket] || {};
-      var isUS = (appState.currentMarket === "US");
-      if (!appState.activeDate || !marketDb[appState.activeDate]) return;
-
-      var dayData = marketDb[appState.activeDate];
-      var dateLabel = document.getElementById('label-market-date');
-      var macroTitle = document.getElementById('macro-section-title');
-      
-      if (dateLabel) dateLabel.innerText = dayData.date + ' (' + (dayData.dayOfWeek ? '週' + dayData.dayOfWeek : '盤後') + ')';
-      if (macroTitle) macroTitle.innerText = isUS ? "一、美股市場結論與指數結構 (那指 / 費半)" : "一、今日市場結論與大盤價量結構";
-
-      var grid = document.getElementById('macro-index-grid');
-      var changeText = dayData.taiexChange || '--';
-      var changeClass = (changeText.indexOf('+') === 0) ? 'text-rose-400' : 'text-emerald-400';
-      var candCount = (dayData.candidates && Array.isArray(dayData.candidates)) ? dayData.candidates.length : 0;
-
-      if (grid) {
-        grid.innerHTML = '<div class="bg-slate-950/60 rounded-xl p-3 border border-slate-800">' +
-          '<div class="text-[10px] text-slate-400">' + (isUS ? '那斯達克指數 (NASDAQ)' : '加權指數 (TAIEX)') + '</div>' +
-          '<div class="text-base font-bold font-mono text-white mt-1">' + (dayData.taiexClose || '--') + '</div>' +
-          '<div class="text-[11px] font-mono mt-0.5 font-semibold ' + changeClass + '">' + changeText + ' (' + (dayData.taiexPercent || '--') + ')</div>' +
-        '</div>' +
-        '<div class="bg-slate-950/60 rounded-xl p-3 border border-slate-800">' +
-          '<div class="text-[10px] text-slate-400">' + (isUS ? (dayData.secondaryIndexName || '費城半導體 (SOX)') : '大盤成交金額') + '</div>' +
-          '<div class="text-base font-bold font-mono text-white mt-1">' + (isUS ? (dayData.secondaryIndexClose || '--') : (dayData.taiexVolume || '--')) + '</div>' +
-          '<div class="text-[10px] text-slate-500 mt-0.5">' + (isUS ? '半導體強弱核心指標' : '上市集中市場') + '</div>' +
-        '</div>' +
-        '<div class="bg-slate-950/60 rounded-xl p-3 border border-slate-800">' +
-          '<div class="text-[10px] text-slate-400">盤勢特徵</div>' +
-          '<div class="text-xs font-bold text-indigo-300 mt-1 truncate">' + (dayData.marketNature || '盤後整理') + '</div>' +
-          '<div class="text-[10px] text-slate-500 mt-0.5">多空架構解析</div>' +
-        '</div>' +
-        '<div class="bg-slate-950/60 rounded-xl p-3 border border-slate-800">' +
-          '<div class="text-[10px] text-slate-400">符合檔數</div>' +
-          '<div class="text-base font-bold font-mono text-white mt-1">' + candCount + ' 檔符合</div>' +
-          '<div class="text-[10px] text-slate-500 mt-0.5">嚴守上限5檔‧寧缺勿濫</div>' +
-        '</div>';
-      }
-
-      var secBox = document.getElementById('market-sectors-container');
-      if (secBox) {
-        if (dayData.sectors && dayData.sectors.length > 0) {
-          secBox.innerHTML = dayData.sectors.map(function(s) {
-            return '<div class="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-xs flex items-center gap-1.5">' +
-              '<span class="font-bold px-1.5 py-0.5 rounded text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30">' + s.grade + '</span>' +
-              '<span class="text-white font-medium">' + s.name + '</span>' +
-              '<span class="text-slate-400 text-[10px]">— ' + s.note + '</span>' +
-            '</div>';
-          }).join('');
-        } else {
-          secBox.innerHTML = '<span class="text-xs text-slate-500">當日無明確共振族群</span>';
-        }
-      }
-
-      var tableWrapper = document.getElementById('candidates-table-wrapper');
-      if (tableWrapper) {
-        if (!dayData.candidates || dayData.candidates.length === 0) {
-          tableWrapper.innerHTML = '<div class="py-8 text-center text-xs text-slate-500 border border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center">' +
-            '<span class="text-base mb-1">🛑</span>' +
-            '<span class="font-semibold text-slate-400">今日沒有符合完整量化突破模型的股票（寧缺勿濫）</span>' +
-            '<span class="text-[11px] text-slate-600 mt-1">盤勢重挫或未出現放量突破時嚴禁硬選，嚴格遵守交易紀律。</span>' +
-          '</div>';
-        } else {
-          var rows = dayData.candidates.map(function(c) {
-            var cClass = (c.change && c.change.indexOf('+') === 0) ? 'text-rose-400' : 'text-emerald-400';
-            return '<tr class="hover:bg-slate-800/40">' +
-              '<td class="py-2.5 px-3 font-bold text-slate-300">#' + c.rank + '</td>' +
-              '<td class="py-2.5 px-3 font-bold text-indigo-400">' + c.code + '</td>' +
-              '<td class="py-2.5 px-3 font-sans font-bold text-white">' + c.name + '</td>' +
-              '<td class="py-2.5 px-3 font-bold text-white">' + c.close + '</td>' +
-              '<td class="py-2.5 px-3 font-bold ' + cClass + '">' + c.change + '</td>' +
-              '<td class="py-2.5 px-3 font-sans text-indigo-300">' + c.volRatio + '</td>' +
-              '<td class="py-2.5 px-3 font-sans text-emerald-400 font-semibold">' + c.entryZone + '</td>' +
-              '<td class="py-2.5 px-3 font-bold text-white">' + c.entryPrice + '</td>' +
-              '<td class="py-2.5 px-3 text-rose-400 font-bold">' + c.stopLossPrice + '</td>' +
-            '</tr>';
-          }).join('');
-
-          tableWrapper.innerHTML = '<table class="w-full text-left text-xs whitespace-nowrap">' +
-            '<thead>' +
-              '<tr class="text-slate-400 border-b border-slate-800 bg-slate-950">' +
-                '<th class="py-2 px-3">排名</th><th class="py-2 px-3">代號</th><th class="py-2 px-3">名稱</th>' +
-                '<th class="py-2 px-3">收盤</th><th class="py-2 px-3">漲跌</th><th class="py-2 px-3">量能倍數</th>' +
-                '<th class="py-2 px-3">最佳進場區</th><th class="py-2 px-3">核心買價</th><th class="py-2 px-3 text-rose-400">停損價</th>' +
-              '</tr>' +
-            '</thead>' +
-            '<tbody class="divide-y divide-slate-800/60 font-mono">' + rows + '</tbody>' +
-          '</table>';
-        }
-      }
-
-      var cardsBox = document.getElementById('candidate-cards-container');
-      if (cardsBox) {
-        if (!dayData.candidates || dayData.candidates.length === 0) {
-          cardsBox.innerHTML = '<div class="p-4 rounded-xl bg-slate-900 text-center text-xs text-slate-500">當日無新突破標的詳細資料。</div>';
-        } else {
-          cardsBox.innerHTML = dayData.candidates.map(function(c) {
-            return '<div class="rounded-2xl bg-slate-900 border border-slate-800 p-4 space-y-3">' +
-              '<div class="flex items-center justify-between pb-2 border-b border-slate-800">' +
-                '<div class="flex items-center gap-2">' +
-                  '<span class="w-7 h-7 rounded-lg bg-indigo-600/20 text-indigo-400 flex items-center justify-center font-bold font-mono">#' + c.rank + '</span>' +
-                  '<span class="text-base font-bold text-white">' + c.name + ' (' + c.code + ')</span>' +
-                  '<span class="text-xs text-slate-400">' + c.sector + '</span>' +
-                '</div>' +
-                '<span class="text-sm font-bold font-mono text-amber-300">' + c.score + ' 分</span>' +
-              '</div>' +
-              '<div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">' +
-                '<div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">' +
-                  '<div class="text-indigo-300 font-bold">均線與突破型態</div>' +
-                  '<div class="text-slate-300">' + c.maStatus + '</div>' +
-                  '<div class="text-slate-400">' + c.breakoutReason + '</div>' +
-                '</div>' +
-                '<div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">' +
-                  '<div class="text-indigo-300 font-bold">進出場紀律</div>' +
-                  '<div class="text-emerald-300">最佳進場區：' + c.entryZone + '（核心 ' + c.entryPrice + '）</div>' +
-                  '<div class="text-rose-400">' + c.noBuyCondition + '</div>' +
-                '</div>' +
-              '</div>' +
-            '</div>';
-          }).join('');
-        }
-      }
+      updateMarketButtons();
+      renderDateTabs();
+      renderStrategyBanner();
+      renderMacroSection();
+      renderCandidatesTable();
+      renderCards();
     }
 
-    function renderAllSafe() {
-      try { renderDayTabs(); } catch (e) { console.error("renderDayTabs error:", e); }
-      try { renderActiveView(); } catch (e) { console.error("renderActiveView error:", e); }
-      try { renderEntryZoneAlert(); } catch (e) { console.error("renderEntryZoneAlert error:", e); }
-    }
-
-    async function loadLiveDataJson() {
-      var badge = document.getElementById('data-source-badge');
-      var bustCache = '?_t=' + Date.now();
-      try {
-        var res = await fetch('./data.json' + bustCache, { cache: 'no-store' });
-        if (res.ok) {
-          var liveData = await res.json();
-          if (liveData && typeof liveData === 'object') {
-            if (liveData.TW && Object.keys(liveData.TW).length > 0) {
-              Object.assign(appState.db.TW, liveData.TW);
-            }
-            if (liveData.US && Object.keys(liveData.US).length > 0) {
-              Object.assign(appState.db.US, liveData.US);
-            }
-            if (badge) {
-              badge.innerText = "雲端即時連線 (最新)";
-              badge.className = "text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
-            }
-            showToast("已成功載入最新盤後數據！");
-            renderAllSafe();
-          }
-        }
-      } catch (err) {
-        // 安全使用實盤核實基準，完全不影響畫面顯示
-      }
-    }
-
-    // 第一時間立即直接渲染，絕對不等待任何非同步事件
-    renderAllSafe();
-
-    window.addEventListener('DOMContentLoaded', function() {
-      renderAllSafe();
-      loadLiveDataJson();
-
-      var btnSync = document.getElementById('btn-sync-data');
-      if (btnSync) btnSync.addEventListener('click', loadLiveDataJson);
-      
+    function updateMarketButtons() {
       var btnTw = document.getElementById('btn-market-tw');
       var btnUs = document.getElementById('btn-market-us');
-      
-      if (btnTw && btnUs) {
-        btnTw.addEventListener('click', function() {
-          appState.currentMarket = "TW";
-          btnTw.className = "px-2.5 py-1.5 rounded-md text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm cursor-pointer";
-          btnUs.className = "px-2.5 py-1.5 rounded-md text-xs font-bold transition-all text-slate-400 hover:text-slate-200 cursor-pointer";
-          var dList = getAllMarketDates();
-          appState.activeDate = (dList.length > 0) ? dList[0] : null;
-          renderAllSafe();
-        });
+      var btnRs = document.getElementById('btn-market-rs');
 
-        btnUs.addEventListener('click', function() {
-          appState.currentMarket = "US";
-          btnUs.className = "px-2.5 py-1.5 rounded-md text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm cursor-pointer";
-          btnTw.className = "px-2.5 py-1.5 rounded-md text-xs font-bold transition-all text-slate-400 hover:text-slate-200 cursor-pointer";
-          var dList = getAllMarketDates();
-          appState.activeDate = (dList.length > 0) ? dList[0] : null;
-          renderAllSafe();
-        });
+      var baseInactive = "px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-200 cursor-pointer";
+      if (btnTw) btnTw.className = (appState.currentMarket === "TW") ? "px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow-md cursor-pointer" : baseInactive;
+      if (btnUs) btnUs.className = (appState.currentMarket === "US") ? "px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow-md cursor-pointer" : baseInactive;
+      if (btnRs) btnRs.className = (appState.currentMarket === "RS") ? "px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-amber-500 text-slate-950 font-black shadow-md cursor-pointer flex items-center gap-1" : baseInactive;
+    }
+
+    function renderDateTabs() {
+      var container = document.getElementById('tabs-date-container');
+      if (!container) return;
+      container.innerHTML = "";
+      var marketData = appState.db[appState.currentMarket] || {};
+      var dates = Object.keys(marketData).sort().reverse().slice(0, 5);
+
+      if (dates.length === 0) {
+        container.innerHTML = '<span class="text-xs text-slate-500 py-1">暫無歷史交易日數據</span>';
+        return;
       }
-    });
+
+      dates.forEach(function(d) {
+        var dayObj = marketData[d] || {};
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        var isActive = (d === appState.activeDate);
+        btn.className = isActive
+          ? "px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold bg-slate-800 text-white border border-slate-700 shadow-sm shrink-0 flex items-center gap-1.5 cursor-pointer"
+          : "px-3.5 py-1.5 rounded-xl text-xs font-mono font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900 border border-transparent shrink-0 flex items-center gap-1.5 cursor-pointer";
+
+        var dotColor = (appState.currentMarket === "RS") ? "bg-amber-400" : "bg-indigo-400";
+        var dot = isActive ? '<span class="w-1.5 h-1.5 rounded-full ' + dotColor + '"></span>' : '';
+        btn.innerHTML = dot + '<span>' + d + ' (' + (dayObj.dayOfWeek || "--") + ')</span>';
+        btn.onclick = function() {
+          appState.activeDate = d;
+          renderActiveView();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderStrategyBanner() {
+      var banner = document.getElementById('strategy-intro-banner');
+      if (!banner) return;
+      if (appState.currentMarket === "RS") {
+        banner.className = "rounded-2xl bg-gradient-to-r from-amber-950/50 via-slate-900 to-amber-950/30 border border-amber-500/50 p-4 sm:p-5 shadow-xl";
+        banner.innerHTML = '<div class="flex items-start gap-3">' +
+          '<div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0 font-bold text-lg">🐻</div>' +
+          '<div class="space-y-1.5">' +
+            '<div class="flex items-center gap-2 flex-wrap">' +
+              '<h2 class="text-sm font-bold text-amber-300">熊市抗跌 / 領先大盤突破策略（純上市優選 × 財報 EPS 雙重驗證）</h2>' +
+              '<span class="text-[9px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-200 border border-amber-500/40 font-mono">僅限上市 (TWSE) ‧ 一律剔除上櫃與興櫃 ‧ PEG 防雷</span>' +
+            '</div>' +
+            '<p class="text-xs text-slate-300"><b>風控升級原則：</b>嚴格鎖定<b>台灣證交所「上市股票」</b>，一律剔除股本小、易受單一事件或財報突襲的上櫃與興櫃股票，確保選出體質穩健、籌碼厚實的優質領頭羊。</p>' +
+            '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px]">' +
+              '<div class="p-2 rounded-lg bg-slate-950/80 border border-amber-500/30 text-amber-300">🎯 <b>純上市雙重驗證：</b>上市大中型資安/軟體龍頭（如華經 2468、資通 2471），兼具財報透明度與抗跌動能。</div>' +
+              '<div class="p-2 rounded-lg bg-slate-950/80 border border-indigo-500/30 text-indigo-300">⚡ <b>衍生品避險：</b>台指期反彈遇均線放空對衝現貨，加密貨幣守穩關鍵支撐操作。</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      } else {
+        banner.className = "rounded-2xl bg-gradient-to-r from-indigo-950/40 via-slate-900 to-indigo-950/20 border border-indigo-500/30 p-4 sm:p-5 shadow-sm";
+        banner.innerHTML = '<div class="flex items-start gap-3">' +
+          '<div class="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 shrink-0 font-bold text-sm">突破</div>' +
+          '<div class="space-y-1">' +
+            '<div class="flex items-center gap-2 flex-wrap">' +
+              '<h2 class="text-sm font-bold text-white">' + (appState.currentMarket === "TW" ? "台股" : "美股") + '經典多頭強勢突破量化策略（含 PE Band 估值檢驗）</h2>' +
+              '<span class="text-[9px] px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono">日漲幅 ≥ 8.5% ‧ 放量 ≥ 1.8倍 ‧ 突破箱型</span>' +
+            '</div>' +
+            '<p class="text-xs text-slate-300">嚴格執行四大硬性量化條件與財報估值防雷檢驗。若大盤重挫回檔、無個股符合標準時，系統恪守<b>「寧缺勿濫（0 檔符合）」</b>原則！</p>' +
+          '</div>' +
+        '</div>';
+      }
+    }
+
+    function renderMacroSection() {
+      var dateLabel = document.getElementById('label-market-date');
+      var grid = document.getElementById('macro-index-grid');
+      var radar = document.getElementById('derivative-radar-container');
+      var sectorsContainer = document.getElementById('market-sectors-container');
+      var filterRuleLabel = document.getElementById('table-filter-rule-label');
+
+      var marketData = appState.db[appState.currentMarket] || {};
+      var dayObj = marketData[appState.activeDate] || {};
+
+      if (dateLabel) dateLabel.innerText = (dayObj.date || appState.activeDate || "--") + " (" + (dayObj.dayOfWeek || "--") + ")";
+
+      if (grid) {
+        var isDown = (dayObj.taiexPercent || "").indexOf('-') !== -1 || (dayObj.taiexChange || "").indexOf('-') !== -1;
+        var pColor = isDown ? "text-rose-400" : "text-emerald-400";
+        var isRs = (appState.currentMarket === "RS");
+        var primaryName = isRs ? "大盤實盤結構" : (appState.currentMarket === "TW" ? "臺灣加權指數" : "NASDAQ 指數");
+        
+        grid.innerHTML = '' +
+          '<div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800">' +
+            '<div class="text-[11px] text-slate-400">' + primaryName + '</div>' +
+            '<div class="text-sm sm:text-base font-bold text-white mt-0.5">' + (dayObj.taiexClose || "--") + '</div>' +
+          '</div>' +
+          '<div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800">' +
+            '<div class="text-[11px] text-slate-400">當日點數漲跌</div>' +
+            '<div class="text-sm sm:text-base font-bold ' + pColor + ' mt-0.5">' + (dayObj.taiexChange || "--") + '</div>' +
+          '</div>' +
+          '<div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800">' +
+            '<div class="text-[11px] text-slate-400">策略判定狀態</div>' +
+            '<div class="text-sm sm:text-base font-bold text-amber-400 mt-0.5">' + (dayObj.taiexPercent || "--") + '</div>' +
+          '</div>' +
+          '<div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800">' +
+            '<div class="text-[11px] text-slate-400">成交量量能</div>' +
+            '<div class="text-sm sm:text-base font-bold text-indigo-300 mt-0.5">' + (dayObj.taiexVolume || "--") + '</div>' +
+          '</div>';
+      }
+
+      if (radar) {
+        if (dayObj.derivatives && appState.currentMarket === "RS") {
+          radar.innerHTML = '' +
+            '<div class="p-3.5 rounded-xl bg-slate-950/90 border border-indigo-500/30 grid grid-cols-1 md:grid-cols-2 gap-3">' +
+              '<div class="space-y-1">' +
+                '<div class="text-xs font-bold text-indigo-300 flex items-center gap-1.5">⚡ <span>台指期 (TX) 當沖與波段對衝點位</span></div>' +
+                '<div class="text-[11px] text-slate-200">現況：<span class="font-mono text-amber-300">' + dayObj.derivatives.txStatus + '</span></div>' +
+                '<div class="text-[11px] text-slate-400">策略：' + dayObj.derivatives.txStrategy + '</div>' +
+              '</div>' +
+              '<div class="space-y-1 border-t md:border-t-0 md:border-l border-slate-800/80 md:pl-3 pt-2 md:pt-0">' +
+                '<div class="text-xs font-bold text-purple-300 flex items-center gap-1.5">🪙 <span>主流加密貨幣 (BTC) 避險與結構</span></div>' +
+                '<div class="text-[11px] text-slate-200">報價：<span class="font-mono text-purple-300">' + dayObj.derivatives.cryptoStatus + '</span></div>' +
+                '<div class="text-[11px] text-slate-400">策略：' + dayObj.derivatives.cryptoStrategy + '</div>' +
+              '</div>' +
+            '</div>';
+        } else {
+          radar.innerHTML = "";
+        }
+      }
+
+      if (sectorsContainer) {
+        sectorsContainer.innerHTML = "";
+        var sectors = dayObj.sectors || [];
+        if (sectors.length === 0) {
+          sectorsContainer.innerHTML = '<span class="text-xs text-slate-500">當日無顯著共振族群</span>';
+        } else {
+          sectors.forEach(function(s) {
+            var tag = document.createElement('div');
+            var isS = (s.grade || "").indexOf("S") !== -1;
+            tag.className = isS
+              ? "px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/40 text-amber-300 text-xs flex items-center gap-1.5"
+              : "px-2.5 py-1 rounded-lg bg-slate-800/70 border border-slate-700/80 text-slate-300 text-xs flex items-center gap-1.5";
+            tag.innerHTML = '<span class="font-bold">' + s.name + '</span><span class="text-[10px] px-1 py-0.2 rounded bg-slate-900 border border-slate-700">' + s.grade + '</span><span class="text-[11px] text-slate-400 hidden sm:inline">(' + (s.note || "") + ')</span>';
+            sectorsContainer.appendChild(tag);
+          });
+        }
+      }
+
+      if (filterRuleLabel) {
+        filterRuleLabel.innerText = (appState.currentMarket === "RS")
+          ? "逆勢領頭羊條件：100% 純上市股票 (剔除上櫃興櫃) ‧ 穩守月季線 ‧ 率先破頸線 ‧ PEG 估值"
+          : "硬性條件：日漲幅 ≥ 8.5% ‧ 放量 ≥ 1.8倍 ‧ 均線多頭 ‧ 箱型突破";
+      }
+    }
+
+    function renderCandidatesTable() {
+      var tbody = document.getElementById('candidates-table-body');
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      var marketData = appState.db[appState.currentMarket] || {};
+      var dayObj = marketData[appState.activeDate] || {};
+      var list = dayObj.candidates || [];
+
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-slate-400">' +
+          '<div class="flex flex-col items-center justify-center space-y-1">' +
+            '<span class="text-sm font-semibold text-slate-300">今日精選候選股：0 檔符合（寧缺勿濫）</span>' +
+            '<span class="text-xs text-slate-500">大盤回檔或超跌反抽時嚴格執行防守，杜絕追高套牢與小型股財報突襲風險！</span>' +
+          '</div>' +
+        '</td></tr>';
+        return;
+      }
+
+      list.forEach(function(c) {
+        var tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-900/60 transition";
+        var val = c.valuation || {};
+        var peText = val.forwardPe ? ('PE ' + val.forwardPe + 'x / PEG ' + val.pegRatio) : '純技術評估';
+        var valColor = (val.valuationGrade || "").indexOf("S") !== -1 ? "text-emerald-400 font-bold" : ((val.valuationGrade || "").indexOf("C") !== -1 ? "text-rose-400 font-bold" : "text-sky-300");
+        var boardBadge = c.marketBoard ? '<span class="ml-1 text-[9px] px-1 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/40">' + c.marketBoard + '</span>' : '';
+
+        tr.innerHTML = '' +
+          '<td class="py-2.5 px-3"><span class="w-5 h-5 rounded-md ' + (c.rank === 1 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-slate-800 text-slate-300') + ' inline-flex items-center justify-center text-xs font-bold">' + c.rank + '</span></td>' +
+          '<td class="py-2.5 px-3 font-bold text-white">' + c.code + ' ' + c.name + boardBadge + '</td>' +
+          '<td class="py-2.5 px-3 font-bold text-amber-400">' + c.close + '</td>' +
+          '<td class="py-2.5 px-3 font-semibold text-emerald-400">' + c.change + '</td>' +
+          '<td class="py-2.5 px-3 ' + valColor + '">' + peText + '</td>' +
+          '<td class="py-2.5 px-3 text-sky-200">' + (val.fairValueZone || "--") + '</td>' +
+          '<td class="py-2.5 px-3 text-emerald-300 font-semibold">' + (c.entryZone || "--") + '</td>' +
+          '<td class="py-2.5 px-3 text-rose-400 font-semibold">' + (c.stopLossPrice || "--") + '</td>' +
+          '<td class="py-2.5 px-3 text-right font-black text-amber-400">' + c.score + '</td>';
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderCards() {
+      var container = document.getElementById('cards-container');
+      if (!container) return;
+      container.innerHTML = "";
+
+      var marketData = appState.db[appState.currentMarket] || {};
+      var dayObj = marketData[appState.activeDate] || {};
+      var list = dayObj.candidates || [];
+
+      if (list.length === 0) {
+        container.innerHTML = '<div class="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 text-center text-xs text-slate-400">當日無突破或逆勢發動上市個股需要解構</div>';
+        return;
+      }
+
+      list.forEach(function(c) {
+        var card = document.createElement('div');
+        card.className = "rounded-2xl bg-slate-900/90 border border-slate-800 p-5 shadow-lg space-y-4 card-hover";
+
+        var newsSection = "";
+        if (c.catalystNews) {
+          newsSection = '' +
+            '<div class="p-3 rounded-xl bg-amber-950/30 border border-amber-500/40 space-y-1">' +
+              '<div class="text-xs font-bold text-amber-300 flex items-center gap-1.5">' +
+                '<span>📢</span> <span>市場實質新聞與催化事件 (' + (c.catalystGrade || "S級") + ')</span>' +
+              '</div>' +
+              '<div class="text-xs text-slate-200 leading-relaxed">' + c.catalystNews + '</div>' +
+            '</div>';
+        }
+
+        var valSection = "";
+        if (c.valuation) {
+          var v = c.valuation;
+          var isS = (v.valuationGrade || "").indexOf("S") !== -1;
+          var isC = (v.valuationGrade || "").indexOf("C") !== -1;
+          var badgeStyle = isS
+            ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+            : (isC ? "bg-rose-500/20 text-rose-300 border-rose-500/40" : "bg-sky-500/20 text-sky-300 border-sky-500/40");
+
+          valSection = '' +
+            '<div class="p-3.5 rounded-xl bg-sky-950/30 border border-sky-500/30 space-y-1.5">' +
+              '<div class="flex items-center justify-between flex-wrap gap-2">' +
+                '<div class="text-xs font-bold text-sky-300 flex items-center gap-1.5">💰 <span>財報 EPS 量化估值模型 (PE Band × PEG 成長檢驗)</span></div>' +
+                '<span class="text-[10px] px-2 py-0.5 rounded border font-mono font-bold ' + badgeStyle + '">' + (v.valuationGrade || "A") + '</span>' +
+              '</div>' +
+              '<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-xs font-mono">' +
+                '<div class="bg-slate-950/60 p-2 rounded border border-slate-800/80"><span class="text-slate-400">預估年 EPS：</span><span class="text-white font-bold">' + (v.forwardEps ? v.forwardEps + ' 元' : '--') + '</span></div>' +
+                '<div class="bg-slate-950/60 p-2 rounded border border-slate-800/80"><span class="text-slate-400">動態 PE / PEG：</span><span class="text-amber-300 font-bold">' + (v.forwardPe ? v.forwardPe + 'x / ' + v.pegRatio : '--') + '</span></div>' +
+                '<div class="bg-slate-950/60 p-2 rounded border border-slate-800/80"><span class="text-slate-400">PE河流合理區：</span><span class="text-sky-300 font-bold">' + (v.fairValueZone || '--') + '</span></div>' +
+              '</div>' +
+              '<div class="text-xs text-slate-300 pt-0.5">📊 <b>估值判定：</b>' + (v.valuationStatus || '--') + '</div>' +
+            '</div>';
+        }
+
+        var leadTimeSection = "";
+        if (c.leadTime) {
+          leadTimeSection = '' +
+            '<div class="p-2.5 rounded-xl bg-indigo-950/40 border border-indigo-500/30 text-xs text-indigo-200 flex items-center gap-2">' +
+              '<span class="font-bold text-indigo-300">⏱️ 何時領漲推估：</span>' +
+              '<span>' + c.leadTime + '</span>' +
+            '</div>';
+        }
+
+        var boardTag = c.marketBoard ? '<span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono">' + c.marketBoard + '</span>' : '';
+
+        card.innerHTML = '' +
+          '<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">' +
+            '<div class="flex items-center gap-2.5 flex-wrap">' +
+              '<span class="text-xs font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">TOP ' + c.rank + '</span>' +
+              '<h3 class="text-base font-bold text-white">' + c.name + ' (' + c.code + ')</h3>' +
+              boardTag +
+              '<span class="text-xs text-slate-400">' + c.sector + '</span>' +
+            '</div>' +
+            '<div class="flex items-center gap-3">' +
+              '<div class="text-right">' +
+                '<div class="text-sm font-bold text-amber-400">' + c.close + ' 元</div>' +
+                '<div class="text-xs font-semibold text-emerald-400">' + c.change + '</div>' +
+              '</div>' +
+              '<div class="px-2.5 py-1 rounded-lg bg-slate-800 text-amber-400 font-mono font-bold text-sm border border-slate-700">' +
+                c.score + ' 分' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          newsSection +
+          valSection +
+          '<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">' +
+            '<div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-1.5">' +
+              '<div class="font-bold text-slate-300 flex items-center gap-1.5">📈 <span>技術面與均線架構</span></div>' +
+              '<div class="text-slate-400 leading-relaxed">' + c.maStatus + '</div>' +
+              '<div class="text-indigo-300 pt-1">突破結構：' + c.boxDays + ' (平台 ' + c.boxRange + ')</div>' +
+            '</div>' +
+            '<div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-1.5">' +
+              '<div class="font-bold text-slate-300 flex items-center gap-1.5">🎯 <span>點位規劃與防守鐵律</span></div>' +
+              '<div class="text-emerald-300 font-bold">技術進場區：' + c.entryZone + ' (核心 ' + c.entryPrice + ')</div>' +
+              '<div class="text-rose-400 font-bold">停損防線：' + c.stopLossPrice + '</div>' +
+              '<div class="text-purple-300">波段目標：' + (c.targetPrice || "--") + '</div>' +
+            '</div>' +
+          '</div>' +
+          leadTimeSection +
+          '<div class="text-xs text-slate-400 bg-slate-950/40 p-2.5 rounded-lg border border-slate-800/50">' +
+            '<span class="text-rose-400 font-semibold">⚠️ 禁買/防守條件：</span>' + c.noBuyCondition +
+          '</div>';
+
+        container.appendChild(card);
+      });
+    }
+
+    function fetchLiveDataJson(isManual) {
+      var badge = document.getElementById('badge-api-status');
+      if (badge) {
+        badge.innerText = "連線檢查中...";
+        badge.className = "text-[10px] px-2 py-0.5 rounded-full font-medium bg-amber-500/20 text-amber-300 border border-amber-500/40";
+      }
+
+      fetch('./data.json?_t=' + new Date().getTime(), { cache: 'no-store' })
+        .then(function(res) {
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          return res.json();
+        })
+        .then(function(remoteJson) {
+          if (remoteJson && typeof remoteJson === 'object') {
+            for (var m in remoteJson) {
+              if (remoteJson[m]) {
+                if (!appState.db[m]) appState.db[m] = {};
+                for (var d in remoteJson[m]) {
+                  appState.db[m][d] = remoteJson[m][d];
+                }
+              }
+            }
+            var curDates = Object.keys(appState.db[appState.currentMarket] || {}).sort().reverse();
+            if (curDates.length > 0) {
+              appState.activeDate = curDates[0];
+            }
+          }
+          if (badge) {
+            badge.innerText = isManual ? "雲端最新數據已同步" : "雲端即時連線 (最新)";
+            badge.className = "text-[10px] px-2 py-0.5 rounded-full font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 badge-glow";
+          }
+          renderActiveView();
+        })
+        .catch(function(err) {
+          if (badge) {
+            badge.innerText = isManual ? "無新雲端檔 (使用基準)" : "實盤核實基準 (快照)";
+            badge.className = "text-[10px] px-2 py-0.5 rounded-full font-medium bg-slate-800 text-slate-300 border border-slate-700";
+          }
+        });
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>
