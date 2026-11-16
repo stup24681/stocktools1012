@@ -1,185 +1,5 @@
 {
   "TW": {
-    "2026-10-27": {
-      "date": "2026-10-27",
-      "dayOfWeek": "二",
-      "taiexClose": "46,096.23",
-      "taiexChange": "+54.80",
-      "taiexPercent": "+0.12%",
-      "taiexVolume": "10,105.71 億元",
-      "marketNature": "盤後量化篩選 ‧ 均線多頭 ‧ 箱型放量突破確認",
-      "sectors": [
-        {
-          "name": "防禦型金融 / 傳產",
-          "grade": "B級",
-          "note": "權值電子全面回檔整理"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
-    "2026-10-28": {
-      "date": "2026-10-28",
-      "dayOfWeek": "三",
-      "taiexClose": "47,035.58",
-      "taiexChange": "+939.35",
-      "taiexPercent": "+2.04%",
-      "taiexVolume": "7,432.36 億元",
-      "marketNature": "盤後量化篩選 ‧ 均線多頭 ‧ 箱型放量突破確認",
-      "sectors": [
-        {
-          "name": "防禦型金融 / 傳產",
-          "grade": "B級",
-          "note": "權值電子全面回檔整理"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
-    "2026-10-29": {
-      "date": "2026-10-29",
-      "dayOfWeek": "四",
-      "taiexClose": "46,368.33",
-      "taiexChange": "-667.25",
-      "taiexPercent": "-1.42%",
-      "taiexVolume": "8,213.76 億元",
-      "marketNature": "大盤帶量長黑摜破萬九 ‧ 權值股殺盤 ‧ 嚴守空手觀望紀律",
-      "sectors": [
-        {
-          "name": "防禦型金融 / 傳產",
-          "grade": "B級",
-          "note": "權值電子全面回檔整理"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
-    "2026-10-30": {
-      "date": "2026-10-30",
-      "dayOfWeek": "五",
-      "taiexClose": "45,211.83",
-      "taiexChange": "-1,156.50",
-      "taiexPercent": "-2.49%",
-      "taiexVolume": "9,338.51 億元",
-      "marketNature": "大盤帶量長黑摜破萬九 ‧ 權值股殺盤 ‧ 嚴守空手觀望紀律",
-      "sectors": [
-        {
-          "name": "防禦型金融 / 傳產",
-          "grade": "B級",
-          "note": "權值電子全面回檔整理"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
-    "2026-11-02": {
-      "date": "2026-11-02",
-      "dayOfWeek": "一",
-      "taiexClose": "44,920.14",
-      "taiexChange": "-291.69",
-      "taiexPercent": "-0.65%",
-      "taiexVolume": "7,895.30 億元",
-      "marketNature": "盤後量化篩選 ‧ 均線多頭 ‧ 箱型放量突破確認",
-      "sectors": [
-        {
-          "name": "防禦型金融 / 傳產",
-          "grade": "B級",
-          "note": "權值電子全面回檔整理"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
-    "2026-11-03": {
-      "date": "2026-11-03",
-      "dayOfWeek": "二",
-      "taiexClose": "43,307.54",
-      "taiexChange": "-1,612.60",
-      "taiexPercent": "-3.59%",
-      "taiexVolume": "9,905.06 億元",
-      "marketNature": "大盤帶量長黑摜破萬九 ‧ 權值股殺盤 ‧ 嚴守空手觀望紀律",
-      "sectors": [
-        {
-          "name": "防禦型金融 / 傳產",
-          "grade": "B級",
-          "note": "權值電子全面回檔整理"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
-    "2026-11-04": {
-      "date": "2026-11-04",
-      "dayOfWeek": "三",
-      "taiexClose": "42,948.91",
-      "taiexChange": "-358.63",
-      "taiexPercent": "-0.83%",
-      "taiexVolume": "11,708.06 億元",
-      "marketNature": "大盤帶量長黑摜破萬九 ‧ 權值股殺盤 ‧ 嚴守空手觀望紀律",
-      "sectors": [
-        {
-          "name": "防禦型金融 / 傳產",
-          "grade": "B級",
-          "note": "權值電子全面回檔整理"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
-    "2026-11-05": {
-      "date": "2026-11-05",
-      "dayOfWeek": "四",
-      "taiexClose": "41,574.72",
-      "taiexChange": "-1,374.19",
-      "taiexPercent": "-3.20%",
-      "taiexVolume": "9,753.90 億元",
-      "marketNature": "大盤帶量長黑摜破萬九 ‧ 權值股殺盤 ‧ 嚴守空手觀望紀律",
-      "sectors": [
-        {
-          "name": "防禦型金融 / 傳產",
-          "grade": "B級",
-          "note": "權值電子全面回檔整理"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
-    "2026-11-06": {
-      "date": "2026-11-06",
-      "dayOfWeek": "五",
-      "taiexClose": "39,701.64",
-      "taiexChange": "-1,873.08",
-      "taiexPercent": "-4.51%",
-      "taiexVolume": "13,125.17 億元",
-      "marketNature": "大盤帶量長黑摜破萬九 ‧ 權值股殺盤 ‧ 嚴守空手觀望紀律",
-      "sectors": [
-        {
-          "name": "防禦型金融 / 傳產",
-          "grade": "B級",
-          "note": "權值電子全面回檔整理"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
-    "2026-11-09": {
-      "date": "2026-11-09",
-      "dayOfWeek": "一",
-      "taiexClose": "41,661.70",
-      "taiexChange": "+1,960.06",
-      "taiexPercent": "+4.94%",
-      "taiexVolume": "8,639.35 億元",
-      "marketNature": "盤後量化篩選 ‧ 均線多頭 ‧ 箱型放量突破確認",
-      "sectors": [
-        {
-          "name": "防禦型金融 / 傳產",
-          "grade": "B級",
-          "note": "權值電子全面回檔整理"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
     "2026-11-10": {
       "date": "2026-11-10",
       "dayOfWeek": "二",
@@ -255,223 +75,22 @@
     "2026-11-16": {
       "date": "2026-11-16",
       "dayOfWeek": "一",
-      "taiexClose": "41,040.08",
+      "taiexClose": "41,040.08 (-6.03%)",
       "taiexChange": "-2,635.04",
       "taiexPercent": "-6.03%",
       "taiexVolume": "9,031.15 億元",
-      "marketNature": "大盤帶量長黑摜破萬九 ‧ 權值股殺盤 ‧ 嚴守空手觀望紀律",
+      "marketNature": "嚴格執行四大硬性突破門檻與財報估值檢驗（無符合標的時恪守 0 檔寧缺勿濫）",
       "sectors": [
         {
-          "name": "防禦型金融 / 傳產",
-          "grade": "B級",
-          "note": "權值電子全面回檔整理"
+          "name": "上市軟體與資安避風港",
+          "grade": "S級",
+          "note": "資金大舉撤出硬體轉入上市資服股"
         }
       ],
-      "candidates": [],
-      "entryZoneAlerts": []
+      "candidates": []
     }
   },
   "US": {
-    "2026-10-26": {
-      "date": "2026-10-26",
-      "dayOfWeek": "一",
-      "taiexClose": "26,169.38",
-      "taiexChange": "+214.04",
-      "taiexPercent": "+0.82%",
-      "taiexVolume": "74.0 億股",
-      "secondaryIndexName": "費城半導體 (SOX)",
-      "secondaryIndexClose": "11,083.47 (+2.82%)",
-      "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
-      "sectors": [
-        {
-          "name": "AI 高速傳輸 / 光互連",
-          "grade": "A級",
-          "note": "量能增溫帶動主升段"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
-    "2026-10-27": {
-      "date": "2026-10-27",
-      "dayOfWeek": "二",
-      "taiexClose": "26,477.81",
-      "taiexChange": "+308.43",
-      "taiexPercent": "+1.18%",
-      "taiexVolume": "79.1 億股",
-      "secondaryIndexName": "費城半導體 (SOX)",
-      "secondaryIndexClose": "11,482.50 (+3.60%)",
-      "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
-      "sectors": [
-        {
-          "name": "AI 高速傳輸 / 光互連",
-          "grade": "A級",
-          "note": "量能增溫帶動主升段"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
-    "2026-10-28": {
-      "date": "2026-10-28",
-      "dayOfWeek": "三",
-      "taiexClose": "26,549.85",
-      "taiexChange": "+72.04",
-      "taiexPercent": "+0.27%",
-      "taiexVolume": "79.9 億股",
-      "secondaryIndexName": "費城半導體 (SOX)",
-      "secondaryIndexClose": "11,684.00 (+1.75%)",
-      "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
-      "sectors": [
-        {
-          "name": "AI 高速傳輸 / 光互連",
-          "grade": "A級",
-          "note": "量能增溫帶動主升段"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
-    "2026-10-29": {
-      "date": "2026-10-29",
-      "dayOfWeek": "四",
-      "taiexClose": "26,184.72",
-      "taiexChange": "-365.13",
-      "taiexPercent": "-1.38%",
-      "taiexVolume": "74.1 億股",
-      "secondaryIndexName": "費城半導體 (SOX)",
-      "secondaryIndexClose": "11,518.20 (-1.42%)",
-      "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
-      "sectors": [
-        {
-          "name": "AI 高速傳輸 / 光互連",
-          "grade": "A級",
-          "note": "量能增溫帶動主升段"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
-    "2026-10-30": {
-      "date": "2026-10-30",
-      "dayOfWeek": "五",
-      "taiexClose": "25,437.00",
-      "taiexChange": "-747.72",
-      "taiexPercent": "-2.86%",
-      "taiexVolume": "90.7 億股",
-      "secondaryIndexName": "費城半導體 (SOX)",
-      "secondaryIndexClose": "10,688.80 (-7.20%)",
-      "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
-      "sectors": [
-        {
-          "name": "AI 高速傳輸 / 光互連",
-          "grade": "A級",
-          "note": "量能增溫帶動主升段"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
-    "2026-11-02": {
-      "date": "2026-11-02",
-      "dayOfWeek": "一",
-      "taiexClose": "25,164.31",
-      "taiexChange": "-272.69",
-      "taiexPercent": "-1.07%",
-      "taiexVolume": "91.5 億股",
-      "secondaryIndexName": "費城半導體 (SOX)",
-      "secondaryIndexClose": "10,328.33 (-3.37%)",
-      "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
-      "sectors": [
-        {
-          "name": "AI 高速傳輸 / 光互連",
-          "grade": "A級",
-          "note": "量能增溫帶動主升段"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
-    "2026-11-03": {
-      "date": "2026-11-03",
-      "dayOfWeek": "二",
-      "taiexClose": "25,372.01",
-      "taiexChange": "+207.70",
-      "taiexPercent": "+0.83%",
-      "taiexVolume": "83.5 億股",
-      "secondaryIndexName": "費城半導體 (SOX)",
-      "secondaryIndexClose": "10,600.40 (+2.63%)",
-      "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
-      "sectors": [
-        {
-          "name": "AI 高速傳輸 / 光互連",
-          "grade": "A級",
-          "note": "量能增溫帶動主升段"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
-    "2026-11-04": {
-      "date": "2026-11-04",
-      "dayOfWeek": "三",
-      "taiexClose": "25,736.51",
-      "taiexChange": "+364.50",
-      "taiexPercent": "+1.44%",
-      "taiexVolume": "99.5 億股",
-      "secondaryIndexName": "費城半導體 (SOX)",
-      "secondaryIndexClose": "10,268.65 (-3.13%)",
-      "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
-      "sectors": [
-        {
-          "name": "AI 高速傳輸 / 光互連",
-          "grade": "A級",
-          "note": "量能增溫帶動主升段"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
-    "2026-11-05": {
-      "date": "2026-11-05",
-      "dayOfWeek": "四",
-      "taiexClose": "24,315.00",
-      "taiexChange": "-1,421.51",
-      "taiexPercent": "-5.52%",
-      "taiexVolume": "128.3 億股",
-      "secondaryIndexName": "費城半導體 (SOX)",
-      "secondaryIndexClose": "9,011.14 (-12.25%)",
-      "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
-      "sectors": [
-        {
-          "name": "AI 高速傳輸 / 光互連",
-          "grade": "A級",
-          "note": "量能增溫帶動主升段"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
-    "2026-11-06": {
-      "date": "2026-11-06",
-      "dayOfWeek": "五",
-      "taiexClose": "24,579.43",
-      "taiexChange": "+264.43",
-      "taiexPercent": "+1.09%",
-      "taiexVolume": "106.2 億股",
-      "secondaryIndexName": "費城半導體 (SOX)",
-      "secondaryIndexClose": "9,390.25 (+4.21%)",
-      "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
-      "sectors": [
-        {
-          "name": "AI 高速傳輸 / 光互連",
-          "grade": "A級",
-          "note": "量能增溫帶動主升段"
-        }
-      ],
-      "candidates": [],
-      "entryZoneAlerts": []
-    },
     "2026-11-09": {
       "date": "2026-11-09",
       "dayOfWeek": "一",
@@ -555,22 +174,219 @@
     "2026-11-16": {
       "date": "2026-11-16",
       "dayOfWeek": "一",
-      "taiexClose": "24,591.97",
-      "taiexChange": "-544.29",
-      "taiexPercent": "-2.17%",
-      "taiexVolume": "47.7 億股",
-      "secondaryIndexName": "費城半導體 (SOX)",
-      "secondaryIndexClose": "9,675.63 (-4.64%)",
-      "marketNature": "美股動態掃描 ‧ 均線多頭排列 ‧ 突破整理平台",
+      "taiexClose": "24,577.39 (-2.22%)",
+      "taiexChange": "-558.88",
+      "taiexPercent": "-2.22%",
+      "taiexVolume": "48.5 億股",
+      "marketNature": "美股科技與半導體量化突破篩選（含 Forward PE / PEG 雙重驗證）",
       "sectors": [
         {
-          "name": "AI 高速傳輸 / 光互連",
-          "grade": "A級",
-          "note": "量能增溫帶動主升段"
+          "name": "美股 AI 與高速傳輸",
+          "grade": "觀察級",
+          "note": "監控費半與那斯達克動向"
         }
       ],
-      "candidates": [],
-      "entryZoneAlerts": []
+      "candidates": []
+    }
+  },
+  "RS": {
+    "2026-11-16": {
+      "date": "2026-11-16",
+      "dayOfWeek": "一",
+      "taiexClose": "41,040.08 (-6.03%)",
+      "taiexChange": "-2,635.04",
+      "taiexPercent": "RS相對強度篩選 (純上市)",
+      "taiexVolume": "9,031.15 億元",
+      "marketNature": "【純上市股票限定】技術面領先突破 + 財報 EPS (PE Band / PEG) 雙重驗證模型",
+      "sectors": [
+        {
+          "name": "上市軟體 / 資安 / 系統整合",
+          "grade": "S級催化",
+          "note": "排除上櫃興櫃小型股，聚焦體質穩健上市資服龍頭"
+        },
+        {
+          "name": "上市高股息與基礎設施防禦",
+          "grade": "A級催化",
+          "note": "具穩定財報與法人護盤底氣"
+        }
+      ],
+      "candidates": [
+        {
+          "symbol": "2468.TW",
+          "code": "2468",
+          "name": "華經",
+          "marketBoard": "上市 (TWSE)",
+          "sector": "上市 ‧ 資安與系統整合 / 集團綜效",
+          "close": NaN,
+          "change": "+nan%",
+          "volume": "7,644,738",
+          "volRatio": "0.17 倍 (逆勢表態)",
+          "maStatus": "上市大型股 ‧ 站穩 20MA/60MA，相對強度 (RS) 極高",
+          "boxDays": "20+ 日箱型搶先突破 (模式 B)",
+          "boxRange": "44.8 ～ 71.2",
+          "breakoutPrice": "71.2",
+          "breakoutReason": "【純上市標的】大盤修正時逆勢站穩均線，今日率先衝破 71.2 元頸線，法人主力搶先表態！",
+          "leadTime": "大盤止跌守穩即展開波段主升攻擊",
+          "strategy": "模式 B：突破回踩頸線入場",
+          "entryZone": "70.5 ～ 73.3 元",
+          "entryPrice": "71.9 元",
+          "stopLossPrice": "68.4 元 (頸線下方防線)",
+          "stopLossNum": 68.4,
+          "targetPrice": "84.0 元",
+          "valuation": {
+            "forwardEps": 1.36,
+            "trailingEps": 1.36,
+            "forwardPe": NaN,
+            "pegRatio": NaN,
+            "fairValueZone": "20.4 ～ 29.9 元 (15~22x PE)",
+            "valuationStatus": "中性偏高 (PE nanx)，需靠強勢動能推升",
+            "valuationGrade": "B (動能驅動)"
+          },
+          "noBuyCondition": "若跌回 68.4 頸線下方則結構轉弱果斷停損；中性偏高 (PE nanx)，需靠強勢動能推升",
+          "score": NaN,
+          "rank": 1
+        },
+        {
+          "symbol": "2471.TW",
+          "code": "2471",
+          "name": "資通",
+          "marketBoard": "上市 (TWSE)",
+          "sector": "上市 ‧ 企業軟體 / 金融資安系統",
+          "close": NaN,
+          "change": "+nan%",
+          "volume": "13,222,411",
+          "volRatio": "1.38 倍 (逆勢表態)",
+          "maStatus": "上市大型股 ‧ 站穩 20MA/60MA，相對強度 (RS) 極高",
+          "boxDays": "20+ 日箱型搶先突破 (模式 B)",
+          "boxRange": "49.2 ～ 65.7",
+          "breakoutPrice": "65.7",
+          "breakoutReason": "【純上市標的】大盤修正時逆勢站穩均線，今日率先衝破 65.7 元頸線，法人主力搶先表態！",
+          "leadTime": "大盤止跌守穩即展開波段主升攻擊",
+          "strategy": "模式 B：突破回踩頸線入場",
+          "entryZone": "65.0 ～ 67.7 元",
+          "entryPrice": "66.4 元",
+          "stopLossPrice": "63.1 元 (頸線下方防線)",
+          "stopLossNum": 63.1,
+          "targetPrice": "77.5 元",
+          "valuation": {
+            "forwardEps": 3.01,
+            "trailingEps": 4.77,
+            "forwardPe": NaN,
+            "pegRatio": NaN,
+            "fairValueZone": "45.1 ～ 66.2 元 (15~22x PE)",
+            "valuationStatus": "中性偏高 (PE nanx)，需靠強勢動能推升",
+            "valuationGrade": "B (動能驅動)"
+          },
+          "noBuyCondition": "若跌回 63.1 頸線下方則結構轉弱果斷停損；中性偏高 (PE nanx)，需靠強勢動能推升",
+          "score": NaN,
+          "rank": 2
+        },
+        {
+          "symbol": "6214.TW",
+          "code": "6214",
+          "name": "精誠",
+          "marketBoard": "上市 (TWSE)",
+          "sector": "上市 ‧ 台灣資訊服務龍頭 / 企業AI雲",
+          "close": NaN,
+          "change": "+nan%",
+          "volume": "2,599,995",
+          "volRatio": "1.35 倍 (逆勢表態)",
+          "maStatus": "上市大型股 ‧ 站穩 20MA/60MA，相對強度 (RS) 極高",
+          "boxDays": "20+ 日箱型搶先突破 (模式 B)",
+          "boxRange": "160.0 ～ 204.0",
+          "breakoutPrice": "204.0",
+          "breakoutReason": "【純上市標的】大盤修正時逆勢站穩均線，今日率先衝破 204.0 元頸線，法人主力搶先表態！",
+          "leadTime": "大盤止跌守穩即展開波段主升攻擊",
+          "strategy": "模式 B：突破回踩頸線入場",
+          "entryZone": "202.0 ～ 210.1 元",
+          "entryPrice": "206.0 元",
+          "stopLossPrice": "195.8 元 (頸線下方防線)",
+          "stopLossNum": 195.8,
+          "targetPrice": "240.7 元",
+          "valuation": {
+            "forwardEps": 11.33,
+            "trailingEps": 10.68,
+            "forwardPe": NaN,
+            "pegRatio": NaN,
+            "fairValueZone": "169.9 ～ 249.3 元 (15~22x PE)",
+            "valuationStatus": "中性偏高 (PE nanx)，需靠強勢動能推升",
+            "valuationGrade": "B (動能驅動)"
+          },
+          "noBuyCondition": "若跌回 195.8 頸線下方則結構轉弱果斷停損；中性偏高 (PE nanx)，需靠強勢動能推升",
+          "score": NaN,
+          "rank": 3
+        },
+        {
+          "symbol": "2453.TW",
+          "code": "2453",
+          "name": "凌群",
+          "marketBoard": "上市 (TWSE)",
+          "sector": "上市 ‧ 系統整合 / 智慧機器人與雲端",
+          "close": NaN,
+          "change": "+nan%",
+          "volume": "6,206,273",
+          "volRatio": "2.27 倍 (逆勢表態)",
+          "maStatus": "上市大型股 ‧ 站穩 20MA/60MA，相對強度 (RS) 極高",
+          "boxDays": "20+ 日箱型搶先突破 (模式 B)",
+          "boxRange": "48.3 ～ 60.5",
+          "breakoutPrice": "60.5",
+          "breakoutReason": "【純上市標的】大盤修正時逆勢站穩均線，今日率先衝破 60.5 元頸線，法人主力搶先表態！",
+          "leadTime": "大盤止跌守穩即展開波段主升攻擊",
+          "strategy": "模式 B：突破回踩頸線入場",
+          "entryZone": "59.9 ～ 62.3 元",
+          "entryPrice": "61.1 元",
+          "stopLossPrice": "58.1 元 (頸線下方防線)",
+          "stopLossNum": 58.1,
+          "targetPrice": "71.4 元",
+          "valuation": {
+            "forwardEps": 3.14,
+            "trailingEps": 3.14,
+            "forwardPe": NaN,
+            "pegRatio": NaN,
+            "fairValueZone": "47.1 ～ 69.1 元 (15~22x PE)",
+            "valuationStatus": "中性偏高 (PE nanx)，需靠強勢動能推升",
+            "valuationGrade": "B (動能驅動)"
+          },
+          "noBuyCondition": "若跌回 58.1 頸線下方則結構轉弱果斷停損；中性偏高 (PE nanx)，需靠強勢動能推升",
+          "score": NaN,
+          "rank": 4
+        },
+        {
+          "symbol": "5203.TW",
+          "code": "5203",
+          "name": "訊連",
+          "marketBoard": "上市 (TWSE)",
+          "sector": "上市 ‧ 純AI軟體 / 臉部辨識與生成式AI",
+          "close": NaN,
+          "change": "+nan%",
+          "volume": "286,388",
+          "volRatio": "1.35 倍 (逆勢表態)",
+          "maStatus": "上市大型股 ‧ 站穩 20MA/60MA，相對強度 (RS) 極高",
+          "boxDays": "20+ 日箱型搶先突破 (模式 B)",
+          "boxRange": "48.8 ～ 61.5",
+          "breakoutPrice": "61.5",
+          "breakoutReason": "【純上市標的】大盤修正時逆勢站穩均線，今日率先衝破 61.5 元頸線，法人主力搶先表態！",
+          "leadTime": "大盤止跌守穩即展開波段主升攻擊",
+          "strategy": "模式 B：突破回踩頸線入場",
+          "entryZone": "60.9 ～ 63.3 元",
+          "entryPrice": "62.1 元",
+          "stopLossPrice": "59.0 元 (頸線下方防線)",
+          "stopLossNum": 59.0,
+          "targetPrice": "72.6 元",
+          "valuation": {
+            "forwardEps": 4.69,
+            "trailingEps": 2.9,
+            "forwardPe": NaN,
+            "pegRatio": NaN,
+            "fairValueZone": "70.4 ～ 103.2 元 (15~22x PE)",
+            "valuationStatus": "中性偏高 (PE nanx)，需靠強勢動能推升",
+            "valuationGrade": "B (動能驅動)"
+          },
+          "noBuyCondition": "若跌回 59.0 頸線下方則結構轉弱果斷停損；中性偏高 (PE nanx)，需靠強勢動能推升",
+          "score": NaN,
+          "rank": 5
+        }
+      ]
     }
   }
 }
