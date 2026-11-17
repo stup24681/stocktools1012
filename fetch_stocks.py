@@ -13,12 +13,12 @@ MIN_VOL_RATIO = 1.8       # 台股傳統突破：單日放量 >= 1.8倍
 MAX_HISTORY_DAYS = 5      # 嚴格保留最近 5 個交易日
 
 def get_dynamic_trading_date(ticker_symbol="^TWII"):
-    """從市場行情動態取得最新真實開盤交易日 (YYYY-MM-DD)"""
+    """從證交所官方盤後行情動態取得最新真實開盤交易日 (YYYY-MM-DD)"""
     if ticker_symbol == "^TWII":
         try:
             url = "https://www.twse.com.tw/rwd/zh/afterTrading/FMTQIK?response=json"
             headers = {"User-Agent": "Mozilla/5.0"}
-            res = requests.get(url, headers=headers, timeout=8)
+            res = requests.get(url, headers=headers, timeout=10)
             if res.status_code == 200:
                 data = res.json()
                 if "data" in data and len(data["data"]) > 0:
@@ -41,18 +41,103 @@ def get_dynamic_trading_date(ticker_symbol="^TWII"):
     now_tw = datetime.datetime.now(datetime.timezone.utc) + timedelta(hours=8)
     return now_tw.strftime("%Y-%m-%d")
 
-def calculate_fundamental_valuation(ticker, close_price):
+def fetch_twse_official_daily_quotes():
+    """
+    【核心資訊正確保證】
+    直連台灣證券交易所 (TWSE) 官方每日收盤行情總表 (STOCK_DAY_ALL)
+    取得全市場「純上市股票」的 100% 官方結算收盤價、漲跌價差、成交張數
+    """
+    quotes_map = {}
+    headers = {"User-Agent": "Mozilla/5.0"}
+    
+    # 來源 1：TWSE 官方 OpenAPI (STOCK_DAY_ALL)
+    try:
+        url = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
+        res = requests.get(url, headers=headers, timeout=15)
+        if res.status_code == 200:
+            rows = res.json()
+            for r in rows:
+                code = str(r.get("Code", "")).strip()
+                if not code or len(code) != 4:
+                    continue
+                try:
+                    close_str = str(r.get("ClosingPrice", "")).replace(",", "").strip()
+                    change_str = str(r.get("Change", "")).replace(",", "").replace("+", "").replace("X", "").strip()
+                    vol_shares_str = str(r.get("TradeVolume", "0")).replace(",", "").strip()
+                    if not close_str or close_str == "--":
+                        continue
+                    close_val = float(close_str)
+                    change_val = float(change_str) if change_str and change_str != "--" else 0.0
+                    prev_close = close_val - change_val
+                    pct = (change_val / prev_close * 100) if prev_close > 0 else 0.0
+                    vol_lots = int(int(vol_shares_str) / 1000)
+
+                    quotes_map[code] = {
+                        "code": code,
+                        "name": str(r.get("Name", "")).strip(),
+                        "close": round(close_val, 2),
+                        "change": round(change_val, 2),
+                        "pct": round(pct, 2),
+                        "vol_lots": vol_lots,
+                        "source": "TWSE_OFFICIAL"
+                    }
+                except ValueError:
+                    continue
+            if len(quotes_map) > 500:
+                print(f"成功從 TWSE OpenAPI 載入 {len(quotes_map)} 檔純上市股票官方收盤報價！")
+                return quotes_map
+    except Exception as e:
+        print(f"TWSE OpenAPI 連線異常，嘗試備援端點: {e}")
+
+    # 來源 2：TWSE RWD 每日收盤行情備援端點
+    try:
+        url_rwd = "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?type=ALLBUT0999&response=json"
+        res = requests.get(url_rwd, headers=headers, timeout=15)
+        if res.status_code == 200:
+            data = res.json()
+            tables = data.get("tables", [])
+            for tbl in tables:
+                if "每日收盤行情" in tbl.get("title", ""):
+                    for row in tbl.get("data", []):
+                        code = str(row[0]).strip()
+                        if len(code) != 4:
+                            continue
+                        try:
+                            vol_lots = int(int(str(row[2]).replace(",", "")) / 1000)
+                            close_val = float(str(row[8]).replace(",", ""))
+                            sign_html = str(row[9])
+                            diff_val = float(str(row[10]).replace(",", ""))
+                            change_val = -diff_val if "-" in sign_html else diff_val
+                            prev_close = close_val - change_val
+                            pct = (change_val / prev_close * 100) if prev_close > 0 else 0.0
+                            quotes_map[code] = {
+                                "code": code,
+                                "name": str(row[1]).strip(),
+                                "close": round(close_val, 2),
+                                "change": round(change_val, 2),
+                                "pct": round(pct, 2),
+                                "vol_lots": vol_lots,
+                                "source": "TWSE_RWD"
+                            }
+                        except ValueError:
+                            continue
+    except Exception as e:
+        print(f"TWSE RWD 備援抓取異常: {e}")
+
+    return quotes_map
+
+def calculate_fundamental_valuation(ticker, official_close_price):
     """
     財報 EPS 量化估值引擎 (PE Band + PEG 成長估值模型)
-    自動抓取預估 EPS、本益比、營收/獲利成長率，計算合理價值區間與過熱警示
+    以證交所官方精準收盤價計算動態 PE 與合理價值區間
     """
     val_data = {
         "forwardEps": None,
         "trailingEps": None,
         "forwardPe": None,
         "pegRatio": None,
-        "fairValueZone": "財報數據不足 (純技術評估)",
-        "valuationStatus": "中性 / 題材驅動",
+        "fairValueZone": "財報數據更新中 (純技術評估)",
+        "valuationStatus": "中性 / 題材動能驅動",
         "valuationGrade": "B (動能驅動)"
     }
     try:
@@ -63,7 +148,7 @@ def calculate_fundamental_valuation(ticker, close_price):
 
         if f_eps and float(f_eps) > 0:
             f_eps = float(f_eps)
-            f_pe = round(close_price / f_eps, 2)
+            f_pe = round(official_close_price / f_eps, 2)
             
             growth_pct = max(15.0, min(float(rev_growth) * 100, 50.0))
             peg = round(f_pe / growth_pct, 2)
@@ -77,17 +162,17 @@ def calculate_fundamental_valuation(ticker, close_price):
             val_data["pegRatio"] = peg
             val_data["fairValueZone"] = f"{low_fair} ～ {high_fair} 元 (15~22x PE)"
 
-            if peg < 0.85 and close_price <= high_fair:
-                val_data["valuationStatus"] = f"嚴重低估 (PEG {peg} < 0.85)，極具安全邊際"
-                val_data["valuationGrade"] = "S (低估黃金區)"
-            elif peg <= 1.25 and close_price <= high_fair * 1.1:
-                val_data["valuationStatus"] = f"合理成長區間 (PEG {peg})，業績跟上股價"
+            if peg < 0.85 and official_close_price <= high_fair:
+                val_data["valuationStatus"] = f"嚴重低估 (PEG {peg} < 0.85)，極具基本面安全邊際"
+                val_data["valuationGrade"] = "S (基本面+技術雙優)"
+            elif peg <= 1.25 and official_close_price <= high_fair * 1.1:
+                val_data["valuationStatus"] = f"合理成長區間 (PEG {peg})，業績成長支撐股價"
                 val_data["valuationGrade"] = "A (合理價值)"
             elif peg > 1.8 or f_pe > 40:
                 val_data["valuationStatus"] = f"估值偏高過熱 (PE {f_pe}x / PEG {peg})，嚴防純題材回檔"
                 val_data["valuationGrade"] = "C (過熱警示)"
             else:
-                val_data["valuationStatus"] = f"中性偏高 (PE {f_pe}x)，需靠強勢動能推升"
+                val_data["valuationStatus"] = f"中性區間 (PE {f_pe}x)，需靠強勢動能推升"
                 val_data["valuationGrade"] = "B (動能驅動)"
     except Exception as e:
         print(f"財報估值解析異常: {e}")
@@ -95,7 +180,7 @@ def calculate_fundamental_valuation(ticker, close_price):
     return val_data
 
 def fetch_twse_market_summary():
-    """獲取今日最新加權指數與成交金額 (雙重校核)"""
+    """獲取今日最新加權指數與成交金額 (證交所官方 FMTQIK 雙重校核)"""
     try:
         url = "https://www.twse.com.tw/rwd/zh/afterTrading/FMTQIK?response=json"
         headers = {"User-Agent": "Mozilla/5.0"}
@@ -118,27 +203,6 @@ def fetch_twse_market_summary():
                 }
     except Exception as e:
         print(f"TWSE FMTQIK 抓取警告: {e}")
-
-    try:
-        twii = yf.Ticker("^TWII").history(period="5d")
-        if not twii.empty and len(twii) >= 2:
-            last = twii.iloc[-1]
-            prev = twii.iloc[-2]
-            close_val = float(last['Close'])
-            prev_val = float(prev['Close'])
-            change = close_val - prev_val
-            pct = (change / prev_val) * 100
-            sign = "+" if change >= 0 else ""
-            vol = float(last['Volume'])
-            vol_str = f"{vol / 100000000:,.2f} 億元" if vol > 100000000 else "-- 億元"
-            return {
-                "close": f"{close_val:,.2f} ({sign}{pct:.2f}%)",
-                "change": f"{sign}{change:,.2f}",
-                "percent": f"{sign}{pct:.2f}%",
-                "volume": vol_str
-            }
-    except Exception as e:
-        print(f"Yahoo ^TWII 備援失敗: {e}")
 
     return {"close": "--", "change": "--", "percent": "--", "volume": "--"}
 
@@ -164,50 +228,58 @@ def fetch_us_market_summary():
         print(f"美股大盤動態抓取異常: {e}")
     return summary
 
-def evaluate_bear_market_rs_candidate(symbol, name, sector="上市優質大型企業"):
+def evaluate_bear_market_rs_candidate(symbol, name, sector, twse_quotes):
     """
     模式 B：熊市抗跌領先突破篩選模型 + 財報 EPS 雙重驗證
-    【硬性風控過濾】：僅限台灣證交所「上市股票 (.TW)」，一律剔除上櫃 (.TWO) 與興櫃股票！
+    1. 僅限純上市股票 (.TW)，且必須存在於證交所官方報價表中 (徹底剔除上櫃與興櫃)
+    2. 收盤價、漲跌幅、成交張數 100% 採用證交所官方數據，杜絕 Yahoo 價格誤差
     """
     if not symbol.endswith(".TW"):
         return None
+    clean_code = symbol.replace(".TW", "")
+    
+    # 強制從證交所官方報價表讀取當日真實價格
+    official = twse_quotes.get(clean_code)
+    if not official:
+        return None
+
+    close = official["close"]
+    gain_pct = official["pct"]
+    vol_lots = official["vol_lots"]
+    official_name = official["name"] or name
 
     try:
         ticker = yf.Ticker(symbol)
         df = ticker.history(period="3mo")
-        if df.empty or len(df) < 30:
+        if df.empty or len(df) < 25:
             return None
 
-        today = df.iloc[-1]
-        yesterday = df.iloc[-2]
-        close = float(today['Close'])
-        prev_close = float(yesterday['Close'])
-        gain_pct = ((close - prev_close) / prev_close) * 100
-
+        # 計算歷史均線與箱型頸線 (以歷史區間校準)
         df['20MA'] = df['Close'].rolling(20).mean()
         df['60MA'] = df['Close'].rolling(60).mean()
         df['5VMA'] = df['Volume'].rolling(5).mean()
 
         ma20 = float(df['20MA'].iloc[-1])
         ma60 = float(df['60MA'].iloc[-1]) if not math.isnan(df['60MA'].iloc[-1]) else ma20 * 0.95
-        vma5 = float(df['5VMA'].iloc[-2])
-        volume = float(today['Volume'])
+        vma5_lots = float(df['5VMA'].iloc[-2]) / 1000.0 if df['5VMA'].iloc[-2] > 0 else 1.0
 
+        # 1. 均線防線：官方收盤價必須穩站月線與季線之上
         if close < ma20 or close < ma60:
             return None
 
-        vol_ratio = volume / vma5 if vma5 > 0 else 1.0
-        if vol_ratio < 1.3 and gain_pct < 9.0:
+        # 2. 量能與表態條件：放量 >= 1.3倍 或單日強勢漲幅 >= 6%
+        vol_ratio = vol_lots / vma5_lots if vma5_lots > 0 else 1.0
+        if vol_ratio < 1.3 and gain_pct < 6.0:
             return None
 
-        box_window = df.iloc[-22:-2]
+        # 3. 突破近 20 日箱型高點頸線
+        box_window = df.iloc[-22:-1]
         box_high = float(box_window['High'].max())
         box_low = float(box_window['Low'].min())
         if close < box_high:
             return None
 
         val_info = calculate_fundamental_valuation(ticker, close)
-        clean_code = symbol.replace(".TW", "")
         neckline = round(box_high, 1)
         entry_min = round(neckline * 0.99, 1)
         entry_max = round(neckline * 1.03, 1)
@@ -216,22 +288,23 @@ def evaluate_bear_market_rs_candidate(symbol, name, sector="上市優質大型�
         target_price = round(neckline * 1.18, 1)
 
         val_bonus = 3 if "S" in val_info["valuationGrade"] else (1 if "A" in val_info["valuationGrade"] else (-3 if "C" in val_info["valuationGrade"] else 0))
+        sign = "+" if gain_pct >= 0 else ""
 
         return {
             "symbol": symbol,
             "code": clean_code,
-            "name": name,
+            "name": official_name,
             "marketBoard": "上市 (TWSE)",
             "sector": sector,
-            "close": round(close, 2),
-            "change": f"+{gain_pct:.2f}%",
-            "volume": f"{int(volume):,}",
-            "volRatio": f"{vol_ratio:.2f} 倍 (逆勢表態)",
-            "maStatus": "上市大型股 ‧ 站穩 20MA/60MA，相對強度 (RS) 極高",
+            "close": close,
+            "change": f"{sign}{gain_pct:.2f}%",
+            "volume": f"{vol_lots:,} 張",
+            "volRatio": f"{vol_ratio:.2f} 倍 (證交所實盤核實)",
+            "maStatus": f"上市大型股 ‧ 站穩 20MA ({ma20:.1f}) 與 60MA ({ma60:.1f})",
             "boxDays": "20+ 日箱型搶先突破 (模式 B)",
             "boxRange": f"{box_low:.1f} ～ {neckline}",
             "breakoutPrice": f"{neckline}",
-            "breakoutReason": f"【純上市標的】大盤修正時逆勢站穩均線，今日率先衝破 {neckline} 元頸線，法人主力搶先表態！",
+            "breakoutReason": f"【證交所官方實盤核實】純上市標的逆勢站穩均線，今日衝破 {neckline} 元頸線收 {close} 元 ({sign}{gain_pct:.2f}%)！",
             "leadTime": "大盤止跌守穩即展開波段主升攻擊",
             "strategy": "模式 B：突破回踩頸線入場",
             "entryZone": f"{entry_min} ～ {entry_max} 元",
@@ -241,25 +314,41 @@ def evaluate_bear_market_rs_candidate(symbol, name, sector="上市優質大型�
             "targetPrice": f"{target_price} 元",
             "valuation": val_info,
             "noBuyCondition": f"若跌回 {stop_loss} 頸線下方則結構轉弱果斷停損；{val_info['valuationStatus']}",
-            "score": round(91 + min(gain_pct, 5.0) + val_bonus, 1)
+            "score": round(91 + min(max(gain_pct, 0), 5.0) + val_bonus, 1)
         }
     except Exception as e:
         print(f"熊市抗跌評估異常 {symbol}: {e}")
         return None
 
-def evaluate_stock_candidate(symbol, name, sector="科技/半導體", is_us=False):
-    """經典多頭突破模型 + 財報 EPS 雙重驗證"""
+def evaluate_stock_candidate(symbol, name, sector, twse_quotes=None, is_us=False):
+    """經典多頭突破模型 (台股強制使用證交所官方收盤價)"""
+    clean_code = symbol.replace(".TW", "").replace(".TWO", "")
+    official = twse_quotes.get(clean_code) if (not is_us and twse_quotes) else None
+
+    if not is_us and not official:
+        return None
+
     try:
         ticker = yf.Ticker(symbol)
         df = ticker.history(period="3mo")
         if df.empty or len(df) < 25:
             return None
 
-        today = df.iloc[-1]
-        yesterday = df.iloc[-2]
-        close = float(today['Close'])
-        prev_close = float(yesterday['Close'])
-        gain_pct = ((close - prev_close) / prev_close) * 100
+        if official:
+            close = official["close"]
+            gain_pct = official["pct"]
+            vol_str = f"{official['vol_lots']:,} 張"
+            vol_lots = official["vol_lots"]
+            official_name = official["name"] or name
+        else:
+            today = df.iloc[-1]
+            yesterday = df.iloc[-2]
+            close = round(float(today['Close']), 2)
+            prev_close = float(yesterday['Close'])
+            gain_pct = ((close - prev_close) / prev_close) * 100
+            vol_lots = int(today['Volume'])
+            vol_str = f"{vol_lots:,}"
+            official_name = name
 
         min_gain = 4.5 if is_us else MIN_GAIN_PCT
         if gain_pct < min_gain:
@@ -274,18 +363,17 @@ def evaluate_stock_candidate(symbol, name, sector="科技/半導體", is_us=Fals
         ma10 = float(df['10MA'].iloc[-1])
         ma20 = float(df['20MA'].iloc[-1])
         ma20_prev = float(df['20MA'].iloc[-2])
-        vma5 = float(df['5VMA'].iloc[-2])
-        volume = float(today['Volume'])
 
         if not ((ma5 > ma10 > ma20) and (ma20 >= ma20_prev)):
             return None
 
+        vma5_base = (float(df['5VMA'].iloc[-2]) / 1000.0) if not is_us else float(df['5VMA'].iloc[-2])
+        vol_ratio = vol_lots / vma5_base if vma5_base > 0 else 1.0
         min_vol = 1.5 if is_us else MIN_VOL_RATIO
-        vol_ratio = volume / vma5 if vma5 > 0 else 1.0
         if vol_ratio < min_vol:
             return None
 
-        box_window = df.iloc[-22:-2]
+        box_window = df.iloc[-22:-1]
         box_high = float(box_window['High'].max())
         box_low = float(box_window['Low'].min())
         if close <= box_high:
@@ -303,22 +391,21 @@ def evaluate_stock_candidate(symbol, name, sector="科技/半導體", is_us=Fals
         entry_max = fib236
         entry_price = round(fib382 * 1.01, 1)
         stop_loss = round(fib618 * 0.98, 1)
-        clean_code = symbol.replace(".TW", "").replace(".TWO", "")
 
         return {
             "symbol": symbol,
             "code": clean_code,
-            "name": name,
+            "name": official_name,
             "sector": sector,
-            "close": round(close, 2),
+            "close": close,
             "change": f"+{gain_pct:.2f}%",
-            "volume": f"{int(volume):,}",
+            "volume": vol_str,
             "volRatio": f"{vol_ratio:.2f} 倍 (放量突破)",
             "maStatus": "5MA > 10MA > 20MA 多頭排列，20MA 向上",
             "boxDays": "20+ 交易日箱型突破",
             "boxRange": f"{box_low:.1f} ～ {box_high:.1f}",
             "breakoutPrice": f"{box_high:.1f}",
-            "breakoutReason": f"放量突破長天期箱型上緣 ({box_high:.1f})，單日放量 {vol_ratio:.2f} 倍。",
+            "breakoutReason": f"官方收盤 {close} 元放量突破長天期箱型上緣 ({box_high:.1f})，單日放量 {vol_ratio:.2f} 倍。",
             "strategy": "等38.2%回踩",
             "entryZone": f"{entry_min} ～ {entry_max}",
             "entryPrice": f"{entry_price}",
@@ -332,14 +419,14 @@ def evaluate_stock_candidate(symbol, name, sector="科技/半導體", is_us=Fals
         print(f"個股分析失敗 {symbol}: {e}")
         return None
 
-def run_pool_screener(pool, is_us=False, is_rs=False):
+def run_pool_screener(pool, twse_quotes=None, is_us=False, is_rs=False):
     """通用股票池掃描排序"""
     candidates = []
     for sym, name, sec in pool:
         if is_rs:
-            res = evaluate_bear_market_rs_candidate(sym, name, sec)
+            res = evaluate_bear_market_rs_candidate(sym, name, sec, twse_quotes)
         else:
-            res = evaluate_stock_candidate(sym, name, sec, is_us=is_us)
+            res = evaluate_stock_candidate(sym, name, sec, twse_quotes=twse_quotes, is_us=is_us)
         if res:
             candidates.append(res)
     candidates.sort(key=lambda x: x["score"], reverse=True)
@@ -354,9 +441,12 @@ def trim_history(market_dict, max_days=MAX_HISTORY_DAYS):
         del market_dict[old_date]
 
 def main():
-    print("啟動三大獨立引擎量化篩選機器人 (嚴格保留 5 交易日 + 領頭羊純上市 TWSE 過濾)...")
+    print("啟動量化篩選機器人 (直連證交所官方 STOCK_DAY_ALL 確保 100% 價格精準 + 純上市過濾)...")
     tw_active_date = get_dynamic_trading_date("^TWII")
     us_active_date = get_dynamic_trading_date("^IXIC")
+
+    # 優先載入證交所官方今日全市場上市股票收盤價總表
+    twse_quotes = fetch_twse_official_daily_quotes()
 
     history_data = {"TW": {}, "US": {}, "RS": {}}
     if os.path.exists("data.json"):
@@ -370,7 +460,7 @@ def main():
         if k not in history_data or not isinstance(history_data[k], dict):
             history_data[k] = {}
 
-    # 【純上市 TWSE 觀察池】完全剔除上櫃 (.TWO) 與興櫃小型股，避免單一事件與財報突襲風險
+    # 【純上市 TWSE 觀察池】完全剔除上櫃 (.TWO) 與興櫃小型股
     tw_listed_pool = [
         ("2468.TW", "華經", "上市 ‧ 資安與系統整合 / 集團綜效"),
         ("2471.TW", "資通", "上市 ‧ 企業軟體 / 金融資安系統"),
@@ -403,7 +493,7 @@ def main():
     # 1. 執行台股經典多頭突破篩選 (TW)
     try:
         tw_summary = fetch_twse_market_summary()
-        tw_candidates = run_pool_screener(tw_listed_pool, is_us=False, is_rs=False)
+        tw_candidates = run_pool_screener(tw_listed_pool, twse_quotes=twse_quotes, is_us=False, is_rs=False)
         tw_wd = ["一", "二", "三", "四", "五", "六", "日"][datetime.date.fromisoformat(tw_active_date).weekday()]
         history_data["TW"][tw_active_date] = {
             "date": tw_active_date,
@@ -412,7 +502,7 @@ def main():
             "taiexChange": tw_summary["change"],
             "taiexPercent": tw_summary["percent"],
             "taiexVolume": tw_summary["volume"],
-            "marketNature": "嚴格執行四大硬性突破門檻與財報估值檢驗（無符合標的時恪守 0 檔寧缺勿濫）",
+            "marketNature": "嚴格執行四大硬性突破門檻與證交所官方報價校核（無符合標的時恪守 0 檔寧缺勿濫）",
             "sectors": [{"name": "上市軟體與資安避風港", "grade": "S級", "note": "資金大舉撤出硬體轉入上市資服股"}],
             "candidates": tw_candidates
         }
@@ -423,7 +513,7 @@ def main():
     # 2. 執行美股經典多頭突破篩選 (US)
     try:
         us_summary = fetch_us_market_summary()
-        us_candidates = run_pool_screener(us_pool, is_us=True, is_rs=False)
+        us_candidates = run_pool_screener(us_pool, twse_quotes=None, is_us=True, is_rs=False)
         us_wd = ["一", "二", "三", "四", "五", "六", "日"][datetime.date.fromisoformat(us_active_date).weekday()]
         history_data["US"][us_active_date] = {
             "date": us_active_date,
@@ -440,20 +530,20 @@ def main():
     except Exception as e:
         print(f"US 篩選異常: {e}")
 
-    # 3. 執行逆勢領頭羊模式 B 篩選 (RS) - 100% 僅限上市股票 (.TW)
+    # 3. 執行逆勢領頭羊模式 B 篩選 (RS) - 100% 證交所官方報價 + 純上市股票 (.TW)
     try:
-        rs_candidates = run_pool_screener(tw_listed_pool, is_us=False, is_rs=True)
+        rs_candidates = run_pool_screener(tw_listed_pool, twse_quotes=twse_quotes, is_us=False, is_rs=True)
         tw_wd = ["一", "二", "三", "四", "五", "六", "日"][datetime.date.fromisoformat(tw_active_date).weekday()]
         history_data["RS"][tw_active_date] = {
             "date": tw_active_date,
             "dayOfWeek": tw_wd,
             "taiexClose": tw_summary.get("close", "大盤動態監控"),
             "taiexChange": tw_summary.get("change", "--"),
-            "taiexPercent": "RS相對強度篩選 (純上市)",
+            "taiexPercent": "證交所官方實盤核實 (純上市)",
             "taiexVolume": tw_summary.get("volume", "--"),
-            "marketNature": "【純上市股票限定】技術面領先突破 + 財報 EPS (PE Band / PEG) 雙重驗證模型",
+            "marketNature": "【證交所官方實盤直連 + 純上市限定】技術面領先突破 + 財報 EPS (PE Band / PEG) 雙重驗證",
             "sectors": [
-                {"name": "上市軟體 / 資安 / 系統整合", "grade": "S級催化", "note": "排除上櫃興櫃小型股，聚焦體質穩健上市資服龍頭"},
+                {"name": "上市軟體 / 資安 / 系統整合", "grade": "S級催化", "note": "排除上櫃興櫃小型股，直連證交所收盤報價"},
                 {"name": "上市高股息與基礎設施防禦", "grade": "A級催化", "note": "具穩定財報與法人護盤底氣"}
             ],
             "candidates": rs_candidates
@@ -465,7 +555,7 @@ def main():
     with open("data.json", "w", encoding="utf-8") as f:
         json.dump(history_data, f, ensure_ascii=False, indent=2)
 
-    print("三大策略與財報估值更新完畢（嚴格 5 日歷史 + 純上市領頭羊過濾）！已成功寫入 data.json")
+    print("三大策略與證交所官方實盤數據更新完畢！已成功寫入 data.json")
 
 if __name__ == "__main__":
     main()
