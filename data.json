@@ -77,16 +77,48 @@
       "taiexClose": "40,092.11 (-2.31%)",
       "taiexChange": "-947.97",
       "taiexPercent": "-2.31%",
-      "taiexVolume": "10,128.68 億元",
-      "marketNature": "嚴格執行四大硬性突破門檻與證交所官方報價校核（無符合標的時恪守 0 檔寧缺勿濫）",
+      "taiexVolume": "成交 10,128.68 億",
+      "marketNature": "全市場純上市動態掃描 + 證交所 2026-11-17 官方結算校核（無符合標的時恪守 0 檔寧缺勿濫）",
       "sectors": [
         {
-          "name": "上市軟體與資安避風港",
+          "name": "全市場上市突破掃描",
           "grade": "S級",
-          "note": "資金大舉撤出硬體轉入上市資服股"
+          "note": "已核對 2026-11-17 官方收盤價"
         }
       ],
-      "candidates": []
+      "candidates": [
+        {
+          "symbol": "9933.TW",
+          "code": "9933",
+          "name": "中鼎",
+          "sector": "上市 (TWSE) ‧ 全市場動態強勢股",
+          "close": 56.6,
+          "change": "+9.90%",
+          "volume": "53,644 張",
+          "volRatio": "3.28 倍 (放量突破)",
+          "maStatus": "5MA > 10MA > 20MA 多頭排列，20MA 向上",
+          "boxDays": "20 交易日箱型突破",
+          "boxRange": "41.9 ～ 52.6",
+          "breakoutPrice": "52.6",
+          "breakoutReason": "官方收盤 56.6 元放量突破長天期箱型上緣 (52.6)，單日放量 3.28 倍。",
+          "strategy": "等38.2%回踩",
+          "entryZone": "50.9 ～ 53.1",
+          "entryPrice": "51.4",
+          "stopLossPrice": "46.5",
+          "stopLossNum": 46.5,
+          "valuation": {
+            "forwardEps": 7.09,
+            "forwardPe": 8.0,
+            "pegRatio": 0.05,
+            "fairValueZone": "106.3 ～ 156.0 元 (15~22x PE)",
+            "valuationStatus": "合理價值黃金區 (PE 8.0x / PEG 0.05)，具獲利成長安全邊際",
+            "valuationGrade": "S (基本面+技術雙優)"
+          },
+          "noBuyCondition": "剛大漲嚴禁追價；若跌破 46.5 結構失效嚴禁抄底",
+          "score": 99.9,
+          "rank": 1
+        }
+      ]
     }
   },
   "US": {
@@ -170,10 +202,10 @@
     "2026-11-17": {
       "date": "2026-11-17",
       "dayOfWeek": "二",
-      "taiexClose": "24,301.82 (-0.85%)",
-      "taiexChange": "-207.94",
-      "taiexPercent": "-0.85%",
-      "taiexVolume": "48.6 億股",
+      "taiexClose": "24,328.38 (-0.74%)",
+      "taiexChange": "-181.38",
+      "taiexPercent": "-0.74%",
+      "taiexVolume": "85.9 億股",
       "marketNature": "美股科技與半導體量化突破篩選（含 Forward PE / PEG 雙重驗證）",
       "sectors": [
         {
@@ -284,91 +316,55 @@
       "dayOfWeek": "二",
       "taiexClose": "40,092.11 (-2.31%)",
       "taiexChange": "-947.97",
-      "taiexPercent": "證交所官方實盤核實 (純上市)",
-      "taiexVolume": "10,128.68 億元",
-      "marketNature": "【證交所官方實盤直連 + 純上市限定】技術面領先突破 + 財報 EPS (PE Band / PEG) 雙重驗證",
+      "taiexPercent": "證交所 2026-11-17 實盤核實",
+      "taiexVolume": "成交 10,128.68 億",
+      "marketNature": "【全市場純上市動態掃描 + 官方日期校核】技術面領先突破 + 財報 EPS (PE Band / PEG) 雙重驗證",
       "sectors": [
         {
-          "name": "上市軟體 / 資安 / 系統整合",
+          "name": "純上市強勢領頭羊 (排除上櫃興櫃)",
           "grade": "S級催化",
-          "note": "排除上櫃興櫃小型股，直連證交所收盤報價"
+          "note": "直連證交所 2026-11-17 MI_INDEX 總表"
         },
         {
-          "name": "上市高股息與基礎設施防禦",
+          "name": "基本面 EPS 雙重驗證",
           "grade": "A級催化",
           "note": "具穩定財報與法人護盤底氣"
         }
       ],
       "candidates": [
         {
-          "symbol": "2471.TW",
-          "code": "2471",
-          "name": "資通",
+          "symbol": "9933.TW",
+          "code": "9933",
+          "name": "中鼎",
           "marketBoard": "上市 (TWSE)",
-          "sector": "上市 ‧ 企業軟體 / 金融資安系統",
-          "close": 78.2,
-          "change": "+9.99%",
-          "volume": "13,231 張",
-          "volRatio": "1.13 倍 (證交所實盤核實)",
-          "maStatus": "上市大型股 ‧ 站穩 20MA (nan) 與 60MA (nan)",
-          "boxDays": "20+ 日箱型搶先突破 (模式 B)",
-          "boxRange": "49.2 ～ 78.2",
-          "breakoutPrice": "78.2",
-          "breakoutReason": "【證交所官方實盤核實】純上市標的逆勢站穩均線，今日衝破 78.2 元頸線收 78.2 元 (+9.99%)！",
+          "sector": "上市 (TWSE) ‧ 全市場動態強勢股",
+          "close": 56.6,
+          "change": "+9.90%",
+          "volume": "53,644 張",
+          "volRatio": "3.28 倍 (證交所 2026-11-17 實盤核實)",
+          "maStatus": "上市強勢股 ‧ 站穩 20MA (47.4) 與 60MA (43.4)",
+          "boxDays": "20 日箱型搶先突破 (模式 B)",
+          "boxRange": "41.9 ～ 52.6",
+          "breakoutPrice": "52.6",
+          "breakoutReason": "【證交所 2026-11-17 官方結算】純上市標的逆勢站穩均線，衝破 52.6 元頸線收 56.6 元 (+9.90%)！",
           "leadTime": "大盤止跌守穩即展開波段主升攻擊",
           "strategy": "模式 B：突破回踩頸線入場",
-          "entryZone": "77.4 ～ 80.5 元",
-          "entryPrice": "79.0 元",
-          "stopLossPrice": "75.1 元 (頸線下方防線)",
-          "stopLossNum": 75.1,
-          "targetPrice": "92.3 元",
+          "entryZone": "52.1 ～ 54.2 元",
+          "entryPrice": "53.1 元",
+          "stopLossPrice": "50.5 元 (頸線下方防線)",
+          "stopLossNum": 50.5,
+          "targetPrice": "62.1 元",
           "valuation": {
-            "forwardEps": 3.01,
-            "trailingEps": 4.93,
-            "forwardPe": 25.98,
-            "pegRatio": 1.73,
-            "fairValueZone": "45.1 ～ 66.2 元 (15~22x PE)",
-            "valuationStatus": "中性區間 (PE 25.98x)，需靠強勢動能推升",
-            "valuationGrade": "B (動能驅動)"
+            "forwardEps": 7.09,
+            "forwardPe": 8.0,
+            "pegRatio": 0.05,
+            "fairValueZone": "106.3 ～ 156.0 元 (15~22x PE)",
+            "valuationStatus": "合理價值黃金區 (PE 8.0x / PEG 0.05)，具獲利成長安全邊際",
+            "valuationGrade": "S (基本面+技術雙優)"
           },
-          "noBuyCondition": "若跌回 75.1 頸線下方則結構轉弱果斷停損；中性區間 (PE 25.98x)，需靠強勢動能推升",
-          "score": 96.0,
+          "noBuyCondition": "若跌回 50.5 頸線下方則結構轉弱果斷停損；合理價值黃金區 (PE 8.0x / PEG 0.05)，具獲利成長安全邊際",
+          "score": 99.0,
           "rank": 1
-        },
-        {
-          "symbol": "2468.TW",
-          "code": "2468",
-          "name": "華經",
-          "marketBoard": "上市 (TWSE)",
-          "sector": "上市 ‧ 資安與系統整合 / 集團綜效",
-          "close": 81.6,
-          "change": "+9.97%",
-          "volume": "7,648 張",
-          "volRatio": "0.21 倍 (證交所實盤核實)",
-          "maStatus": "上市大型股 ‧ 站穩 20MA (nan) 與 60MA (nan)",
-          "boxDays": "20+ 日箱型搶先突破 (模式 B)",
-          "boxRange": "47.2 ～ 81.6",
-          "breakoutPrice": "81.6",
-          "breakoutReason": "【證交所官方實盤核實】純上市標的逆勢站穩均線，今日衝破 81.6 元頸線收 81.6 元 (+9.97%)！",
-          "leadTime": "大盤止跌守穩即展開波段主升攻擊",
-          "strategy": "模式 B：突破回踩頸線入場",
-          "entryZone": "80.8 ～ 84.0 元",
-          "entryPrice": "82.4 元",
-          "stopLossPrice": "78.3 元 (頸線下方防線)",
-          "stopLossNum": 78.3,
-          "targetPrice": "96.3 元",
-          "valuation": {
-            "forwardEps": 1.36,
-            "trailingEps": 1.36,
-            "forwardPe": 60.0,
-            "pegRatio": 4.0,
-            "fairValueZone": "20.4 ～ 29.9 元 (15~22x PE)",
-            "valuationStatus": "估值偏高過熱 (PE 60.0x / PEG 4.0)，嚴防純題材回檔",
-            "valuationGrade": "C (過熱警示)"
-          },
-          "noBuyCondition": "若跌回 78.3 頸線下方則結構轉弱果斷停損；估值偏高過熱 (PE 60.0x / PEG 4.0)，嚴防純題材回檔",
-          "score": 93.0,
-          "rank": 2
         }
       ]
     }
