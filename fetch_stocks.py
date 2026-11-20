@@ -6,11 +6,11 @@ import urllib3
 import requests
 import yfinance as yf
 
-# 關閉因證交所 SSL 憑證鏈在 Linux 虛擬機上可能產生的警告
+# 關閉證交所 SSL 憑證鏈在 Linux 虛擬機上可能產生的警告
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # ==========================================
-# 全域量化篩選參數設定 (嚴格定義，避免 NameError)
+# 全域量化篩選參數設定
 # ==========================================
 MAX_HISTORY_DAYS = 5
 MIN_GAIN_PCT = 8.5
@@ -21,137 +21,77 @@ HTTP_HEADERS = {
 }
 
 
-def get_dynamic_trading_date(ticker_symbol="^TWII"):
-    """從證交所官方盤後行情動態取得最新真實開盤交易日 (YYYY-MM-DD)"""
-    if ticker_symbol == "^TWII":
-        try:
-            url = "https://www.twse.com.tw/rwd/zh/afterTrading/FMTQIK?response=json"
-            res = requests.get(url, headers=HTTP_HEADERS, timeout=15, verify=False)
-            if res.status_code == 200:
-                data = res.json()
-                if "data" in data and len(data["data"]) > 0:
-                    last_row = data["data"][-1]
-                    roc_parts = str(last_row[0]).strip().split('/')
-                    if len(roc_parts) == 3:
-                        ad_year = int(roc_parts[0]) + 1911
-                        return f"{ad_year:04d}-{int(roc_parts[1]):02d}-{int(roc_parts[2]):02d}"
-        except Exception as e:
-            print(f"TWSE 日期解析備援啟動: {e}")
-
-    try:
-        ticker = yf.Ticker(ticker_symbol)
-        df = ticker.history(period="5d")
-        if not df.empty:
-            return df.index[-1].strftime("%Y-%m-%d")
-    except Exception as e:
-        print(f"Yahoo 行情日期取得異常: {e}")
-
+def get_taiwan_today_str():
+    """取得台灣時區 (UTC+8) 今日日期字串 YYYY-MM-DD"""
     now_tw = datetime.datetime.now(datetime.timezone.utc) + timedelta(hours=8)
     return now_tw.strftime("%Y-%m-%d")
 
 
-def fetch_twse_market_summary():
-    """取得台灣加權指數最新盤後收盤點數、漲跌與成交金額"""
-    try:
-        url = "https://www.twse.com.tw/rwd/zh/afterTrading/FMTQIK?response=json"
-        res = requests.get(url, headers=HTTP_HEADERS, timeout=15, verify=False)
-        if res.status_code == 200:
-            data = res.json()
-            if "data" in data and len(data["data"]) > 0:
-                last_row = data["data"][-1]
-                # FMTQIK 欄位: [0]日期, [1]成交股數, [2]成交金額, [3]成交筆數, [4]發行量加權股價指數, [5]漲跌點數
-                vol_yuan = float(str(last_row[2]).replace(",", ""))
-                vol_billion = round(vol_yuan / 100000000.0, 2)
-                close_idx = float(str(last_row[4]).replace(",", ""))
-                change_pts = float(str(last_row[5]).replace(",", ""))
-                prev_idx = close_idx - change_pts
-                pct = (change_pts / prev_idx * 100.0) if prev_idx > 0 else 0.0
-                sign = "+" if change_pts >= 0 else ""
-                return {
-                    "close": f"{close_idx:,.2f} ({sign}{pct:.2f}%)",
-                    "change": f"{sign}{change_pts:,.2f}",
-                    "percent": f"{sign}{pct:.2f}%",
-                    "volume": f"成交 {vol_billion:,.2f} 億"
-                }
-    except Exception as e:
-        print(f"TWSE 大盤總表取得異常，改用 yfinance 備援: {e}")
-
-    try:
-        ticker = yf.Ticker("^TWII")
-        df = ticker.history(period="5d")
-        if len(df) >= 2:
-            c = float(df["Close"].iloc[-1])
-            p = float(df["Close"].iloc[-2])
-            diff = c - p
-            pct = (diff / p * 100.0) if p > 0 else 0.0
-            sign = "+" if diff >= 0 else ""
-            return {
-                "close": f"{c:,.2f} ({sign}{pct:.2f}%)",
-                "change": f"{sign}{diff:,.2f}",
-                "percent": f"{sign}{pct:.2f}%",
-                "volume": "大盤動態量能"
-            }
-    except Exception as e:
-        print(f"yfinance 大盤備援失敗: {e}")
-
-    return {"close": "盤後結算中", "change": "--", "percent": "--", "volume": "--"}
-
-
-def fetch_us_market_summary():
-    """取得美股那斯達克 (^IXIC) 最新收盤資訊"""
-    try:
-        ticker = yf.Ticker("^IXIC")
-        df = ticker.history(period="5d")
-        if len(df) >= 2:
-            c = float(df["Close"].iloc[-1])
-            p = float(df["Close"].iloc[-2])
-            vol_b = round(float(df["Volume"].iloc[-1]) / 100000000.0, 1)
-            diff = c - p
-            pct = (diff / p * 100.0) if p > 0 else 0.0
-            sign = "+" if diff >= 0 else ""
-            return {
-                "close": f"{c:,.2f} ({sign}{pct:.2f}%)",
-                "change": f"{sign}{diff:,.2f}",
-                "percent": f"{sign}{pct:.2f}%",
-                "volume": f"{vol_b} 億股"
-            }
-    except Exception as e:
-        print(f"美股大盤取得異常: {e}")
-
-    return {"close": "盤後結算中", "change": "--", "percent": "--", "volume": "--"}
-
-
-def fetch_twse_official_daily_quotes(target_date_str):
+def fetch_twse_official_daily_quotes_with_fallback():
     """
-    【核心資訊正確保證 - 附帶官方日期強制核驗】
-    直連台灣證券交易所 (TWSE) 指定交易日每日收盤行情總表 (MI_INDEX)
-    1. 強制帶入 target_date_str (YYYYMMDD) 參數，杜絕抓到昨日舊快取
-    2. 驗證回傳資料日期是否與 target_date_str 吻合
-    3. 僅保留 4 碼純上市普通股 (排除 00 開頭 ETF、權證、上櫃、興櫃)
+    【最新交易日自動探測與官方報價引擎】
+    不依賴更新較慢的 FMTQIK，直接從台灣今日日期往回探測近 5 天，
+    向證交所每日收盤行情總表 (MI_INDEX) 請求數據（15:00 盤後即已結算），
+    保證 16:05 執行時第一時間拿到當日最新收盤價！
     """
-    quotes_map = {}
-    yyyymmdd = target_date_str.replace("-", "")
+    now_tw = datetime.datetime.now(datetime.timezone.utc) + timedelta(hours=8)
 
-    try:
-        url = f"https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?response=json&date={yyyymmdd}&type=ALLBUT0999"
-        res = requests.get(url, headers=HTTP_HEADERS, timeout=25, verify=False)
-        if res.status_code == 200:
+    for offset in range(6):
+        check_dt = now_tw - timedelta(days=offset)
+        # 跳過週六(5)、週日(6)
+        if check_dt.weekday() >= 5:
+            continue
+
+        target_date_str = check_dt.strftime("%Y-%m-%d")
+        yyyymmdd = check_dt.strftime("%Y%m%d")
+
+        try:
+            url = f"https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?response=json&date={yyyymmdd}&type=ALLBUT0999"
+            res = requests.get(url, headers=HTTP_HEADERS, timeout=25, verify=False)
+            if res.status_code != 200:
+                continue
+
             data = res.json()
             if data.get("stat") != "OK":
-                print(f"TWSE MI_INDEX 尚未公布 {yyyymmdd} 盤後資料 (stat={data.get('stat')})")
-                return {}
+                print(f"探測 {target_date_str}：證交所尚無盤後資料 (stat={data.get('stat')})")
+                continue
 
             returned_date = str(data.get("date", "")).strip()
             if returned_date and returned_date != yyyymmdd:
-                print(f"日期不符警告：請求 {yyyymmdd} 但證交所回傳 {returned_date}，拒絕寫入舊資料！")
-                return {}
+                continue
 
+            quotes_map = {}
+            taiex_summary = None
             tables = data.get("tables", [])
+
             for tbl in tables:
-                if "每日收盤行情" in tbl.get("title", ""):
+                title = tbl.get("title", "")
+                # 1. 解析大盤加權指數最新收盤
+                if "價格指數" in title or "大盤統計資訊" in title:
+                    for row in tbl.get("data", []):
+                        if "發行量加權股價指數" in str(row[0]):
+                            try:
+                                close_idx = float(str(row[1]).replace(",", ""))
+                                sign_str = str(row[2])
+                                diff_pts = float(str(row[3]).replace(",", ""))
+                                change_pts = -diff_pts if "-" in sign_str else diff_pts
+                                pct = float(str(row[4]).replace(",", "").replace("%", ""))
+                                if "-" in sign_str and pct > 0:
+                                    pct = -pct
+                                s_char = "+" if change_pts >= 0 else ""
+                                taiex_summary = {
+                                    "close": f"{close_idx:,.2f} ({s_char}{pct:.2f}%)",
+                                    "change": f"{s_char}{change_pts:,.2f}",
+                                    "percent": f"{s_char}{pct:.2f}%",
+                                    "volume": "證交所盤後結算"
+                                }
+                            except Exception:
+                                pass
+
+                # 2. 解析全市場純上市普通股收盤行情
+                if "每日收盤行情" in title:
                     for row in tbl.get("data", []):
                         code = str(row[0]).strip()
-                        # 嚴格過濾：僅限 4 碼純上市普通股 (排除 00xx ETF 與 6 碼權證)
                         if len(code) != 4 or not code.isdigit() or code.startswith("00"):
                             continue
                         try:
@@ -174,24 +114,88 @@ def fetch_twse_official_daily_quotes(target_date_str):
                                 "change": round(change_val, 2),
                                 "pct": round(pct, 2),
                                 "vol_lots": vol_lots,
-                                "date": target_date_str,
-                                "source": f"TWSE_MI_INDEX_{yyyymmdd}"
+                                "date": target_date_str
                             }
                         except (ValueError, IndexError):
                             continue
-            if len(quotes_map) > 500:
-                print(f"成功從 TWSE MI_INDEX 載入 {target_date_str} 共 {len(quotes_map)} 檔純上市股票官方收盤價！")
-                return quotes_map
-    except Exception as e:
-        print(f"TWSE MI_INDEX 抓取異常: {e}")
 
-    return quotes_map
+            if len(quotes_map) > 500:
+                if not taiex_summary:
+                    taiex_summary = fetch_twse_market_summary_fallback(target_date_str)
+                print(f"成功鎖定最新交易日 {target_date_str}，共載入 {len(quotes_map)} 檔純上市官方收盤數據！")
+                return target_date_str, quotes_map, taiex_summary
+
+        except Exception as e:
+            print(f"探測 {target_date_str} 異常: {e}")
+
+    return get_taiwan_today_str(), {}, {"close": "盤後結算中", "change": "--", "percent": "--", "volume": "--"}
+
+
+def fetch_twse_market_summary_fallback(target_date_str):
+    """大盤指數與成交金額備援查詢"""
+    try:
+        url = "https://www.twse.com.tw/rwd/zh/afterTrading/FMTQIK?response=json"
+        res = requests.get(url, headers=HTTP_HEADERS, timeout=15, verify=False)
+        if res.status_code == 200:
+            data = res.json()
+            if "data" in data and len(data["data"]) > 0:
+                last_row = data["data"][-1]
+                vol_yuan = float(str(last_row[2]).replace(",", ""))
+                vol_billion = round(vol_yuan / 100000000.0, 2)
+                close_idx = float(str(last_row[4]).replace(",", ""))
+                change_pts = float(str(last_row[5]).replace(",", ""))
+                prev_idx = close_idx - change_pts
+                pct = (change_pts / prev_idx * 100.0) if prev_idx > 0 else 0.0
+                sign = "+" if change_pts >= 0 else ""
+                return {
+                    "close": f"{close_idx:,.2f} ({sign}{pct:.2f}%)",
+                    "change": f"{sign}{change_pts:,.2f}",
+                    "percent": f"{sign}{pct:.2f}%",
+                    "volume": f"成交 {vol_billion:,.2f} 億"
+                }
+    except Exception:
+        pass
+    return {"close": f"{target_date_str} 結算", "change": "--", "percent": "--", "volume": "--"}
+
+
+def get_us_latest_trading_date():
+    """取得美股最新交易日"""
+    try:
+        ticker = yf.Ticker("^IXIC")
+        df = ticker.history(period="5d")
+        if not df.empty:
+            return df.index[-1].strftime("%Y-%m-%d")
+    except Exception:
+        pass
+    return get_taiwan_today_str()
+
+
+def fetch_us_market_summary():
+    """取得美股那斯達克 (^IXIC) 最新收盤資訊"""
+    try:
+        ticker = yf.Ticker("^IXIC")
+        df = ticker.history(period="5d")
+        if len(df) >= 2:
+            c = float(df["Close"].iloc[-1])
+            p = float(df["Close"].iloc[-2])
+            vol_b = round(float(df["Volume"].iloc[-1]) / 100000000.0, 1)
+            diff = c - p
+            pct = (diff / p * 100.0) if p > 0 else 0.0
+            sign = "+" if diff >= 0 else ""
+            return {
+                "close": f"{c:,.2f} ({sign}{pct:.2f}%)",
+                "change": f"{sign}{diff:,.2f}",
+                "percent": f"{sign}{pct:.2f}%",
+                "volume": f"{vol_b} 億股"
+            }
+    except Exception:
+        pass
+    return {"close": "盤後結算中", "change": "--", "percent": "--", "volume": "--"}
 
 
 def calculate_fundamental_valuation(ticker, official_close_price):
     """
     財報 EPS 量化估值引擎 (PE Band × PEG 成長檢驗)
-    遇到缺乏財報資料的個股自動安全降級為純技術評估，保證絕不拋出例外崩潰
     """
     try:
         info = ticker.info or {}
@@ -213,17 +217,20 @@ def calculate_fundamental_valuation(ticker, official_close_price):
                 else:
                     peg_val = round(fwd_pe / 20.0, 2)
 
-            if fwd_pe <= 22.0 and peg_val <= 1.0:
+            is_value_qualified = (fwd_pe <= 28.0 and peg_val <= 1.25)
+
+            if fwd_pe <= 20.0 and peg_val <= 1.0:
                 grade = "S (基本面+技術雙優)"
                 status = f"合理價值黃金區 (PE {fwd_pe}x / PEG {peg_val})，具獲利成長安全邊際"
-            elif fwd_pe <= 35.0:
+            elif is_value_qualified:
                 grade = "A (穩健成長)"
-                status = f"合理成長區間 (PE {fwd_pe}x / PEG {peg_val})，適合回踩頸線操作"
+                status = f"合理成長區間 (PE {fwd_pe}x / PEG {peg_val})，符合低估值提前佈局標準"
             else:
-                grade = "C (高估值動能警示)"
-                status = f"動態 PE 偏高 ({fwd_pe}x)，屬純動能題材驅動，嚴格執行停損紀律"
+                grade = "C (高估值過熱)"
+                status = f"動態 PE 偏高 ({fwd_pe}x / PEG {peg_val})，不符合低估值安全邊際"
 
             return {
+                "isQualified": is_value_qualified,
                 "forwardEps": fwd_eps,
                 "forwardPe": fwd_pe,
                 "pegRatio": peg_val,
@@ -235,21 +242,24 @@ def calculate_fundamental_valuation(ticker, official_close_price):
         pass
 
     return {
+        "isQualified": False,
         "forwardEps": None,
         "forwardPe": None,
         "pegRatio": None,
-        "fairValueZone": "依技術箱型位階評估",
-        "valuationStatus": "財報預測數據更新中，以技術面突破與停損防線為主",
-        "valuationGrade": "B (純技術突破)"
+        "fairValueZone": "無預估 EPS 數據",
+        "valuationStatus": "缺乏明確預估 EPS 數據，不符合基本面價值模型",
+        "valuationGrade": "B (無EPS估值)"
     }
 
 
 def evaluate_bear_market_rs_candidate(symbol, name, sector, twse_quotes, target_date_str):
     """
-    模式 B：熊市抗跌領先突破篩選模型 + 財報 EPS 雙重驗證
-    1. 僅限純上市股票 (.TW)，且必須存在於當日證交所官方 MI_INDEX 報價表中
-    2. 收盤價、漲跌幅、成交張數 100% 採用證交所當日官方數據
-    3. 歷史箱型高點強制排除當日 K 線，確保計算基準純淨無誤差
+    【策略二：熊市逆勢領頭羊 (基本面 EPS 價值 + 抗跌突破)】
+    與「經典台股突破 (≥8.5% 斐波回踩)」完全獨立、互不重疊：
+    1. 僅限純上市股票 (.TW)，排除上櫃與興櫃
+    2. 漲幅區間限制在 3.0% ～ 8.4%（專抓「低調穩健抗跌發動」，不追已漲停過熱股，避免與經典突破重疊）
+    3. 強制要求具備正向預估 EPS，且動態 PE <= 28倍、PEG <= 1.25（嚴格基本面篩選）
+    4. 股價穩站 20MA 与 60MA 之上並突破 20 日箱型高點
     """
     if not symbol.endswith(".TW"):
         return None
@@ -264,52 +274,51 @@ def evaluate_bear_market_rs_candidate(symbol, name, sector, twse_quotes, target_
     vol_lots = official["vol_lots"]
     official_name = official["name"] or name
 
-    # 基本流動性與逆勢強勢初篩：成交量 >= 1,500 張 且 單日漲幅 >= 4.0%
-    if vol_lots < 1500 or gain_pct < 4.0:
+    # 策略區隔條件：漲幅 3.0% ~ 8.4%（不追漲停板，專抓穩健抗跌提前發動股）
+    if vol_lots < 1500 or not (3.0 <= gain_pct < MIN_GAIN_PCT):
         return None
 
     try:
         ticker = yf.Ticker(symbol)
+        # 優先檢驗財報 EPS 基本面門檻（無預估 EPS 或 PE > 28x 直接淘汰）
+        val_info = calculate_fundamental_valuation(ticker, close)
+        if not val_info.get("isQualified"):
+            return None
+
         df = ticker.history(period="3mo")
         if df.empty or len(df) < 25:
             return None
 
-        # 排除當日未完成或已同步的 K 線，純粹取「昨日及以前」的歷史 K 線計算箱型與均量
         df_hist = df[df.index.strftime("%Y-%m-%d") < target_date_str]
         if len(df_hist) < 20:
             df_hist = df.iloc[:-1]
 
-        # 將當日官方精準收盤價納入計算最新 20MA / 60MA
         hist_closes = list(df_hist['Close'].tail(59)) + [close]
         ma20 = sum(hist_closes[-20:]) / 20.0
         ma60 = sum(hist_closes) / len(hist_closes)
         vma5_lots = float(df_hist['Volume'].tail(5).mean()) / 1000.0
 
-        # 1. 均線防線：當日官方收盤價必須穩站月線與季線之上
         if close < ma20 or close < ma60:
             return None
 
-        # 2. 量能與表態條件：放量 >= 1.3倍 或單日強勢漲幅 >= 6.5%
         vol_ratio = vol_lots / vma5_lots if vma5_lots > 0 else 1.0
-        if vol_ratio < 1.3 and gain_pct < 6.5:
+        if vol_ratio < 1.2:
             return None
 
-        # 3. 突破近 20 個歷史交易日箱型高點頸線
         box_window = df_hist.tail(20)
         box_high = float(box_window['High'].max())
         box_low = float(box_window['Low'].min())
         if close <= box_high:
             return None
 
-        val_info = calculate_fundamental_valuation(ticker, close)
         neckline = round(box_high, 1)
         entry_min = round(neckline * 0.99, 1)
-        entry_max = round(neckline * 1.03, 1)
-        entry_price = round(neckline * 1.01, 1)
+        entry_max = round(neckline * 1.025, 1)
+        entry_price = round(neckline * 1.005, 1)
         stop_loss = round(neckline * 0.96, 1)
-        target_price = round(neckline * 1.18, 1)
+        target_price = round(val_info["forwardEps"] * 22.0, 1) if val_info.get("forwardEps") else round(neckline * 1.15, 1)
 
-        val_bonus = 3 if "S" in val_info["valuationGrade"] else (1 if "A" in val_info["valuationGrade"] else (-3 if "C" in val_info["valuationGrade"] else 0))
+        val_bonus = 4 if "S" in val_info["valuationGrade"] else 2
         sign = "+" if gain_pct >= 0 else ""
 
         return {
@@ -322,21 +331,21 @@ def evaluate_bear_market_rs_candidate(symbol, name, sector, twse_quotes, target_
             "change": f"{sign}{gain_pct:.2f}%",
             "volume": f"{vol_lots:,} 張",
             "volRatio": f"{vol_ratio:.2f} 倍 (證交所 {target_date_str} 實盤核實)",
-            "maStatus": f"上市強勢股 ‧ 站穩 20MA ({ma20:.1f}) 與 60MA ({ma60:.1f})",
-            "boxDays": "20 日箱型搶先突破 (模式 B)",
+            "maStatus": f"上市價值領頭羊 ‧ 站穩 20MA ({ma20:.1f}) 與 60MA ({ma60:.1f})",
+            "boxDays": "20 日箱型低調突破 (模式 B + EPS 價值雙驗證)",
             "boxRange": f"{box_low:.1f} ～ {neckline}",
             "breakoutPrice": f"{neckline}",
-            "breakoutReason": f"【證交所 {target_date_str} 官方結算】純上市標的逆勢站穩均線，衝破 {neckline} 元頸線收 {close} 元 ({sign}{gain_pct:.2f}%)！",
-            "leadTime": "大盤止跌守穩即展開波段主升攻擊",
-            "strategy": "模式 B：突破回踩頸線入場",
+            "breakoutReason": f"【財報估值+抗跌雙驗證】PE 僅 {val_info['forwardPe']}x (PEG {val_info['pegRatio']})，不追漲停板，穩健帶量突破 {neckline} 元頸線！",
+            "leadTime": "具備實質獲利保護與低本益比安全邊際，大盤止跌即展開價值重估行情",
+            "strategy": "模式 B：EPS合理價值區 + 回踩頸線布局",
             "entryZone": f"{entry_min} ～ {entry_max} 元",
             "entryPrice": f"{entry_price} 元",
-            "stopLossPrice": f"{stop_loss} 元 (頸線下方防線)",
+            "stopLossPrice": f"{stop_loss} 元 (跌破頸線防線)",
             "stopLossNum": stop_loss,
-            "targetPrice": f"{target_price} 元",
+            "targetPrice": f"{target_price} 元 (22x PE 目標)",
             "valuation": val_info,
-            "noBuyCondition": f"若跌回 {stop_loss} 頸線下方則結構轉弱果斷停損；{val_info['valuationStatus']}",
-            "score": round(91 + min(max(gain_pct, 0), 5.0) + val_bonus, 1)
+            "noBuyCondition": f"若跌回 {stop_loss} 頸線下方則結構轉弱停損；{val_info['valuationStatus']}",
+            "score": round(90 + min(gain_pct, 5.0) + val_bonus, 1)
         }
     except Exception as e:
         print(f"熊市抗跌評估異常 {symbol}: {e}")
@@ -344,7 +353,10 @@ def evaluate_bear_market_rs_candidate(symbol, name, sector, twse_quotes, target_
 
 
 def evaluate_stock_candidate(symbol, name, sector, twse_quotes=None, target_date_str=None, is_us=False):
-    """經典多頭突破模型 (台股強制使用證交所當日官方收盤價)"""
+    """
+    【策略一：經典多頭動能突破模型 (日漲幅 >= 8.5% + 斐波那契 38.2% 回踩)】
+    純技術面強勢爆發動能策略，與「逆勢領頭羊」完全區隔
+    """
     clean_code = symbol.replace(".TW", "").replace(".TWO", "")
     official = twse_quotes.get(clean_code) if (not is_us and twse_quotes) else None
 
@@ -423,19 +435,19 @@ def evaluate_stock_candidate(symbol, name, sector, twse_quotes=None, target_date
             "close": close,
             "change": f"+{gain_pct:.2f}%",
             "volume": vol_str,
-            "volRatio": f"{vol_ratio:.2f} 倍 (放量突破)",
-            "maStatus": "5MA > 10MA > 20MA 多頭排列，20MA 向上",
-            "boxDays": "20 交易日箱型突破",
+            "volRatio": f"{vol_ratio:.2f} 倍 (動能放量突破)",
+            "maStatus": "5MA > 10MA > 20MA 強勢多頭排列，20MA 向上",
+            "boxDays": "20 交易日箱型動能突破",
             "boxRange": f"{box_low:.1f} ～ {box_high:.1f}",
             "breakoutPrice": f"{box_high:.1f}",
-            "breakoutReason": f"官方收盤 {close} 元放量突破長天期箱型上緣 ({box_high:.1f})，單日放量 {vol_ratio:.2f} 倍。",
-            "strategy": "等38.2%回踩",
+            "breakoutReason": f"【動能突破策略】單日強漲 +{gain_pct:.2f}% 並放量 {vol_ratio:.2f} 倍衝破箱型上緣 ({box_high:.1f})，靜待斐波那契 38.2% 回踩。",
+            "strategy": "等斐波那契 38.2% 回踩",
             "entryZone": f"{entry_min} ～ {entry_max}",
             "entryPrice": f"{entry_price}",
             "stopLossPrice": f"{stop_loss}",
             "stopLossNum": stop_loss,
             "valuation": val_info,
-            "noBuyCondition": f"剛大漲嚴禁追價；若跌破 {stop_loss} 結構失效嚴禁抄底",
+            "noBuyCondition": f"剛大漲 ≥8.5% 嚴禁追高；若跌破斐波 61.8% ({stop_loss}) 結構失效嚴禁抄底",
             "score": round(90 + min(gain_pct, 10.0), 1)
         }
     except Exception as e:
@@ -466,49 +478,43 @@ def trim_history(market_dict, max_days=MAX_HISTORY_DAYS):
         del market_dict[old_date]
 
 
-def build_dynamic_tw_listed_pool(twse_quotes):
+def build_split_tw_pools(twse_quotes):
     """
-    【全市場純上市動態掃描池】
-    直接從當日證交所 MI_INDEX 全市場 1,000+ 檔純上市股票中，
-    動態挑選「當日成交量 >= 1,500 張 且 漲幅 >= 3.5%」的活躍領頭羊進行深度均線與財報分析！
+    分別建構兩套互不重疊的純上市動態掃描池：
+    1. momentum_pool (經典台股突破)：日漲幅 >= 8.5%、成交量 >= 1,500 張
+    2. value_rs_pool (逆勢領頭羊)：日漲幅 3.0% ~ 8.4%、成交量 >= 1,500 張
     """
-    sector_lookup = {
-        "2468": "上市 ‧ 資安與系統整合 / 集團綜效",
-        "2471": "上市 ‧ 企業軟體 / 金融資安系統",
-        "6214": "上市 ‧ 台灣資訊服務龍頭 / 企業AI雲",
-        "2453": "上市 ‧ 系統整合 / 智慧機器人與雲端",
-        "5203": "上市 ‧ 純AI軟體 / 臉部辨識與生成式AI",
-        "2412": "上市 ‧ 電信防禦 / AI算力IDC機房",
-        "1802": "上市 ‧ 低介電玻纖布 / AI基板材料",
-        "2492": "上市 ‧ 被動元件 / MLCC高階電容",
-        "3450": "上市 ‧ AI光模組封裝 / CPO",
-        "2330": "上市 ‧ 晶圓代工龍頭",
-        "2317": "上市 ‧ AI伺服器組裝",
-        "2382": "上市 ‧ AI伺服器/雲端",
-        "3231": "上市 ‧ AI伺服器基板",
-        "2308": "上市 ‧ AI電源散熱龍頭"
-    }
-    dynamic_pool = []
-    sorted_strong = sorted(
-        [q for q in twse_quotes.values() if q["vol_lots"] >= 1500 and q["pct"] >= 3.5],
+    momentum_pool = []
+    value_rs_pool = []
+
+    strong_momentum = sorted(
+        [q for q in twse_quotes.values() if q["vol_lots"] >= 1500 and q["pct"] >= MIN_GAIN_PCT],
+        key=lambda x: x["pct"],
+        reverse=True
+    )[:30]
+
+    steady_rs = sorted(
+        [q for q in twse_quotes.values() if q["vol_lots"] >= 1500 and (3.0 <= q["pct"] < MIN_GAIN_PCT)],
         key=lambda x: x["pct"],
         reverse=True
     )[:40]
 
-    for q in sorted_strong:
-        code = q["code"]
-        sec = sector_lookup.get(code, "上市 (TWSE) ‧ 全市場動態強勢股")
-        dynamic_pool.append((f"{code}.TW", q["name"], sec))
-    return dynamic_pool
+    for q in strong_momentum:
+        momentum_pool.append((f"{q['code']}.TW", q["name"], "上市 (TWSE) ‧ 強勢動能突破股"))
+
+    for q in steady_rs:
+        value_rs_pool.append((f"{q['code']}.TW", q["name"], "上市 (TWSE) ‧ 穩健抗跌價值股"))
+
+    return momentum_pool, value_rs_pool
 
 
 def main():
     try:
-        print("啟動量化篩選機器人 (完整自包含版 + 證交所日期核驗 + 全市場純上市動態掃描)...")
-        tw_active_date = get_dynamic_trading_date("^TWII")
-        us_active_date = get_dynamic_trading_date("^IXIC")
+        print("啟動量化篩選機器人 (雙策略物理隔離 + MI_INDEX 即時日期探測版)...")
 
-        twse_quotes = fetch_twse_official_daily_quotes(tw_active_date)
+        # 直接探測 MI_INDEX 取得最新已結算交易日與全市場報價
+        tw_active_date, twse_quotes, tw_summary = fetch_twse_official_daily_quotes_with_fallback()
+        us_active_date = get_us_latest_trading_date()
 
         history_data = {"TW": {}, "US": {}, "RS": {}}
         if os.path.exists("data.json"):
@@ -533,60 +539,53 @@ def main():
         ]
 
         if len(twse_quotes) > 500:
-            tw_dynamic_pool = build_dynamic_tw_listed_pool(twse_quotes)
-            print(f"已從全市場純上市股票動態篩出 {len(tw_dynamic_pool)} 檔活躍強勢股進入深度運算...")
-            tw_summary = fetch_twse_market_summary()
+            momentum_pool, value_rs_pool = build_split_tw_pools(twse_quotes)
+            print(f"[{tw_active_date}] 動能突破觀察池: {len(momentum_pool)} 檔 | 逆勢價值領頭羊觀察池: {len(value_rs_pool)} 檔")
 
-            prev_dates = [d for d in sorted(history_data["TW"].keys(), reverse=True) if d < tw_active_date]
-            is_duplicate_market = False
-            if prev_dates:
-                prev_close_str = history_data["TW"][prev_dates[0]].get("taiexClose", "")
-                if prev_close_str and prev_close_str == tw_summary["close"]:
-                    print(f"防重複攔截：{tw_active_date} 大盤指數 ({tw_summary['close']}) 與前一日 {prev_dates[0]} 完全相同，中止寫入！")
-                    is_duplicate_market = True
+            tw_wd = ["一", "二", "三", "四", "五", "六", "日"][datetime.date.fromisoformat(tw_active_date).weekday()]
 
-            if not is_duplicate_market:
-                try:
-                    tw_candidates = run_pool_screener(tw_dynamic_pool, twse_quotes=twse_quotes, target_date_str=tw_active_date, is_us=False, is_rs=False)
-                    tw_wd = ["一", "二", "三", "四", "五", "六", "日"][datetime.date.fromisoformat(tw_active_date).weekday()]
-                    history_data["TW"][tw_active_date] = {
-                        "date": tw_active_date,
-                        "dayOfWeek": tw_wd,
-                        "taiexClose": tw_summary["close"],
-                        "taiexChange": tw_summary["change"],
-                        "taiexPercent": tw_summary["percent"],
-                        "taiexVolume": tw_summary["volume"],
-                        "marketNature": f"全市場純上市動態掃描 + 證交所 {tw_active_date} 官方結算校核（無符合標的時恪守 0 檔寧缺勿濫）",
-                        "sectors": [{"name": "全市場上市突破掃描", "grade": "S級", "note": f"已核對 {tw_active_date} 官方收盤價"}],
-                        "candidates": tw_candidates
-                    }
-                    trim_history(history_data["TW"], MAX_HISTORY_DAYS)
-                except Exception as e:
-                    print(f"TW 篩選異常: {e}")
+            # 1. 經典台股突破 (日漲幅 >= 8.5% + 斐波回踩)
+            try:
+                tw_candidates = run_pool_screener(momentum_pool, twse_quotes=twse_quotes, target_date_str=tw_active_date, is_us=False, is_rs=False)
+                history_data["TW"][tw_active_date] = {
+                    "date": tw_active_date,
+                    "dayOfWeek": tw_wd,
+                    "taiexClose": tw_summary["close"],
+                    "taiexChange": tw_summary["change"],
+                    "taiexPercent": tw_summary["percent"],
+                    "taiexVolume": tw_summary["volume"],
+                    "marketNature": f"【策略一：動能爆發 + 斐波那契 38.2% 回踩】證交所 {tw_active_date} 官方結算（漲幅 ≥ 8.5% 且放量 ≥ 1.8 倍）",
+                    "sectors": [{"name": "強勢動能突破掃描", "grade": "S級", "note": f"已核對 {tw_active_date} 官方收盤價"}],
+                    "candidates": tw_candidates
+                }
+                trim_history(history_data["TW"], MAX_HISTORY_DAYS)
+            except Exception as e:
+                print(f"TW 篩選異常: {e}")
 
-                try:
-                    rs_candidates = run_pool_screener(tw_dynamic_pool, twse_quotes=twse_quotes, target_date_str=tw_active_date, is_us=False, is_rs=True)
-                    tw_wd = ["一", "二", "三", "四", "五", "六", "日"][datetime.date.fromisoformat(tw_active_date).weekday()]
-                    history_data["RS"][tw_active_date] = {
-                        "date": tw_active_date,
-                        "dayOfWeek": tw_wd,
-                        "taiexClose": tw_summary.get("close", "大盤動態監控"),
-                        "taiexChange": tw_summary.get("change", "--"),
-                        "taiexPercent": f"證交所 {tw_active_date} 實盤核實",
-                        "taiexVolume": tw_summary.get("volume", "--"),
-                        "marketNature": "【全市場純上市動態掃描 + 官方日期校核】技術面領先突破 + 財報 EPS (PE Band / PEG) 雙重驗證",
-                        "sectors": [
-                            {"name": "純上市強勢領頭羊 (排除上櫃興櫃)", "grade": "S級催化", "note": f"直連證交所 {tw_active_date} MI_INDEX 總表"},
-                            {"name": "基本面 EPS 雙重驗證", "grade": "A級催化", "note": "具穩定財報與法人護盤底氣"}
-                        ],
-                        "candidates": rs_candidates
-                    }
-                    trim_history(history_data["RS"], MAX_HISTORY_DAYS)
-                except Exception as e:
-                    print(f"RS 篩選異常: {e}")
+            # 2. 逆勢領頭羊 (日漲幅 3.0~8.4% + 財報 PE<=28 / PEG<=1.25 雙重驗證)
+            try:
+                rs_candidates = run_pool_screener(value_rs_pool, twse_quotes=twse_quotes, target_date_str=tw_active_date, is_us=False, is_rs=True)
+                history_data["RS"][tw_active_date] = {
+                    "date": tw_active_date,
+                    "dayOfWeek": tw_wd,
+                    "taiexClose": tw_summary["close"],
+                    "taiexChange": tw_summary["change"],
+                    "taiexPercent": f"證交所 {tw_active_date} 實盤核實",
+                    "taiexVolume": tw_summary["volume"],
+                    "marketNature": "【策略二：純上市價值領頭羊】排除漲停過熱股，專挑漲幅 3~8.4% 且動態 PE ≤ 28x、PEG ≤ 1.25 之低估值基本面優選股",
+                    "sectors": [
+                        {"name": "純上市低估值領頭羊 (排除上櫃興櫃)", "grade": "S級催化", "note": f"證交所 {tw_active_date} MI_INDEX 核實"},
+                        {"name": "財報 EPS 嚴格過濾 (PE ≤ 28x)", "grade": "A級催化", "note": "杜絕高本益比純題材炒作"}
+                    ],
+                    "candidates": rs_candidates
+                }
+                trim_history(history_data["RS"], MAX_HISTORY_DAYS)
+            except Exception as e:
+                print(f"RS 篩選異常: {e}")
         else:
-            print(f"提示：尚未取得 {tw_active_date} 證交所官方 MI_INDEX 結算總表（可能尚未到盤後結算時間），保留既有台股資料。")
+            print(f"警告：無法取得證交所盤後報價，保留既有資料。")
 
+        # 3. 美股篩選
         try:
             us_summary = fetch_us_market_summary()
             us_candidates = run_pool_screener(us_pool, twse_quotes=None, target_date_str=us_active_date, is_us=True, is_rs=False)
