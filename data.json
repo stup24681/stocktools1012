@@ -120,23 +120,6 @@
     }
   },
   "US": {
-    "2026-11-17": {
-      "date": "2026-11-17",
-      "dayOfWeek": "二",
-      "taiexClose": "24,328.38 (-0.74%)",
-      "taiexChange": "-181.38",
-      "taiexPercent": "-0.74%",
-      "taiexVolume": "85.9 億股",
-      "marketNature": "美股科技與半導體量化突破篩選（含 Forward PE / PEG 雙重驗證）",
-      "sectors": [
-        {
-          "name": "美股 AI 與高速傳輸",
-          "grade": "觀察級",
-          "note": "監控費半與那斯達克動向"
-        }
-      ],
-      "candidates": []
-    },
     "2026-11-18": {
       "date": "2026-11-18",
       "dayOfWeek": "三",
@@ -195,6 +178,23 @@
       "taiexChange": "+1,471.83",
       "taiexPercent": "+6.51%",
       "taiexVolume": "113.5 億股",
+      "marketNature": "美股科技與半導體量化突破篩選（含 Forward PE / PEG 雙重驗證）",
+      "sectors": [
+        {
+          "name": "美股 AI 與高速傳輸",
+          "grade": "觀察級",
+          "note": "監控費半與那斯達克動向"
+        }
+      ],
+      "candidates": []
+    },
+    "2026-11-24": {
+      "date": "2026-11-24",
+      "dayOfWeek": "二",
+      "taiexClose": "23,651.26 (-1.82%)",
+      "taiexChange": "-438.30",
+      "taiexPercent": "-1.82%",
+      "taiexVolume": "25.8 億股",
       "marketNature": "美股科技與半導體量化突破篩選（含 Forward PE / PEG 雙重驗證）",
       "sectors": [
         {
