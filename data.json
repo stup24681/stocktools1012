@@ -1,54 +1,5 @@
 {
   "TW": {
-    "2026-11-17": {
-      "date": "2026-11-17",
-      "dayOfWeek": "二",
-      "taiexClose": "40,092.11 (-2.31%)",
-      "taiexChange": "-947.97",
-      "taiexPercent": "-2.31%",
-      "taiexVolume": "成交 10,128.68 億",
-      "marketNature": "全市場純上市動態掃描 + 證交所 2026-11-17 官方結算校核（無符合標的時恪守 0 檔寧缺勿濫）",
-      "sectors": [
-        {
-          "name": "全市場上市突破掃描",
-          "grade": "S級",
-          "note": "已核對 2026-11-17 官方收盤價"
-        }
-      ],
-      "candidates": [
-        {
-          "symbol": "9933.TW",
-          "code": "9933",
-          "name": "中鼎",
-          "sector": "上市 (TWSE) ‧ 全市場動態強勢股",
-          "close": 56.6,
-          "change": "+9.90%",
-          "volume": "53,644 張",
-          "volRatio": "3.28 倍 (放量突破)",
-          "maStatus": "5MA > 10MA > 20MA 多頭排列，20MA 向上",
-          "boxDays": "20 交易日箱型突破",
-          "boxRange": "41.9 ～ 52.6",
-          "breakoutPrice": "52.6",
-          "breakoutReason": "官方收盤 56.6 元放量突破長天期箱型上緣 (52.6)，單日放量 3.28 倍。",
-          "strategy": "等38.2%回踩",
-          "entryZone": "50.9 ～ 53.1",
-          "entryPrice": "51.4",
-          "stopLossPrice": "46.5",
-          "stopLossNum": 46.5,
-          "valuation": {
-            "forwardEps": 7.09,
-            "forwardPe": 8.0,
-            "pegRatio": 0.05,
-            "fairValueZone": "106.3 ～ 156.0 元 (15~22x PE)",
-            "valuationStatus": "合理價值黃金區 (PE 8.0x / PEG 0.05)，具獲利成長安全邊際",
-            "valuationGrade": "S (基本面+技術雙優)"
-          },
-          "noBuyCondition": "剛大漲嚴禁追價；若跌破 46.5 結構失效嚴禁抄底",
-          "score": 99.9,
-          "rank": 1
-        }
-      ]
-    },
     "2026-11-18": {
       "date": "2026-11-18",
       "dayOfWeek": "三",
@@ -149,6 +100,23 @@
           "rank": 1
         }
       ]
+    },
+    "2026-11-24": {
+      "date": "2026-11-24",
+      "dayOfWeek": "二",
+      "taiexClose": "40,122.35 (+8.99%)",
+      "taiexChange": "+3,310.46",
+      "taiexPercent": "+8.99%",
+      "taiexVolume": "證交所盤後結算",
+      "marketNature": "【策略一：動能爆發 + 斐波那契 38.2% 回踩】證交所 2026-11-24 官方結算（漲幅 ≥ 8.5% 且放量 ≥ 1.8 倍）",
+      "sectors": [
+        {
+          "name": "強勢動能突破掃描",
+          "grade": "S級",
+          "note": "已核對 2026-11-24 官方收盤價"
+        }
+      ],
+      "candidates": []
     }
   },
   "US": {
@@ -223,10 +191,10 @@
     "2026-11-23": {
       "date": "2026-11-23",
       "dayOfWeek": "一",
-      "taiexClose": "24,100.59 (+6.56%)",
-      "taiexChange": "+1,482.86",
-      "taiexPercent": "+6.56%",
-      "taiexVolume": "71.2 億股",
+      "taiexClose": "24,089.56 (+6.51%)",
+      "taiexChange": "+1,471.83",
+      "taiexPercent": "+6.51%",
+      "taiexVolume": "113.5 億股",
       "marketNature": "美股科技與半導體量化突破篩選（含 Forward PE / PEG 雙重驗證）",
       "sectors": [
         {
@@ -239,63 +207,6 @@
     }
   },
   "RS": {
-    "2026-11-17": {
-      "date": "2026-11-17",
-      "dayOfWeek": "二",
-      "taiexClose": "40,092.11 (-2.31%)",
-      "taiexChange": "-947.97",
-      "taiexPercent": "證交所 2026-11-17 實盤核實",
-      "taiexVolume": "成交 10,128.68 億",
-      "marketNature": "【全市場純上市動態掃描 + 官方日期校核】技術面領先突破 + 財報 EPS (PE Band / PEG) 雙重驗證",
-      "sectors": [
-        {
-          "name": "純上市強勢領頭羊 (排除上櫃興櫃)",
-          "grade": "S級催化",
-          "note": "直連證交所 2026-11-17 MI_INDEX 總表"
-        },
-        {
-          "name": "基本面 EPS 雙重驗證",
-          "grade": "A級催化",
-          "note": "具穩定財報與法人護盤底氣"
-        }
-      ],
-      "candidates": [
-        {
-          "symbol": "9933.TW",
-          "code": "9933",
-          "name": "中鼎",
-          "marketBoard": "上市 (TWSE)",
-          "sector": "上市 (TWSE) ‧ 全市場動態強勢股",
-          "close": 56.6,
-          "change": "+9.90%",
-          "volume": "53,644 張",
-          "volRatio": "3.28 倍 (證交所 2026-11-17 實盤核實)",
-          "maStatus": "上市強勢股 ‧ 站穩 20MA (47.4) 與 60MA (43.4)",
-          "boxDays": "20 日箱型搶先突破 (模式 B)",
-          "boxRange": "41.9 ～ 52.6",
-          "breakoutPrice": "52.6",
-          "breakoutReason": "【證交所 2026-11-17 官方結算】純上市標的逆勢站穩均線，衝破 52.6 元頸線收 56.6 元 (+9.90%)！",
-          "leadTime": "大盤止跌守穩即展開波段主升攻擊",
-          "strategy": "模式 B：突破回踩頸線入場",
-          "entryZone": "52.1 ～ 54.2 元",
-          "entryPrice": "53.1 元",
-          "stopLossPrice": "50.5 元 (頸線下方防線)",
-          "stopLossNum": 50.5,
-          "targetPrice": "62.1 元",
-          "valuation": {
-            "forwardEps": 7.09,
-            "forwardPe": 8.0,
-            "pegRatio": 0.05,
-            "fairValueZone": "106.3 ～ 156.0 元 (15~22x PE)",
-            "valuationStatus": "合理價值黃金區 (PE 8.0x / PEG 0.05)，具獲利成長安全邊際",
-            "valuationGrade": "S (基本面+技術雙優)"
-          },
-          "noBuyCondition": "若跌回 50.5 頸線下方則結構轉弱果斷停損；合理價值黃金區 (PE 8.0x / PEG 0.05)，具獲利成長安全邊際",
-          "score": 99.0,
-          "rank": 1
-        }
-      ]
-    },
     "2026-11-18": {
       "date": "2026-11-18",
       "dayOfWeek": "三",
@@ -375,6 +286,28 @@
           "name": "純上市低估值領頭羊 (排除上櫃興櫃)",
           "grade": "S級催化",
           "note": "證交所 2026-11-23 MI_INDEX 核實"
+        },
+        {
+          "name": "財報 EPS 嚴格過濾 (PE ≤ 28x)",
+          "grade": "A級催化",
+          "note": "杜絕高本益比純題材炒作"
+        }
+      ],
+      "candidates": []
+    },
+    "2026-11-24": {
+      "date": "2026-11-24",
+      "dayOfWeek": "二",
+      "taiexClose": "40,122.35 (+8.99%)",
+      "taiexChange": "+3,310.46",
+      "taiexPercent": "證交所 2026-11-24 實盤核實",
+      "taiexVolume": "證交所盤後結算",
+      "marketNature": "【策略二：純上市價值領頭羊】排除漲停過熱股，專挑漲幅 3~8.4% 且動態 PE ≤ 28x、PEG ≤ 1.25 之低估值基本面優選股",
+      "sectors": [
+        {
+          "name": "純上市低估值領頭羊 (排除上櫃興櫃)",
+          "grade": "S級催化",
+          "note": "證交所 2026-11-24 MI_INDEX 核實"
         },
         {
           "name": "財報 EPS 嚴格過濾 (PE ≤ 28x)",
