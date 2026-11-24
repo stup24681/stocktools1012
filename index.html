@@ -27,7 +27,7 @@
           <div class="flex items-center gap-2">
             <h1 class="text-sm sm:text-base font-bold text-white tracking-wide">台美股盤後量化選股助手</h1>
             <span id="badge-api-status" class="text-[10px] px-2 py-0.5 rounded-full font-medium bg-slate-800 text-slate-300 border border-slate-700">
-              實盤核實基準 (快照)
+              實盤核實基準 (v2.5 含停利測幅)
             </span>
           </div>
           <p class="text-[11px] text-slate-400 hidden sm:block">純上市優選 × 財報EPS估值 (PE/PEG) 雙重驗證 ‧ 近 5 交易日歷史</p>
@@ -309,15 +309,15 @@
     };
 
     function computeDynamicTargetText(c) {
-      if (c.targetPrice && c.targetPrice !== "--") {
-        return c.targetPrice;
+      if (c && c.targetPrice && String(c.targetPrice).trim() !== "" && String(c.targetPrice).trim() !== "--") {
+        return String(c.targetPrice).trim();
       }
-      var closeVal = parseFloat(c.close);
-      if (!isNaN(closeVal) && c.boxRange) {
-        var parts = String(c.boxRange).split("～");
-        if (parts.length === 2) {
-          var low = parseFloat(parts[0].trim());
-          var high = parseFloat(parts[1].trim());
+      var closeVal = parseFloat(c && c.close);
+      if (!isNaN(closeVal) && c && c.boxRange) {
+        var nums = String(c.boxRange).match(/[\d.]+/g);
+        if (nums && nums.length >= 2) {
+          var low = parseFloat(nums[0]);
+          var high = parseFloat(nums[1]);
           if (!isNaN(low) && !isNaN(high) && high > low) {
             var boxH = high - low;
             var tp1 = (closeVal + boxH * 0.382).toFixed(1);
