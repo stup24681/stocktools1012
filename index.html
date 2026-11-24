@@ -111,6 +111,7 @@
               <th class="py-2.5 px-3 font-semibold">合理價值區 (PE Band)</th>
               <th class="py-2.5 px-3 font-semibold">技術進場區間</th>
               <th class="py-2.5 px-3 font-semibold">停損防線</th>
+              <th class="py-2.5 px-3 font-semibold">出場目標價</th>
               <th class="py-2.5 px-3 font-semibold text-right">綜合評分</th>
             </tr>
           </thead>
@@ -131,7 +132,6 @@
   </main>
 
   <script>
-    // 經官方實盤 100% 嚴格核實之歷史資料庫 (嚴格保留完整 5 個交易日 + 純上市 TWSE 領頭羊過濾)
     var VERIFIED_MASTER_DB = {
       "RS": {
         "2026-11-16": {
@@ -146,7 +146,7 @@
           },
           sectors: [
             { name: "上市系統整合 / 資安防護", grade: "S級催化", note: "嚴格排除上櫃小型股，聚焦大聯大控股之上市資服標竿華經 (2468)" },
-            { name: "上市企業軟體 / 金融資訊", grade: "A級催化", note: "具長年穩定獲利與法人護盤之大型軟體企業" }
+            { name: "上市企業軟體 / 金融資訊", grade: "S級催化", note: "資通 (2471) 逆勢漲停收 78.2 元創波段高，具備高獲利成長保護" }
           ],
           candidates: [
             {
@@ -170,34 +170,34 @@
               strategy: "模式 B：回測 75.5～78.5 元頸線支撐入場",
               entryZone: "75.5 ～ 78.5 元", entryPrice: "77.0 元",
               stopLossPrice: "72.0 元 (失守 5 日線與頸線停損)", stopLossNum: 72.0,
-              targetPrice: "90.0 ～ 95.0 元",
+              targetPrice: "第一停利 85.0 元 / 第二停利 92.0 元 (或破 5MA 移動停利)",
               noBuyCondition: "嚴禁漲停板市價追價；若跌破 72.0 元代表結構轉弱立即停損",
               score: 96
             },
             {
               rank: 2, code: "2471", name: "資通", marketBoard: "上市 (TWSE)", sector: "上市 ‧ 企業軟體 / 金融資安系統",
-              close: 64.8, change: "+4.52%", volume: "4,820 張", volRatio: "放量 1.85 倍逆勢抗跌收紅",
-              maStatus: "上市老牌軟體股 ‧ 守穩 20MA (61.5 元) 與 60MA 之上，走出底底高抗跌結構",
-              boxDays: "挑戰箱型頸線 64.0 元",
-              boxRange: "58.0 ～ 64.0 元", breakoutPrice: "64.0 元",
-              catalystGrade: "A 級",
-              catalystNews: "【銀行核心系統升級 + 製造業 MES 智慧工廠軟體剛需】長年配息穩健、財務體質透明的上市軟體公司，無單一暴雷風險，獲防禦資金青睞。",
+              close: 78.2, change: "+9.99%", volume: "14,180 張", volRatio: "爆量 8.6 倍亮燈漲停創波段新高",
+              maStatus: "上市老牌軟體股 ‧ 均線多頭發散強攻漲停收 78.2 元，站穩所有均線之上",
+              boxDays: "強勢突破 71.1 元前高頸線",
+              boxRange: "54.4 ～ 71.1 元", breakoutPrice: "71.1 元",
+              catalystGrade: "S 級",
+              catalystNews: "【前三季 EPS 3.08 元年增八成 + 銀行核心與資安系統升級】近 6 個營業日大漲 43.75% 列注意股，全年推估 EPS 約 4.11 元，兼具實質獲利爆發與上市大型軟體股防禦地位。",
               valuation: {
-                forwardEps: 3.60,
-                forwardPe: 18.0,
-                pegRatio: 0.78,
-                fairValueZone: "54.0 ～ 72.0 元 (15~20x PE)",
-                valuationStatus: "合理價值黃金區 (PE 18.0x / PEG 0.78)，具備實質獲利與高殖利率雙重保護",
-                valuationGrade: "S (基本面低估黃金區)"
+                forwardEps: 4.11,
+                forwardPe: 19.0,
+                pegRatio: 0.45,
+                fairValueZone: "61.7 ～ 82.2 元 (15~20x PE)",
+                valuationStatus: "合理價值黃金區 (PE 19.0x / PEG 0.45)，獲利年增八成支撐股價，極具基本面安全邊際",
+                valuationGrade: "S (基本面+技術雙優)"
               },
-              breakoutReason: "【純上市標的】大盤重挫 6% 時逆勢大漲 +4.52% 收過 64.0 元箱型頸線，本益比僅 18 倍極具安全邊際。",
-              leadTime: "屬於穩健防禦型領頭羊，大盤回穩反彈時有望穩步墊高挑戰 72 元。",
-              strategy: "模式 B：回踩 62.5～64.2 元區間低吸",
-              entryZone: "62.5 ～ 64.2 元", entryPrice: "63.5 元",
-              stopLossPrice: "60.5 元 (跌破月線 20MA 停損)", stopLossNum: 60.5,
-              targetPrice: "72.0 ～ 75.0 元",
-              noBuyCondition: "若跌破 60.5 元月線支撐則果斷撤退",
-              score: 92
+              breakoutReason: "【純上市標的】11/16 大盤狂瀉 2,635 點時逆勢亮燈漲停收 78.2 元（+9.99%），動態本益比僅 19 倍，是少數漲停後估值仍處合理區間的上市資服龍頭。",
+              leadTime: "屬短線強勢噴出注意股，待隔日開盤消化獲利賣壓、回踩 5 日線或 71.5 元附近支撐再行低吸。",
+              strategy: "模式 B：嚴禁追高，靜待回踩 70.5～73.5 元頸線支撐",
+              entryZone: "70.5 ～ 73.5 元", entryPrice: "72.0 元",
+              stopLossPrice: "67.5 元 (跌破前波平台與 5 日線停損)", stopLossNum: 67.5,
+              targetPrice: "第一停利 82.2 元 (20x PE) / 第二停利 88.0 元 (箱型滿足)",
+              noBuyCondition: "注意股波動極大，嚴禁開高追價；若跌破 67.5 元則結構轉弱果斷撤退",
+              score: 95
             }
           ]
         },
@@ -235,7 +235,7 @@
           date: "2026-11-16", dayOfWeek: "一",
           taiexClose: "41,040.08 (-6.03%)", taiexChange: "-2,635.04", taiexPercent: "-6.03%", taiexVolume: "8,450.57 億元",
           marketNature: "台股創史上第二大跌點，經典多頭突破嚴守紀律（0 檔符合，請切換至🐻逆勢領頭羊查看純上市資安避風港）",
-          sectors: [{ name: "上市資安與軟體", grade: "S級", note: "華經逆勢漲停創高" }],
+          sectors: [{ name: "上市資安與軟體", grade: "S級", note: "華經、資通雙雙逆勢漲停創高" }],
           candidates: []
         },
         "2026-11-13": {
@@ -307,6 +307,30 @@
       db: JSON.parse(JSON.stringify(VERIFIED_MASTER_DB)),
       activeDate: "2026-11-16"
     };
+
+    function computeDynamicTargetText(c) {
+      if (c.targetPrice && c.targetPrice !== "--") {
+        return c.targetPrice;
+      }
+      var closeVal = parseFloat(c.close);
+      if (!isNaN(closeVal) && c.boxRange) {
+        var parts = String(c.boxRange).split("～");
+        if (parts.length === 2) {
+          var low = parseFloat(parts[0].trim());
+          var high = parseFloat(parts[1].trim());
+          if (!isNaN(low) && !isNaN(high) && high > low) {
+            var boxH = high - low;
+            var tp1 = (closeVal + boxH * 0.382).toFixed(1);
+            var tp2 = (high + boxH).toFixed(1);
+            return "第一停利 " + tp1 + " 元 (減碼半數) / 第二停利 " + tp2 + " 元 (箱型1:1滿足，或破 5MA 移動停利)";
+          }
+        }
+      }
+      if (!isNaN(closeVal)) {
+        return "第一停利 " + (closeVal * 1.12).toFixed(1) + " 元 / 第二停利 " + (closeVal * 1.25).toFixed(1) + " 元 (破 5MA 移動停利)";
+      }
+      return "破 5 日均線移動停利";
+    }
 
     function init() {
       setupEventListeners();
@@ -396,13 +420,9 @@
           '<div class="space-y-1.5">' +
             '<div class="flex items-center gap-2 flex-wrap">' +
               '<h2 class="text-sm font-bold text-amber-300">熊市抗跌 / 領先大盤突破策略（純上市優選 × 財報 EPS 雙重驗證）</h2>' +
-              '<span class="text-[9px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-200 border border-amber-500/40 font-mono">僅限上市 (TWSE) ‧ 一律剔除上櫃與興櫃 ‧ PEG 防雷</span>' +
+              '<span class="text-[9px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-200 border border-amber-500/40 font-mono">僅限上市 (TWSE) ‧ 漲幅 3~8.4% ‧ PE ≤ 28x</span>' +
             '</div>' +
-            '<p class="text-xs text-slate-300"><b>風控升級原則：</b>嚴格鎖定<b>台灣證交所「上市股票」</b>，一律剔除股本小、易受單一事件或財報突襲的上櫃與興櫃股票，確保選出體質穩健、籌碼厚實的優質領頭羊。</p>' +
-            '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px]">' +
-              '<div class="p-2 rounded-lg bg-slate-950/80 border border-amber-500/30 text-amber-300">🎯 <b>純上市雙重驗證：</b>上市大中型資安/軟體龍頭（如華經 2468、資通 2471），兼具財報透明度與抗跌動能。</div>' +
-              '<div class="p-2 rounded-lg bg-slate-950/80 border border-indigo-500/30 text-indigo-300">⚡ <b>衍生品避險：</b>台指期反彈遇均線放空對衝現貨，加密貨幣守穩關鍵支撐操作。</div>' +
-            '</div>' +
+            '<p class="text-xs text-slate-300"><b>雙策略物理隔離：</b>本頁籤專注篩選「不追漲停板、低估值基本面穩健」的純上市領頭羊，與「經典台股突破 (≥8.5% 斐波回踩)」完全互不重疊。</p>' +
           '</div>' +
         '</div>';
       } else {
@@ -411,10 +431,10 @@
           '<div class="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 shrink-0 font-bold text-sm">突破</div>' +
           '<div class="space-y-1">' +
             '<div class="flex items-center gap-2 flex-wrap">' +
-              '<h2 class="text-sm font-bold text-white">' + (appState.currentMarket === "TW" ? "台股" : "美股") + '經典多頭強勢突破量化策略（含 PE Band 估值檢驗）</h2>' +
-              '<span class="text-[9px] px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono">日漲幅 ≥ 8.5% ‧ 放量 ≥ 1.8倍 ‧ 突破箱型</span>' +
+              '<h2 class="text-sm font-bold text-white">' + (appState.currentMarket === "TW" ? "台股" : "美股") + '經典多頭強勢突破量化策略（斐波那契 38.2% 回踩 + 雙停利測幅）</h2>' +
+              '<span class="text-[9px] px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono">日漲幅 ≥ 8.5% ‧ 放量 ≥ 1.8倍 ‧ 箱型1:1測幅</span>' +
             '</div>' +
-            '<p class="text-xs text-slate-300">嚴格執行四大硬性量化條件與財報估值防雷檢驗。若大盤重挫回檔、無個股符合標準時，系統恪守<b>「寧缺勿濫（0 檔符合）」</b>原則！</p>' +
+            '<p class="text-xs text-slate-300">專注捕捉單日強勢爆發動能股，進場採用斐波那契 38.2% 回踩，出場依據「斐波 1.382 延伸（第一停利）」與「箱型 1:1 等距滿足（第二停利）」執行。</p>' +
           '</div>' +
         '</div>';
       }
@@ -497,7 +517,7 @@
 
       if (filterRuleLabel) {
         filterRuleLabel.innerText = (appState.currentMarket === "RS")
-          ? "逆勢領頭羊條件：100% 純上市股票 (剔除上櫃興櫃) ‧ 穩守月季線 ‧ 率先破頸線 ‧ PEG 估值"
+          ? "逆勢領頭羊條件：100% 純上市股票 ‧ 漲幅 3~8.4% ‧ 動態 PE ≤ 28x ‧ PEG ≤ 1.25"
           : "硬性條件：日漲幅 ≥ 8.5% ‧ 放量 ≥ 1.8倍 ‧ 均線多頭 ‧ 箱型突破";
       }
     }
@@ -512,10 +532,10 @@
       var list = dayObj.candidates || [];
 
       if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-slate-400">' +
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-slate-400">' +
           '<div class="flex flex-col items-center justify-center space-y-1">' +
             '<span class="text-sm font-semibold text-slate-300">今日精選候選股：0 檔符合（寧缺勿濫）</span>' +
-            '<span class="text-xs text-slate-500">大盤回檔或超跌反抽時嚴格執行防守，杜絕追高套牢與小型股財報突襲風險！</span>' +
+            '<span class="text-xs text-slate-500">無個股完全符合當前策略硬性門檻，嚴守紀律空手觀望！</span>' +
           '</div>' +
         '</td></tr>';
         return;
@@ -528,6 +548,8 @@
         var peText = val.forwardPe ? ('PE ' + val.forwardPe + 'x / PEG ' + val.pegRatio) : '純技術評估';
         var valColor = (val.valuationGrade || "").indexOf("S") !== -1 ? "text-emerald-400 font-bold" : ((val.valuationGrade || "").indexOf("C") !== -1 ? "text-rose-400 font-bold" : "text-sky-300");
         var boardBadge = c.marketBoard ? '<span class="ml-1 text-[9px] px-1 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/40">' + c.marketBoard + '</span>' : '';
+        var fullTarget = computeDynamicTargetText(c);
+        var shortTarget = fullTarget.split('(')[0].trim();
 
         tr.innerHTML = '' +
           '<td class="py-2.5 px-3"><span class="w-5 h-5 rounded-md ' + (c.rank === 1 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-slate-800 text-slate-300') + ' inline-flex items-center justify-center text-xs font-bold">' + c.rank + '</span></td>' +
@@ -538,6 +560,7 @@
           '<td class="py-2.5 px-3 text-sky-200">' + (val.fairValueZone || "--") + '</td>' +
           '<td class="py-2.5 px-3 text-emerald-300 font-semibold">' + (c.entryZone || "--") + '</td>' +
           '<td class="py-2.5 px-3 text-rose-400 font-semibold">' + (c.stopLossPrice || "--") + '</td>' +
+          '<td class="py-2.5 px-3 text-amber-300 font-semibold" title="' + fullTarget + '">' + shortTarget + '</td>' +
           '<td class="py-2.5 px-3 text-right font-black text-amber-400">' + c.score + '</td>';
         tbody.appendChild(tr);
       });
@@ -553,7 +576,7 @@
       var list = dayObj.candidates || [];
 
       if (list.length === 0) {
-        container.innerHTML = '<div class="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 text-center text-xs text-slate-400">當日無突破或逆勢發動上市個股需要解構</div>';
+        container.innerHTML = '<div class="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 text-center text-xs text-slate-400">當日無符合條件之個股需要解構</div>';
         return;
       }
 
@@ -606,6 +629,7 @@
         }
 
         var boardTag = c.marketBoard ? '<span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono">' + c.marketBoard + '</span>' : '';
+        var resolvedTarget = computeDynamicTargetText(c);
 
         card.innerHTML = '' +
           '<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">' +
@@ -634,10 +658,10 @@
               '<div class="text-indigo-300 pt-1">突破結構：' + c.boxDays + ' (平台 ' + c.boxRange + ')</div>' +
             '</div>' +
             '<div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-1.5">' +
-              '<div class="font-bold text-slate-300 flex items-center gap-1.5">🎯 <span>點位規劃與防守鐵律</span></div>' +
+              '<div class="font-bold text-slate-300 flex items-center gap-1.5">🎯 <span>點位規劃與出場停利目標</span></div>' +
               '<div class="text-emerald-300 font-bold">技術進場區：' + c.entryZone + ' (核心 ' + c.entryPrice + ')</div>' +
               '<div class="text-rose-400 font-bold">停損防線：' + c.stopLossPrice + '</div>' +
-              '<div class="text-purple-300">波段目標：' + (c.targetPrice || "--") + '</div>' +
+              '<div class="text-amber-300 font-bold">出場停利點：' + resolvedTarget + '</div>' +
             '</div>' +
           '</div>' +
           leadTimeSection +
