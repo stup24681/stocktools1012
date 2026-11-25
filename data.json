@@ -1,22 +1,5 @@
 {
   "TW": {
-    "2026-11-18": {
-      "date": "2026-11-18",
-      "dayOfWeek": "三",
-      "taiexClose": "40,194.91 (+0.26%)",
-      "taiexChange": "+102.80",
-      "taiexPercent": "+0.26%",
-      "taiexVolume": "成交 10,751.74 億",
-      "marketNature": "全市場純上市動態掃描 + 證交所 2026-11-18 官方結算校核（無符合標的時恪守 0 檔寧缺勿濫）",
-      "sectors": [
-        {
-          "name": "全市場上市突破掃描",
-          "grade": "S級",
-          "note": "已核對 2026-11-18 官方收盤價"
-        }
-      ],
-      "candidates": []
-    },
     "2026-11-19": {
       "date": "2026-11-19",
       "dayOfWeek": "四",
@@ -117,26 +100,26 @@
         }
       ],
       "candidates": []
-    }
-  },
-  "US": {
-    "2026-11-18": {
-      "date": "2026-11-18",
+    },
+    "2026-11-25": {
+      "date": "2026-11-25",
       "dayOfWeek": "三",
-      "taiexClose": "24,358.77 (+0.12%)",
-      "taiexChange": "+30.39",
-      "taiexPercent": "+0.12%",
-      "taiexVolume": "34.8 億股",
-      "marketNature": "美股科技與半導體量化突破篩選（含 Forward PE / PEG 雙重驗證）",
+      "taiexClose": "38,195.43 (-4.80%)",
+      "taiexChange": "-1,926.92",
+      "taiexPercent": "-4.80%",
+      "taiexVolume": "證交所盤後結算",
+      "marketNature": "【策略一：動能爆發 + 斐波那契 38.2% 回踩】證交所 2026-11-25 官方結算（漲幅 ≥ 8.5% 且放量 ≥ 1.8 倍）",
       "sectors": [
         {
-          "name": "美股 AI 與高速傳輸",
-          "grade": "觀察級",
-          "note": "監控費半與那斯達克動向"
+          "name": "強勢動能突破掃描",
+          "grade": "S級",
+          "note": "已核對 2026-11-25 官方收盤價"
         }
       ],
       "candidates": []
-    },
+    }
+  },
+  "US": {
     "2026-11-19": {
       "date": "2026-11-19",
       "dayOfWeek": "四",
@@ -204,31 +187,26 @@
         }
       ],
       "candidates": []
-    }
-  },
-  "RS": {
-    "2026-11-18": {
-      "date": "2026-11-18",
+    },
+    "2026-11-25": {
+      "date": "2026-11-25",
       "dayOfWeek": "三",
-      "taiexClose": "40,194.91 (+0.26%)",
-      "taiexChange": "+102.80",
-      "taiexPercent": "證交所 2026-11-18 實盤核實",
-      "taiexVolume": "成交 10,751.74 億",
-      "marketNature": "【全市場純上市動態掃描 + 官方日期校核】技術面領先突破 + 財報 EPS (PE Band / PEG) 雙重驗證",
+      "taiexClose": "23,394.06 (-1.43%)",
+      "taiexChange": "-339.48",
+      "taiexPercent": "-1.43%",
+      "taiexVolume": "68.0 億股",
+      "marketNature": "美股科技與半導體量化突破篩選（含 Forward PE / PEG 雙重驗證）",
       "sectors": [
         {
-          "name": "純上市強勢領頭羊 (排除上櫃興櫃)",
-          "grade": "S級催化",
-          "note": "直連證交所 2026-11-18 MI_INDEX 總表"
-        },
-        {
-          "name": "基本面 EPS 雙重驗證",
-          "grade": "A級催化",
-          "note": "具穩定財報與法人護盤底氣"
+          "name": "美股 AI 與高速傳輸",
+          "grade": "觀察級",
+          "note": "監控費半與那斯達克動向"
         }
       ],
       "candidates": []
-    },
+    }
+  },
+  "RS": {
     "2026-11-19": {
       "date": "2026-11-19",
       "dayOfWeek": "四",
@@ -308,6 +286,28 @@
           "name": "純上市低估值領頭羊 (排除上櫃興櫃)",
           "grade": "S級催化",
           "note": "證交所 2026-11-24 MI_INDEX 核實"
+        },
+        {
+          "name": "財報 EPS 嚴格過濾 (PE ≤ 28x)",
+          "grade": "A級催化",
+          "note": "杜絕高本益比純題材炒作"
+        }
+      ],
+      "candidates": []
+    },
+    "2026-11-25": {
+      "date": "2026-11-25",
+      "dayOfWeek": "三",
+      "taiexClose": "38,195.43 (-4.80%)",
+      "taiexChange": "-1,926.92",
+      "taiexPercent": "證交所 2026-11-25 實盤核實",
+      "taiexVolume": "證交所盤後結算",
+      "marketNature": "【策略二：純上市價值領頭羊】排除漲停過熱股，專挑漲幅 3~8.4% 且動態 PE ≤ 28x、PEG ≤ 1.25 之低估值基本面優選股",
+      "sectors": [
+        {
+          "name": "純上市低估值領頭羊 (排除上櫃興櫃)",
+          "grade": "S級催化",
+          "note": "證交所 2026-11-25 MI_INDEX 核實"
         },
         {
           "name": "財報 EPS 嚴格過濾 (PE ≤ 28x)",
